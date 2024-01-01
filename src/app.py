@@ -29,9 +29,8 @@ app = dash.Dash(
     ],
     suppress_callback_exceptions=True,
     title='Trainer Hill',
-    background_callback_manager=cache.background_callback_manager
 )
-cache.flask_cache.init_app(app.server)
+cache.cache.init_app(app.server)
 
 
 def serve_layout():

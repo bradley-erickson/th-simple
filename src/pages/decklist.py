@@ -4,7 +4,7 @@ import dash_bootstrap_components as dbc
 import pandas as pd
 
 from components import tour_filter, deck_label, card_table, matchup_table, trend_graph
-from utils import data, url, cards as _cards
+from utils import data, url, cards as _cards, cache
 
 dash.register_page(
     __name__,
@@ -146,9 +146,9 @@ def update_title(tf, current):
 
 @callback(
     Output(card_select, 'options'),
-    Input(store, 'data'),
-    background=True
+    Input(store, 'data')
 )
+@cache.cache.memoize()
 def update_card_select_options(tour_filters):
     url = f'{data.api_url}/cards/{tour_filters["deck"]}'
     r = data.session.get(url, params=tour_filters)
@@ -178,9 +178,9 @@ def update_search(card, placement, search):
 
 @callback(
     Output(table_store, 'data'),
-    Input(store, 'data'),
-    background=True
+    Input(store, 'data')
 )
+@cache.cache.memoize()
 def update_table_store(tf):
     url = f'{data.analysis_url}/decklists/{tf["deck"]}/skeleton-counts'
     params = tf.copy()
@@ -213,9 +213,9 @@ def update_card_table(view, data):
 @callback(
     Output(card_matchups, 'children'),
     Input(store, 'data'),
-    Input(option_store, 'data'),
-    background=True
+    Input(option_store, 'data')
 )
+@cache.cache.memoize()
 def update_card_matchups(tf, options):
     if tf['card'] is None:
         return html.P('Select a card above.')
@@ -239,9 +239,9 @@ def update_card_matchups(tf, options):
 
 @callback(
     Output(card_trend, 'children'),
-    Input(store, 'data'),
-    background=True
+    Input(store, 'data')
 )
+@cache.cache.memoize()
 def update_card_matchups(tf):
     if tf['card'] is None:
         return html.P('Select a card above.')

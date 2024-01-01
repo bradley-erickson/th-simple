@@ -35,7 +35,7 @@ PTCGOCODES = {
     'PAR': 'sv4',
 }
 
-@cache.flask_cache.memoize(timeout=0)
+@cache.cache.memoize(timeout=0)
 def _query_card(q):
     card = Card.where(q=q)
     if len(card) > 0:

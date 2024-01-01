@@ -3,7 +3,7 @@ from dash import html, dcc, callback, Output, Input, State
 import dash_bootstrap_components as dbc
 
 from components import tour_filter, deck_label, matchup_table
-from utils import data
+from utils import data, cache
 
 dash.register_page(
     __name__,
@@ -116,9 +116,9 @@ def update_options(tour_filters):
 @callback(
     Output(breakdown, 'children'),
     Input(tour_store, 'data'),
-    Input(archetype_select, 'options'),
-    background=True
+    Input(archetype_select, 'options')
 )
+@cache.cache.memoize()
 def update_breakdown(tour_filters, archetypes):
     decks = {d['value']: d['label'] for d in archetypes}
 
@@ -136,9 +136,9 @@ def update_breakdown(tour_filters, archetypes):
     Output(matchups, 'children'),
     Input(tour_store, 'data'),
     Input(archetype_select, 'value'),
-    State(archetype_store, 'data'),
-    background=True
+    State(archetype_store, 'data')
 )
+@cache.cache.memoize()
 def update_matchups(tour_filters, selected, archetypes):
     decks = {d['id']: d for d in archetypes}
     matchup_data = fetch_matchup_data(tour_filters, selected)
