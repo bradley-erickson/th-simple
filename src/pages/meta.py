@@ -83,8 +83,8 @@ def layout(players=None, start_date=None, end_date=None):
         html.H2('Meta Analysis'),
         dbc.Alert([
             'The Tier List Creator has moved to its own ',
-            html.A('Tool', href='/tools/tier-list')
-        ], color='info', dismissable=True, persistence_type='local', persistence=True),
+            html.A('Tool', href='/tools/tier-list', className='alert-link')
+        ], id='tierlist-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
         dcc.Store(id=tour_store, data=tour_filters),
         dcc.Store(id=archetype_store, data=[]),
         tours,
