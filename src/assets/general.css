@@ -1,0 +1,50 @@
+.app {
+  min-height: 100vh;
+  position: relative;
+}
+
+.page-container {
+  height: 100%;
+  padding-bottom: 100px;
+}
+
+.app .footer {
+  bottom: 0;
+  right: 0;
+  left: 0;
+  position: absolute;
+  height: 100px;
+}
+
+.footer .nav-link {
+  padding: 0.5rem;
+  display: inline;
+}
+
+.radio-group .form-check {
+    padding-left: 0;
+  }
+  
+  .radio-group .btn-group > .form-check:not(:last-child) > .btn {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  
+  .radio-group .btn-group > .form-check:not(:first-child) > .btn {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    margin-left: -1px;
+  }
+  
+.bottom-40 {
+    bottom: 40% !important;
+}
+
+.bg-blur {
+  backdrop-filter: blur(5px);
+  --bs-bg-opacity: 0.5 !important;
+}
+
+.inputgroup-input-fix {
+  overflow: clip;
+}

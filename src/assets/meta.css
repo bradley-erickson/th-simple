@@ -1,0 +1,16 @@
+.deck-row {
+    height: 55px;
+}
+
+.deck-row > td {
+    vertical-align: middle;
+}
+
+.Select--multi > .Select-control > .Select-multi-value-wrapper > .Select-value > .Select-value-label > div > img+span {
+    display: none;
+}
+
+.DateRangePicker,
+.DateRangePickerInput {
+    width: 100%
+}
