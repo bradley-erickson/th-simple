@@ -84,7 +84,7 @@ def layout(players=None, start_date=None, end_date=None):
         dbc.Alert([
             'The Tier List Creator has moved to its own ',
             html.A('Tool', href='/tools/tier-list')
-        ], color='info', dismissable=True, persistence_type='local'),
+        ], color='info', dismissable=True, persistence_type='local', persistence=True),
         dcc.Store(id=tour_store, data=tour_filters),
         dcc.Store(id=archetype_store, data=[]),
         tours,
