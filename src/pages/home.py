@@ -40,5 +40,5 @@ cards = [
 
 layout = dbc.Row([
     create_card(c) for c in cards
-], class_name='gy-1 mt-1')
+], class_name='gy-1')
 # tool list + single card for meta and single card for decklist

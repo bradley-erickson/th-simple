@@ -37,8 +37,12 @@ def serve_layout():
     return html.Div(
         [
             navbar.navbar,
+            dbc.Alert([
+                'This is a dev site, things may change. If you would like to see specific changes please fill out a ',
+                html.A('Feedback Form', className='alert-link', href='/feedback')
+            ], id='devsite-alert', color='warning', dismissable=True, persistence=True, persistence_type='local'),
             dbc.Container(
-               dash.page_container,
+               html.Div(dash.page_container, className='my-1'),
                class_name='page-container',
                fluid=True
             ),

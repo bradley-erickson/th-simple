@@ -19,13 +19,21 @@ dash.register_page(
 prefix = 'decklist'
 store = f'{prefix}-store'
 title = f'{prefix}-title'
+deck_count = f'{prefix}-deck-count'
 option_store = f'{prefix}-option-store'
-card_select = f'{prefix}-card-select'
-placement_select = f'{prefix}-placement'
+
+decklist_filters = f'{prefix}-filters'
+filters_collapse = f'{decklist_filters}-collapse'
+card_select = f'{decklist_filters}-card-select'
+exclude_select = f'{decklist_filters}-exclude-card-select'
+granularity_slider = f'{decklist_filters}-granularity'
+placement_select = f'{decklist_filters}-placement'
+
 table_view = f'{prefix}-table-view'
 table_store = f'{prefix}-table-store'
 table_clipboard = f'{prefix}-table-clipboard'
 card_table_id = f'{prefix}-card-table'
+
 card_matchups = f'{prefix}-card-matchups'
 card_trend = f'{prefix}-card-trend'
 
@@ -36,36 +44,69 @@ headers = {
     k: {'header': k, 'collapse': f'{k}-collapse'} for k in [overview_header, matchup_header, trend_header]
 }
 
-def create_filter(card, placement):
-    filter_row = dbc.Row([
-        dbc.Col([
-            dbc.Label('Card'),
-            dcc.Dropdown(id=card_select, searchable=True, value=card)
-        ], lg=4),
-        dbc.Col([
-            dbc.Label('Placement'),
-            dcc.Dropdown(
-                options=[
-                    {'label': 'Winner', 'value': 1},
-                    {'label': 'Finals', 'value': 2},
-                    {'label': 'Top 4', 'value': 4},
-                    {'label': 'Top 8', 'value': 8},
-                    {'label': 'Top 16', 'value': 16},
-                    {'label': 'Top 32', 'value': 32},
-                    {'label': 'Top 64', 'value': 64},
-                    {'label': 'Overall', 'value': 10_000}
-                ], id=placement_select, value=placement, clearable=False
-            )
-        ], lg=4)
-    ], className='mb-1')
+select_card_text = 'Select a card to include in the decklist filters above. '\
+    'Excluded cards are NOT included in this analysis.'
+
+def create_filter(include, exclude, granularity, placement):
+
+    filter_row = dbc.Card([
+        html.A(
+            dbc.CardHeader('Decklist Filters'),
+            id=decklist_filters
+        ),
+        dbc.Collapse(
+            dbc.CardBody([
+                dbc.Row([
+                    dbc.Col([
+                        dbc.Label('Includes Card'),
+                        dcc.Dropdown(id=card_select, searchable=True, value=include)
+                    ], md=6, lg=4, xl=3),
+                    dbc.Col([
+                        dbc.Label('Excludes Card'),
+                        dcc.Dropdown(id=exclude_select, searchable=True, value=exclude)
+                    ], md=6, lg=4, xl=3),
+                    dbc.Col([
+                        dbc.Label('Granularity'),
+                        dcc.Slider(
+                                id=granularity_slider,
+                                value=float(granularity),
+                                min=0.5, max=1, step=0.1,
+                                marks={
+                                    0.5: '50%', 0.6: '60%', 0.7: '70%',
+                                    0.8: '80%', 0.9: '90%', 1: '100%'
+                                }
+                            )
+                    ], md=6, lg=4, xl=3),
+                    dbc.Col([
+                        dbc.Label('Placement'),
+                        dcc.Dropdown(
+                            options=[
+                                {'label': 'Winner', 'value': 1},
+                                {'label': 'Finals', 'value': 2},
+                                {'label': 'Top 4', 'value': 4},
+                                {'label': 'Top 8', 'value': 8},
+                                {'label': 'Top 16', 'value': 16},
+                                {'label': 'Top 32', 'value': 32},
+                                {'label': 'Top 64', 'value': 64},
+                                {'label': 'Overall', 'value': 10_000}
+                            ], id=placement_select, value=placement, clearable=False
+                        )
+                    ], md=6, lg=4, xl=3)
+                ], className='mb-1')
+            ]),
+            id=filters_collapse
+        )
+    ])
     return filter_row
 
-def layout(deck=None, players=None, start_date=None, end_date=None, card=None, placement=10_000):
+def layout(deck=None, players=None, start_date=None, end_date=None, include=None, exclude=None, granularity=0.6, placement=10_000):
     tours = tour_filter.TourFiltersAIO(players, start_date, end_date, prefix)
     filters = tour_filter.create_tour_filter(players, start_date, end_date)
     filters['deck'] = deck
     filters['placement'] = placement
-    filters['card'] = card
+    filters['include'] = include
+    filters['exclude'] = exclude
+    filters['granularity'] = granularity
 
     change_deck_url = f'/decklist{tour_filter.create_param_string(filters)}'
     cont = html.Div([
@@ -74,13 +115,13 @@ def layout(deck=None, players=None, start_date=None, end_date=None, card=None, p
         dcc.Store(id=store, data=filters),
         dcc.Store(id=option_store, data=[]),
         dbc.Spinner(html.Div([
-            html.H3(id=title),
+            html.H3([html.Span(id=title, className='d-flex'), dbc.Badge(0, id=deck_count, className='ms-1')], className='d-flex'),
             dbc.Button([
                 html.I(className='fas fa-list'),
                 html.Span('Change deck', className='ms-1 d-lg-inline-block d-none')
             ], href=change_deck_url, title='Change deck')
         ], className='d-flex justify-content-between align-items-center')),
-        create_filter(card, placement),
+        create_filter(include, exclude, granularity, placement),
         html.Div([
             html.A(html.H4('List Overview'), id=headers[overview_header]['header']),
             html.Div([
@@ -120,6 +161,13 @@ def layout(deck=None, players=None, start_date=None, end_date=None, card=None, p
     ])
     return cont
 
+clientside_callback(
+    ClientsideFunction(namespace='clientside', function_name='toggle_with_button'),
+    Output(filters_collapse, 'is_open'),
+    Input(decklist_filters, 'n_clicks'),
+    State(filters_collapse, 'is_open')
+)
+
 for k in headers.keys():
     clientside_callback(
         ClientsideFunction(namespace='clientside', function_name='toggle_with_button'),
@@ -146,6 +194,7 @@ def update_title(tf, current):
 
 @callback(
     Output(card_select, 'options'),
+    Output(exclude_select, 'options'),
     Input(store, 'data')
 )
 @cache.cache.memoize()
@@ -154,39 +203,50 @@ def update_card_select_options(tour_filters):
     r = data.session.get(url, params=tour_filters)
     if r.status_code == 200:
         cards = r.json()
-        return [{
+        formatted_cards = [{
             'value': c['card_code'],
             'label': f'{c["name"]} {c["card_code"]}'
         } for c in cards]
-    return []
+        return formatted_cards, formatted_cards
+    return [], []
 
 
 @callback(
     Output('_pages_location', 'search'),
     Input(card_select, 'value'),
+    Input(exclude_select, 'value'),
+    Input(granularity_slider, 'value'),
     Input(placement_select, 'value'),
-    State('_pages_location', 'search')
+    State(store, 'data')
 )
-def update_search(card, placement, search):
-    params = url.parse_url_params(search)
+def update_search(include, exclude, granularity, placement, tf):
+    params = tf.copy()
     params_str = tour_filter.create_param_string(params)
-    if card is not None:
-        params_str += f'&card={card}'
+    
+    if include is not None:
+        params_str += f'&include={include}'
+    if exclude is not None:
+        params_str += f'&exclude={exclude}'
+    if granularity is not None:
+        params_str += f'&granularity={granularity}'
     if placement != 10_000:
         params_str += f'&placement={placement}'
     return params_str
 
 @callback(
     Output(table_store, 'data'),
+    Output(deck_count, 'children'),
     Input(store, 'data')
 )
 @cache.cache.memoize()
 def update_table_store(tf):
     url = f'{data.analysis_url}/decklists/{tf["deck"]}/skeleton-counts'
     params = tf.copy()
-    if 'card' in tf:
-        params['include_card'] = tf['card']
-    params['granularity'] = 0.5
+    if 'include' in tf:
+        params['include_card'] = tf['include']
+    if 'exclude' in tf:
+        params['exclude_card'] = tf['exclude']
+    params['granularity'] = tf['granularity']
     r = data.session.post(url, params=params)
     out = {'cards': [], 'total': 0}
     if r.status_code == 200:
@@ -195,7 +255,7 @@ def update_table_store(tf):
         cards = _cards.sort_deck(cards)
         out['cards'] = cards
         out['total'] = resp['total']
-    return out
+    return out, out['total']
 
 
 @callback(
@@ -217,13 +277,13 @@ def update_card_table(view, data):
 )
 @cache.cache.memoize()
 def update_card_matchups(tf, options):
-    if tf['card'] is None:
-        return html.P('Select a card above.')
+    if tf['include'] is None:
+        return html.P(select_card_text)
     
     if len(options) == 0:
         raise exceptions.PreventUpdate
 
-    url = f'{data.analysis_url}/decklists/{tf["deck"]}/card-matchups/{tf["card"]}'
+    url = f'{data.analysis_url}/decklists/{tf["deck"]}/card-matchups/{tf["include"]}'
     params = tf.copy()
     params['against_archetypes'] = [o['id'] for o in options[:15]]
     params['against_archetypes'].remove('other')
@@ -243,10 +303,10 @@ def update_card_matchups(tf, options):
 )
 @cache.cache.memoize()
 def update_card_matchups(tf):
-    if tf['card'] is None:
-        return html.P('Select a card above.')
+    if tf['include'] is None:
+        return html.P(select_card_text)
     
-    url = f'{data.analysis_url}/decklists/{tf["deck"]}/trend/{tf["card"]}'
+    url = f'{data.analysis_url}/decklists/{tf["deck"]}/trend/{tf["include"]}'
     r = data.session.post(url, params=tf)
     trend = []
     if r.status_code == 200:

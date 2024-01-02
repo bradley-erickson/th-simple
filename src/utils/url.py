@@ -16,6 +16,6 @@ def parse_url_params(url_params):
     pairs = url_params.split('&')
 
     # Splitting each pair by '=' and converting to a dictionary
-    params_dict = {key: value for key, value in (pair.split('=') for pair in pairs)}
+    params_dict = {key: value for key, value in (pair.split('=') for pair in pairs if '=' in pair)}
 
     return params_dict

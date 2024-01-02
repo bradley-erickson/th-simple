@@ -69,9 +69,13 @@ def create_grid_item(card, total):
     return item
 
 def create_grid_layout(cards, total):
+    skeleton_count = sum(c['count'] for c in cards if c['skeleton'])
     row = dbc.Row([
-        create_grid_item(card, total) for card in cards
-    ], className='g-1')
+        html.H5(['Skeleton', dbc.Badge(skeleton_count, className='ms-1')]),
+        dbc.Row([create_grid_item(card, total) for card in cards if card['skeleton']], className='g-1 mb-1'),
+        html.H5('Other cards'),
+        dbc.Row([create_grid_item(card, total) for card in cards if not card['skeleton']], className='g-1')
+    ])
     return row
 
 def create_list_item(card, max_count, total):
@@ -121,11 +125,18 @@ def create_list_item(card, max_count, total):
 
 def create_list_layout(cards, total):
     max_count = max(count['count'] for card in cards for count in card['counts'])
-    body = []
+    skeleton_count = sum(c['count'] for c in cards if c['skeleton'])
+    skeleton = []
+    other = []
     for card in cards:
-        body.append(create_list_item(card, max_count, total))
+        if card['skeleton']:
+            skeleton.append(create_list_item(card, max_count, total))
+        else:
+            other.append(create_list_item(card, max_count, total))
 
     headers = [html.Th('Card'), html.Th('Overall')] + [html.Th(i, className='text-end') for i in range(1, 5)]
+
+    body = [html.Tr(html.Td(['Skeleton', dbc.Badge(skeleton_count, className='ms-1')]))] + skeleton + [html.Tr(html.Td('Other'))] + other
 
     table = dbc.Table([
         html.Thead(html.Tr(headers)),
