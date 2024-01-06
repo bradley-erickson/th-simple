@@ -83,9 +83,9 @@ def create_matchup_spread(data, decks, player='deck1', against='deck2'):
             (matchup for matchup in data if matchup[player] == deck),
             key=lambda x: x[against]
         )
-        duplicate = next((index for index, d in enumerate(matchups) if d[player] == d[against]), None)
-        if duplicate is not None:
-            matchups.pop(duplicate)
+        duplicates = [index for index, d in enumerate(matchups) if d[player] == d[against]]
+        if len(duplicates) > 1:
+            matchups.pop(duplicates[0])
 
         ordered_matchups = [None for _ in range(len(against_unique_decks))]
         for m in matchups:

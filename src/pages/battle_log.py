@@ -40,12 +40,6 @@ tags = f'{options}-tags'
 notes = f'{options}-notes'
 submit = f'{options}-submit'
 
-fake_data = [
-    {'playing': 'charizard-ex', 'against': 'mew-meloetta', 'time': '2024-01-04 17:01:12.891066', 'result': 'Win', 'game1': {'result': 'Tie', 'turn': 'First', 'tags': None, 'notes': None}},
-    {'playing': 'mew-meloetta', 'against': 'charizard-ex', 'time': '2024-01-04 17:01:12.891066', 'result': 'Win', 'game1': {'result': 'Tie', 'turn': 'First', 'tags': None, 'notes': None}},
-    {'playing': 'charizard-ex', 'against': 'giratina-lz-box', 'time': '2024-01-04 17:01:12.891066', 'result': 'Loss', 'game1': {'result': 'Loss', 'turn': 'First', 'tags': None, 'notes': None}},
-    {'playing': 'charizard-ex', 'against': 'roaring-moon-ex', 'time': '2024-01-04 17:01:40.000867', 'result': 'Tie', 'game1': {'result': 'Win', 'turn': 'Second', 'tags': [], 'notes': ''}, 'game2': {'result': 'Loss', 'turn': 'First', 'tags': [], 'notes': ''}, 'game3': {'result': 'Win', 'turn': 'Second', 'tags': [], 'notes': ''}}
-]
 
 def create_options():
     games = [dbc.Col([
@@ -57,9 +51,9 @@ def create_options():
                 dbc.Label('Turn'),
                 dbc.RadioItems(id={'type': turn, 'index': g}, options=['First', 'Second'], inline=True),
                 dbc.Label('Tags'),
-                dbc.Checklist(id={'type': tags, 'index': g}),
+                dbc.Checklist(id={'type': tags, 'index': g}, inline=True, options=['Ahead early', 'Behind early', 'Slow start', 'Lucky', 'Got donked', 'Donked opp', 'Quick game', 'Dead drew', 'Poor prizes']),
                 dbc.Label('Notes'),
-                dbc.Textarea(id={'type': notes, 'index': g}),
+                dbc.Textarea(id={'type': notes, 'index': g}, maxlength=300),
             ])
         ])
     ], id={'type': game, 'index': g}, lg=4) for g in range(0, 3)]
@@ -91,6 +85,7 @@ def layout():
     analysis_tab = html.Div(
         dbc.Spinner(id=analysis)
     )
+    fake_data = [{'playing': 'other', 'against': 'other', 'time': str(datetime.datetime.now()), 'result': 'Win', 'game1': {'result': 'Win', 'turn': 'First', 'tags': ['Lucky', 'Slow start'], 'notes': 'Got off to a rocky start from judge, but we top decked the out.'}}]
     cont = html.Div([
         html.H2('Battle Log'),
         html.Div([
@@ -108,7 +103,7 @@ def layout():
             dbc.Tab(dbc.Row(id=history, class_name='flex-column-reverse'), label='History'),
             dbc.Tab(analysis_tab, label='Analysis')
         ]),
-        dcc.Store(id=game_store, data=fake_data, storage_type='session'),
+        dcc.Store(id=game_store, data=fake_data, storage_type='local'),
         dcc.Store(id=archetype_store, data=decks)
     ])
     return cont
@@ -211,16 +206,33 @@ clientside_callback(
 )
 
 # history callbacks
-def create_game(g, decks):
+def create_game(g, title):
+    gtags = g['tags']
+    gturn = g['turn']
+    gnote = g['notes']
+    return html.Div([
+        f'{title} - {gturn.lower() if gturn is not None else ""}',
+        html.Span([dbc.Badge(t, color='primary', pill=True, class_name='ms-1') for t in gtags] if gtags is not None else []),
+        html.P(gnote if gnote is not None else '')
+    ])
+
+
+def create_match(g, decks):
     matchup = dbc.Row([
         html.Div(deck_label.format_label(decks[g['playing']]), className='d-flex w-auto'),
         html.Div('vs.', className='d-flex w-auto'),
         html.Div(deck_label.format_label(decks[g['against']]), className='d-flex w-auto')
     ], align='center')
-    game = dbc.Card([
-        matchup
+    games = html.Div([
+        html.Div([
+            create_game(g[f'game{i+1}'], f'Game {i+1}')
+        ]) for i in range(3) if g.get(f'game{i+1}', False)
+    ])
+    match = dbc.Card([
+        matchup,
+        games
     ], body=True, color=RESULT_COLORS[g['result']], className='bg-opacity-25')
-    return game
+    return match
 
 
 @callback(
@@ -233,7 +245,7 @@ def create_game(g, decks):
 def update_history(history_ts, data, archetype_ts, decks):
     if history_ts is None or archetype_ts is None:
         raise exceptions.PreventUpdate
-    games = [create_game(g, decks) for g in data]
+    games = [create_match(g, decks) for g in data]
     return games
 
 
