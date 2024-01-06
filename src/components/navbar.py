@@ -29,8 +29,9 @@ navbar = dbc.Navbar(
                             dbc.NavItem(dbc.NavLink('Decklist', href='/decklist')),
                             dbc.DropdownMenu(
                                 [
-                                    dbc.DropdownMenuItem('Tier List', href='/tools/tier-list'),
+                                    dbc.DropdownMenuItem('Battle Log', href='/tools/battle-log'),
                                     dbc.DropdownMenuItem('Deck Diff', href='/tools/deck-diff'),
+                                    dbc.DropdownMenuItem('Tier List', href='/tools/tier-list'),
                                 ],
                                 label='Tools',
                                 nav=True,
@@ -47,8 +48,9 @@ navbar = dbc.Navbar(
                             dbc.NavItem(dbc.NavLink('Meta', href='/meta')),
                             dbc.NavItem(dbc.NavLink('Decklist', href='/decklist')),
                             dbc.NavItem(html.Small('Tools')),
-                            dbc.NavItem(dbc.NavLink('Tier List', href='/tools/tier-list')),
+                            dbc.NavItem(dbc.NavLink('Battle Log', href='/tools/battle-log')),
                             dbc.NavItem(dbc.NavLink('Deck Diff', href='/tools/deck-diff')),
+                            dbc.NavItem(dbc.NavLink('Tier List', href='/tools/tier-list')),
                         ],
                         navbar=True,
                         class_name='d-flex d-md-none'

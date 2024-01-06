@@ -33,8 +33,9 @@ cards = [
      'children': html.P('Explore card breakdowns, usage trends, and matchup data for your favorite Pokémon TCG archetypes.')},
     {'title': 'Tools', 'link': '/tools', 'image': 'tools.png',
      'children': html.Ul([
-        html.Li(html.A('Tier List', href='/tools/tier-list', className='text-reset')),
+        html.Li(html.A('Battle Log', href='/tools/battle-log', className='text-reset')),
         html.Li(html.A('Deck Diff', href='/tools/deck-diff', className='text-reset')),
+        html.Li(html.A('Tier List', href='/tools/tier-list', className='text-reset')),
     ])}
 ]
 
