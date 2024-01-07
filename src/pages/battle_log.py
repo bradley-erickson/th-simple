@@ -1,8 +1,12 @@
+import base64
 from collections import Counter
 import dash
 from dash import html, dcc, exceptions, clientside_callback, ClientsideFunction, callback, Output, Input, State, Patch, ALL, ctx, no_update
 import dash_bootstrap_components as dbc
 import datetime
+import io
+import numpy as np
+import pandas as pd
 
 from components import deck_label, matchup_table
 import utils.data
@@ -24,8 +28,9 @@ analysis = f'{prefix}-analysis'
 archetype_store = f'{prefix}-archetype-store'
 
 # buttons
-download = f'{prefix}-download'
-import_id = f'{prefix}-import'
+download_btn = f'{prefix}-download-button'
+download_comp = f'{prefix}-download-component'
+upload_id = f'{prefix}-import'
 clear_id = f'{prefix}-clear'
 
 # options
@@ -80,8 +85,6 @@ def create_options():
 
 
 def layout():
-    archetypes = utils.data.get_decks({'start_date': datetime.date.today() - datetime.timedelta(21)})
-    decks = {d['id']: d for d in archetypes}
     analysis_tab = html.Div(
         dbc.Spinner(id=analysis)
     )
@@ -89,9 +92,13 @@ def layout():
     cont = html.Div([
         html.H2('Battle Log'),
         html.Div([
-            # TODO implement these
-            # dbc.Button([html.I(className='fas fa-upload me-1'), 'Import'], id=import_id, class_name='me-1'),
-            # dbc.Button([html.I(className='fas fa-download me-1'), 'Download'], id=download, class_name='me-1'),
+            # TODO finish implementing this
+            # html.Span(dcc.Upload(
+            #     dbc.Button([html.I(className='fas fa-upload me-1'), 'Upload']),
+            #     id=upload_id, multiple=True
+            # ), className='d-inline-block me-1'),
+            dbc.Button([html.I(className='fas fa-download me-1'), 'Download'], id=download_btn, class_name='me-1'),
+            dcc.Download(id=download_comp),
             html.Div(dcc.ConfirmDialogProvider(
                 dbc.Button([html.I(className='far fa-trash-can me-1'), 'Clear']),
                 id=clear_id,
@@ -104,7 +111,7 @@ def layout():
             dbc.Tab(analysis_tab, label='Analysis')
         ]),
         dcc.Store(id=game_store, data=fake_data, storage_type='local'),
-        dcc.Store(id=archetype_store, data=decks)
+        dcc.Store(id=archetype_store, data={})
     ])
     return cont
 
@@ -116,6 +123,77 @@ clientside_callback(
     allow_duplicate=True,
     prevent_initial_call=True
 )
+
+
+def parse_file_content(contents, filename):
+    content_type, content_string = contents.split(',')
+    decoded = base64.b64decode(content_string)
+    try:
+        if 'csv' in filename:
+            # Assume that the user uploaded a CSV file
+            df = pd.read_csv(
+                io.StringIO(decoded.decode('utf-8')))
+        elif 'xls' in filename:
+            # Assume that the user uploaded an excel file
+            df = pd.read_excel(io.BytesIO(decoded))
+    except Exception as e:
+        print(e)
+        return []
+    print(df.head())
+    return []
+
+
+# @callback(
+#     Output(game_store, 'data', allow_duplicate=True),
+#     Input(upload_id, 'contents'),
+#     State(upload_id, 'filename'),
+#     prevent_initial_call=True
+# )
+# def upload_files(list_of_contents, list_of_filenames):
+#     if list_of_contents is None:
+#         raise exceptions.PreventUpdate
+#     extended_data = []
+#     for c, f in zip(list_of_contents, list_of_filenames):
+#         extended_data.extend(parse_file_content(c, f))
+#     patch = Patch()
+#     patch.extend(extended_data)
+#     return patch
+
+
+@callback(
+    Output(archetype_store, 'data'),
+    Input(game_store, 'modified_timestamp'),
+    State(game_store, 'data'),
+    State(archetype_store, 'data')
+)
+def update_archetype_store(ts, data, current):
+    if ts is None or len(current) > 0:
+        raise exceptions.PreventUpdate
+    weeks_ago_3 = str(datetime.date.today() - datetime.timedelta(21))
+    min_game = min(d['time'] for d in data).split(' ')[0]
+    start_date = min(min_game, weeks_ago_3)
+    archetypes = utils.data.get_decks({'start_date': start_date})
+    decks = {d['id']: d for d in archetypes}
+    return decks
+
+
+@callback(
+    Output(download_comp, 'data'),
+    Input(download_btn, 'n_clicks'),
+    State(game_store, 'data')
+)
+def download_data(clicks, data):
+    if clicks is None:
+        raise exceptions.PreventUpdate
+    df = pd.json_normalize(data, sep='_')
+    df.replace(np.nan, None, inplace=True)
+    clean_tags = lambda x: '+'.join(x) if x is not None and len(x) > 0 else ''
+    df['game1_tags'] = df['game1_tags'].apply(clean_tags)
+    if 'game2_tags' in df.columns:
+        df['game2_tags'] = df['game2_tags'].apply(clean_tags)
+    if 'game3_tags' in df.columns:
+        df['game3_tags'] = df['game3_tags'].apply(clean_tags)
+    return dcc.send_data_frame(df.to_csv, f'trainerhill-battle-log-{str(datetime.date.today())}.csv', index=False)
 
 
 @callback(
@@ -243,7 +321,7 @@ def create_match(g, decks):
     State(archetype_store, 'data')
 )
 def update_history(history_ts, data, archetype_ts, decks):
-    if history_ts is None or archetype_ts is None:
+    if history_ts is None or archetype_ts is None or len(decks) == 0:
         raise exceptions.PreventUpdate
     games = [create_match(g, decks) for g in data]
     return games
@@ -314,7 +392,7 @@ def prep_matchup_spread(data):
     State(archetype_store, 'data')
 )
 def update_matchups(history_ts, data, archetype_ts, decks):
-    if history_ts is None or archetype_ts is None:
+    if history_ts is None or archetype_ts is None or len(decks) == 0:
         raise exceptions.PreventUpdate
     if len(data) == 0:
         return dbc.Alert('Please add matches before accessing analysis tools.', color='danger')
