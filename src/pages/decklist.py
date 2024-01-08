@@ -51,7 +51,10 @@ def create_filter(include, exclude, granularity, placement):
 
     filter_row = dbc.Card([
         html.A(
-            dbc.CardHeader('Decklist Filters'),
+            dbc.CardHeader([
+                html.I(className='fas fa-filter me-1'),
+                'Decklist Filters'
+            ]),
             id=decklist_filters
         ),
         dbc.Collapse(

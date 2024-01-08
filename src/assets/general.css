@@ -48,3 +48,7 @@
 .inputgroup-input-fix {
   overflow: clip;
 }
+
+.ternary-switch {
+  width: 40px;
+}

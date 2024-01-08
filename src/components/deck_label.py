@@ -2,7 +2,7 @@ from dash import html
 
 import utils.images
 
-def format_label(deck, hide_text=False):
+def format_label(deck, hide_text=False, hide_text_small=False):
     if deck is None:
         return ''
     children = [
@@ -12,7 +12,7 @@ def format_label(deck, hide_text=False):
         ) for i in deck.get('icons', [])
     ]
     name = deck.get('name')
-    children.append(html.Span(name, className='d-none' if hide_text else 'ms-1'))
+    children.append(html.Span(name, className='d-none' if hide_text else 'd-none d-md-inline-block' if hide_text_small else 'ms-1'))
     return html.Div(
         children, title=name,
         className='d-flex flex-row align-items-center'

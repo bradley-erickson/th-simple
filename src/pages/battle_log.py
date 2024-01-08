@@ -8,7 +8,7 @@ import io
 import numpy as np
 import pandas as pd
 
-from components import deck_label, matchup_table
+from components import deck_label, matchup_table, ternary_switch
 import utils.data
 
 dash.register_page(
@@ -20,6 +20,8 @@ dash.register_page(
 )
 
 RESULT_COLORS = {'Win': 'success', 'Loss': 'danger', 'Tie': 'warning'}
+TAG_OPTIONS = ['Ahead early', 'Behind early', 'Slow start', 'Lucky', 'Got donked', 'Donked opp', 'Quick game', 'Dead drew', 'Poor prizes']
+TAG_OPTIONS_IDS = [t.lower().replace(' ', '_') for t in TAG_OPTIONS]
 
 prefix = 'battle-log'
 game_store = f'{prefix}-games-store'
@@ -45,6 +47,13 @@ tags = f'{options}-tags'
 notes = f'{options}-notes'
 submit = f'{options}-submit'
 
+# filters
+analysis_filter_header = f'{analysis}-filter-header'
+analysis_filter_collapse = f'{analysis}-filter-collapse'
+analysis_decompose_switch = f'{analysis}-filter-decompose-switch'
+analysis_decompose_collapse = f'{analysis}-filter-decompose-collapse'
+turn_option = f'{analysis}-filter-turn-switch'
+
 
 def create_options():
     games = [dbc.Col([
@@ -54,9 +63,9 @@ def create_options():
                 dbc.Label('Result*' if g == 0 else 'Result'),
                 dbc.RadioItems(id={'type': result, 'index': g}, options=['Win', 'Loss', 'Tie'], inline=True),
                 dbc.Label('Turn'),
-                dbc.RadioItems(id={'type': turn, 'index': g}, options=['First', 'Second'], inline=True),
+                dbc.RadioItems(id={'type': turn, 'index': g}, options={1: 'First', 2: 'Second'}, inline=True),
                 dbc.Label('Tags'),
-                dbc.Checklist(id={'type': tags, 'index': g}, inline=True, options=['Ahead early', 'Behind early', 'Slow start', 'Lucky', 'Got donked', 'Donked opp', 'Quick game', 'Dead drew', 'Poor prizes']),
+                dbc.Checklist(id={'type': tags, 'index': g}, inline=True, options=TAG_OPTIONS),
                 dbc.Label('Notes'),
                 dbc.Textarea(id={'type': notes, 'index': g}, maxlength=300),
             ])
@@ -84,11 +93,36 @@ def create_options():
     return add_round
 
 
+tag_filters = [ternary_switch.create_ternary_switch(t_id, t) for t, t_id in zip(TAG_OPTIONS, TAG_OPTIONS_IDS)]
+tag_filters.insert(0, ternary_switch.create_ternary_switch(turn_option, 'Turn', options=ternary_switch.TURN_OPTIONS))
+analysis_filter_component = dbc.Row([
+    dbc.Col(_filter, md=6, lg=4, xl=3) for _filter in tag_filters
+])
+
 def layout():
-    analysis_tab = html.Div(
+    analysis_tab = html.Div([
+        dbc.Card([
+            html.A(
+                dbc.CardHeader([
+                    html.I(className='fas fa-filter me-1'),
+                    'Game Filters'
+                ]),
+                id=analysis_filter_header
+            ),
+            dbc.Collapse(dbc.CardBody([
+                dbc.Switch(label='Decompose Best of 3s', id=analysis_decompose_switch),
+                dbc.Collapse(analysis_filter_component, id=analysis_decompose_collapse)
+            ]), id=analysis_filter_collapse)
+        ]),
         dbc.Spinner(id=analysis)
-    )
-    fake_data = [{'playing': 'other', 'against': 'other', 'time': str(datetime.datetime.now()), 'result': 'Win', 'game1': {'result': 'Win', 'turn': 'First', 'tags': ['Lucky', 'Slow start'], 'notes': 'Got off to a rocky start from judge, but we top decked the out.'}}]
+    ])
+    fake_data = [
+        {'playing': 'other', 'against': 'other', 'time': str(datetime.datetime.now()), 'result': 'Win', 'game1': {'result': 'Win', 'turn': 1, 'tags': ['Lucky', 'Slow start'], 'notes': 'Got off to a rocky start from judge, but we top decked the out.'}},
+        {'playing': 'other', 'against': 'other', 'time': str(datetime.datetime.now()), 'result': 'Win', 'game1': {'result': 'Win', 'turn': '2', 'tags': ['Slow start'], 'notes': 'Got off to a rocky start from judge, but we top decked the out.'}},
+        {'playing': 'other', 'against': 'other', 'time': str(datetime.datetime.now()), 'result': 'Win', 'game1': {'result': 'Win', 'turn': '1', 'tags': ['Lucky', 'Slow start'], 'notes': 'Got off to a rocky start from judge, but we top decked the out.'}},
+        {'playing': 'other', 'against': 'other', 'time': str(datetime.datetime.now()), 'result': 'Win', 'game1': {'result': 'Win', 'turn': '2', 'tags': ['Lucky'], 'notes': 'Got off to a rocky start from judge, but we top decked the out.'}},
+        {'playing': 'other', 'against': 'other', 'time': str(datetime.datetime.now()), 'result': 'Win', 'game1': {'result': 'Win', 'turn': 2, 'tags': ['Lucky'], 'notes': 'Got off to a rocky start from judge, but we top decked the out.'}}
+    ]
     cont = html.Div([
         html.H2('Battle Log'),
         html.Div([
@@ -109,8 +143,8 @@ def layout():
             dbc.Tab(dbc.Spinner(create_options()), label='Add'),
             dbc.Tab(dbc.Row(id=history, class_name='flex-column-reverse'), label='History'),
             dbc.Tab(analysis_tab, label='Analysis')
-        ]),
-        dcc.Store(id=game_store, data=fake_data, storage_type='local'),
+        ], className='mb-1'),
+        dcc.Store(id=game_store, data=fake_data, storage_type='memory'),
         dcc.Store(id=archetype_store, data={})
     ])
     return cont
@@ -288,8 +322,9 @@ def create_game(g, title):
     gtags = g['tags']
     gturn = g['turn']
     gnote = g['notes']
+    turn_text = f'went {gturn}{"st" if gturn == 1 else "nd"}' if gturn is not None else ''
     return html.Div([
-        f'{title} - {gturn.lower() if gturn is not None else ""}',
+        f'{title} - {turn_text}',
         html.Span([dbc.Badge(t, color='primary', pill=True, class_name='ms-1') for t in gtags] if gtags is not None else []),
         html.P(gnote if gnote is not None else '')
     ])
@@ -297,9 +332,9 @@ def create_game(g, title):
 
 def create_match(g, decks):
     matchup = dbc.Row([
-        html.Div(deck_label.format_label(decks[g['playing']]), className='d-flex w-auto'),
+        html.Div(deck_label.format_label(decks[g['playing']], hide_text_small=True), className='d-flex w-auto'),
         html.Div('vs.', className='d-flex w-auto'),
-        html.Div(deck_label.format_label(decks[g['against']]), className='d-flex w-auto')
+        html.Div(deck_label.format_label(decks[g['against']], hide_text_small=True), className='d-flex w-auto')
     ], align='center')
     games = html.Div([
         html.Div([
@@ -328,6 +363,20 @@ def update_history(history_ts, data, archetype_ts, decks):
 
 
 # analysis callbacks
+clientside_callback(
+    ClientsideFunction(namespace='clientside', function_name='toggle_with_button'),
+    Output(analysis_filter_collapse, 'is_open'),
+    Input(analysis_filter_header, 'n_clicks'),
+    State(analysis_filter_collapse, 'is_open')
+)
+
+clientside_callback(
+    ClientsideFunction(namespace='clientside', function_name='return_self'),
+    Output(analysis_decompose_collapse, 'is_open'),
+    Input(analysis_decompose_switch, 'value')
+)
+
+
 def create_deck_breakdown(data, decks):
     breakdown = {}
     overall = {'Win': 0, 'Loss': 0, 'Tie': 0, 'total': 0}
@@ -384,20 +433,58 @@ def prep_matchup_spread(data):
     return matchup_list
 
 
+def handle_decompose(data, turn, tags):
+    included = set([t for t, t_val in zip(TAG_OPTIONS, tags) if t_val == 1])
+    excluded = set([t for t, t_val in zip(TAG_OPTIONS, tags) if t_val == -1])
+    decomposed_data = []
+    for d in data:
+        # handle the filtering
+        for i in range(3):
+            new_g = {
+                'playing': d['playing'],
+                'against': d['against'],
+                'result': d.get(f'game{i+1}', {}).get('result', None),
+                'turn': d.get(f'game{i+1}', {}).get('turn', 0),
+                'tags': d.get(f'game{i+1}', {}).get('tags', [])
+            }
+            if new_g['result'] is None:
+                continue
+            if turn != 0 and int(new_g['turn']) != turn:
+                continue
+            tag_set = set(new_g['tags'])
+            if len(set.intersection(tag_set, excluded)) > 0:
+                continue
+            if len(included) > 0 and len(set.intersection(tag_set, included)) == 0:
+                continue
+            decomposed_data.append(new_g)
+    return decomposed_data
+
+
 @callback(
     Output(analysis, 'children'),
     Input(game_store, 'modified_timestamp'),
     State(game_store, 'data'),
     Input(archetype_store, 'modified_timestamp'),
-    State(archetype_store, 'data')
+    State(archetype_store, 'data'),
+    Input(analysis_decompose_switch, 'value'),
+    Input(turn_option, 'value'),
+    *[Input(t_id, 'value') for t_id in TAG_OPTIONS_IDS]
 )
-def update_matchups(history_ts, data, archetype_ts, decks):
+def update_matchups(history_ts, data, archetype_ts, decks, decompose, turn, *tags):
     if history_ts is None or archetype_ts is None or len(decks) == 0:
         raise exceptions.PreventUpdate
     if len(data) == 0:
         return dbc.Alert('Please add matches before accessing analysis tools.', color='danger')
-    breakdown_data = create_deck_breakdown(data, decks)
-    matchup_list = prep_matchup_spread(data)
+
+    filtered_data = data
+    if decompose:
+        filtered_data = handle_decompose(data, turn, tags)
+
+    if len(filtered_data) == 0:
+        return dbc.Alert('No games found matching the provided filters', color='warning')
+
+    breakdown_data = create_deck_breakdown(filtered_data, decks)
+    matchup_list = prep_matchup_spread(filtered_data)
     matchup_data = html.Div([
         html.H4('Matchups'),
         matchup_table.create_matchup_spread(matchup_list, decks, player='playing', against='against')

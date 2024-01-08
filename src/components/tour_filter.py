@@ -63,7 +63,10 @@ class TourFiltersAIO(html.Div):
 
         filters = dbc.Card([
             html.A(
-                dbc.CardHeader('Tournament Filters'),
+                dbc.CardHeader([
+                    html.I(className='fas fa-filter me-1'),
+                    'Tournament Filters'
+                ]),
                 id=self.ids.header(aio_id)
             ),
             dbc.Collapse(

@@ -27,8 +27,8 @@ window.dash_clientside.clientside = {
         return `?players=${players}&start_date=${start}${end_string}#${hash}`;
     },
 
-    update_text: function(text) {
-        return text;
+    return_self: function(self) {
+        return self;
     },
 
     update_diff_title: function(text) {
