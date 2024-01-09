@@ -427,12 +427,12 @@ def prep_matchup_spread(data):
     for m in matchup_dict:
         for a in matchup_dict[m]:
             total = matchup_dict[m][a]['Win'] + matchup_dict[m][a]['Loss'] + matchup_dict[m][a]['Tie']
-            matchup_list.append({
-                'playing': m,
-                'against': a,
-                'total': total,
-                'win_rate': round(matchup_dict[m][a]['Win'] / total * 100, 1)
-            })
+            matchup = matchup_dict[m][a].copy()
+            matchup['playing'] = m
+            matchup['against'] = a
+            matchup['total'] = total
+            matchup['win_rate'] = round(matchup_dict[m][a]['Win'] / total * 100, 1)
+            matchup_list.append(matchup)
     return matchup_list
 
 

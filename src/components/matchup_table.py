@@ -5,11 +5,20 @@ import math
 from components import deck_label
 from utils import colors
 
+def create_record_string(match):
+    record_string = None
+    if 'Win' in match and 'Loss' in match:
+        tied = f'-{match["Tie"]}' if 'Tie' in match else ''
+        record_string = f'{match["Win"]}-{match["Loss"]}{tied}'
+    return record_string
+
+
 def create_matchup_tile(match, decks, player, against):
     if match is None:
         return html.Td()
     id = match[player] + match[against]
     wr = match['win_rate']
+    record = create_record_string(match)
 
     color = colors.win_rate_color_bar[math.floor(wr)][1]
     vs_item = html.Div([
@@ -18,12 +27,12 @@ def create_matchup_tile(match, decks, player, against):
         html.Span(deck_label.format_label(decks[match[against]], hide_text=True)),
     ], className='d-flex align-items-center')
     return html.Td([
-        html.Div(wr, id=id, className='text-center'),
+        html.Div([wr, html.Div(record)], id=id, className='text-center'),
         dbc.Popover(
             dbc.PopoverBody([
                 vs_item,
-                html.Div(f'Total: {match["total"]}'),
-                html.Div(f'{wr}%')
+                html.Div(f'{wr}%'),
+                html.Div(record)
             ], class_name='text-dark text-center'),
             style={'backgroundColor': color},
             target=id,
@@ -42,6 +51,7 @@ def create_matchup_tile_full(match, decks, player, against):
         return html.Span()
     id = match[player] + match[against]
     wr = match['win_rate']
+    record = create_record_string(match)
     color = colors.win_rate_color_bar[math.floor(wr)][1]
     vs_item = html.Div([
         html.Span('vs.', className='me-1'),
@@ -50,7 +60,8 @@ def create_matchup_tile_full(match, decks, player, against):
     return dbc.Card(
         dbc.CardBody([
             vs_item,
-            html.Div(f'{match["win_rate"]}%')
+            html.Div(f'{match["win_rate"]}%'),
+            html.Div(record)
         ], class_name='text-dark text-center p-1'),
         style={'backgroundColor': color},
         className='w-auto',
