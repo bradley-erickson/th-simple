@@ -6,11 +6,15 @@ from components import deck_label
 from utils import colors
 
 def create_record_string(match):
-    record_string = None
     if 'Win' in match and 'Loss' in match:
         tied = f'-{match["Tie"]}' if 'Tie' in match else ''
         record_string = f'{match["Win"]}-{match["Loss"]}{tied}'
-    return record_string
+        return record_string
+    if 'wins' in match and 'losses' in match:
+        tied = f'-{match["ties"]}' if 'ties' in match else ''
+        record_string = f'{match["wins"]}-{match["losses"]}{tied}'
+        return record_string
+    return None
 
 
 def create_matchup_tile(match, decks, player, against):
