@@ -118,10 +118,6 @@ def layout():
     ])
     fake_data = [
         {'playing': 'other', 'against': 'other', 'time': str(datetime.datetime.now()), 'result': 'Win', 'game1': {'result': 'Win', 'turn': 1, 'tags': ['Lucky', 'Slow start'], 'notes': 'Got off to a rocky start from judge, but we top decked the out.'}},
-        {'playing': 'other', 'against': 'other', 'time': str(datetime.datetime.now()), 'result': 'Win', 'game1': {'result': 'Win', 'turn': '2', 'tags': ['Slow start'], 'notes': 'Got off to a rocky start from judge, but we top decked the out.'}},
-        {'playing': 'other', 'against': 'other', 'time': str(datetime.datetime.now()), 'result': 'Win', 'game1': {'result': 'Win', 'turn': '1', 'tags': ['Lucky', 'Slow start'], 'notes': 'Got off to a rocky start from judge, but we top decked the out.'}},
-        {'playing': 'other', 'against': 'other', 'time': str(datetime.datetime.now()), 'result': 'Win', 'game1': {'result': 'Win', 'turn': '2', 'tags': ['Lucky'], 'notes': 'Got off to a rocky start from judge, but we top decked the out.'}},
-        {'playing': 'other', 'against': 'other', 'time': str(datetime.datetime.now()), 'result': 'Win', 'game1': {'result': 'Win', 'turn': 2, 'tags': ['Lucky'], 'notes': 'Got off to a rocky start from judge, but we top decked the out.'}}
     ]
     cont = html.Div([
         html.H2('Battle Log'),
