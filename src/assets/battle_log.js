@@ -4,7 +4,14 @@ if (!window.dash_clientside) {
 window.dash_clientside.battle_log = {
     clear_history: function(clicks) {
         if (typeof clicks === 'undefined') { return window.dash_clientside.no_update; }
-        return []
+        return [];
+    },
+
+    disable_download: function(data) {
+        if (data.length === 0) {
+            return true;
+        }
+        return false;
     },
 
     toggle_bo1_bo3: function(games) {

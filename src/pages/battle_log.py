@@ -63,9 +63,9 @@ def create_options():
                 dbc.Label('Result*' if g == 0 else 'Result'),
                 dbc.RadioItems(id={'type': result, 'index': g}, options=['Win', 'Loss', 'Tie'], inline=True),
                 dbc.Label('Turn'),
-                dbc.RadioItems(id={'type': turn, 'index': g}, options={1: 'First', 2: 'Second'}, inline=True),
+                dbc.RadioItems(id={'type': turn, 'index': g}, options={1: 'First', 2: 'Second'}, inline=True, value=0),
                 dbc.Label('Tags'),
-                dbc.Checklist(id={'type': tags, 'index': g}, inline=True, options=TAG_OPTIONS),
+                dbc.Checklist(id={'type': tags, 'index': g}, inline=True, options=TAG_OPTIONS, value=[]),
                 dbc.Label('Notes'),
                 dbc.Textarea(id={'type': notes, 'index': g}, maxlength=300),
             ])
@@ -154,6 +154,12 @@ clientside_callback(
     prevent_initial_call=True
 )
 
+clientside_callback(
+    ClientsideFunction(namespace='battle_log', function_name='disable_download'),
+    Output(download_btn, 'disabled'),
+    Input(game_store, 'data')
+)
+
 
 def parse_file_content(contents, filename):
     content_type, content_string = contents.split(',')
@@ -199,8 +205,9 @@ def parse_file_content(contents, filename):
 def update_archetype_store(ts, data, current):
     if ts is None or len(current) > 0:
         raise exceptions.PreventUpdate
-    weeks_ago_3 = str(datetime.date.today() - datetime.timedelta(21))
-    min_game = min(d['time'] for d in data).split(' ')[0]
+    today = datetime.date.today()
+    weeks_ago_3 = str(today - datetime.timedelta(21))
+    min_game = min(d['time'] for d in data).split(' ')[0] if len(data) > 0 else str(today)
     start_date = min(min_game, weeks_ago_3)
     archetypes = utils.data.get_decks({'start_date': start_date})
     decks = {d['id']: d for d in archetypes}
@@ -316,9 +323,9 @@ clientside_callback(
 # history callbacks
 def create_game(g, title):
     gtags = g['tags']
-    gturn = g['turn']
+    gturn = int(g['turn'])
     gnote = g['notes']
-    turn_text = f'went {gturn}{"st" if gturn == 1 else "nd"}' if gturn is not None else ''
+    turn_text = f'went {gturn}{"st" if gturn == 1 else "nd"}' if gturn > 0 else ''
     return html.Div([
         f'{title} - {turn_text}',
         html.Span([dbc.Badge(t, color='primary', pill=True, class_name='ms-1') for t in gtags] if gtags is not None else []),
@@ -445,7 +452,7 @@ def handle_decompose(data, turn, tags):
             }
             if new_g['result'] is None:
                 continue
-            if turn != 0 and int(new_g['turn']) != turn:
+            if turn != 0 and (int(new_g['turn']) if new_g['turn'] is not None else 0) != turn:
                 continue
             tag_set = set(new_g['tags'] if new_g['tags'] is not None else [])
             if len(set.intersection(tag_set, excluded)) > 0:
