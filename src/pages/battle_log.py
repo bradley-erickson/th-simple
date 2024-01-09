@@ -144,7 +144,7 @@ def layout():
             dbc.Tab(dbc.Row(id=history, class_name='flex-column-reverse'), label='History'),
             dbc.Tab(analysis_tab, label='Analysis')
         ], className='mb-1'),
-        dcc.Store(id=game_store, data=fake_data, storage_type='memory'),
+        dcc.Store(id=game_store, data=fake_data, storage_type='session'),
         dcc.Store(id=archetype_store, data={})
     ])
     return cont
@@ -451,7 +451,7 @@ def handle_decompose(data, turn, tags):
                 continue
             if turn != 0 and int(new_g['turn']) != turn:
                 continue
-            tag_set = set(new_g['tags'])
+            tag_set = set(new_g['tags'] if new_g['tags'] is not None else [])
             if len(set.intersection(tag_set, excluded)) > 0:
                 continue
             if len(included) > 0 and len(set.intersection(tag_set, included)) == 0:
