@@ -5,9 +5,10 @@ import requests_cache
 
 load_dotenv()
 
-BASE_URL = 'https://play.limitlesstcg.com/ext/dinodata'
-api_url = 'https://api.trainerhill.com/api'
-analysis_url = 'https://api.trainerhill.com/analysis'
+BASE_URL = 'https://api.trainerhill.com'
+# BASE_URL = 'http://localhost:5000'
+api_url = f'{BASE_URL}/api'
+analysis_url = f'{BASE_URL}/analysis'
 api_key = {'x-api-key': os.environ['TRAINER_HILL_API_KEY']}
 
 session = requests_cache.CachedSession(expire_after=datetime.timedelta(2), backend='filesystem', cache_name='.session-cache')

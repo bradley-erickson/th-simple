@@ -70,7 +70,8 @@ def layout(players=None, start_date=None, end_date=None):
 
     decks = [{
         'label': deck_label.format_label(deck),
-        'value': deck['id']
+        'value': deck['id'],
+        'search': deck['name']
     } for deck in archetype_raw]
 
     tier_list_tab = dbc.Card(
@@ -105,7 +106,7 @@ def layout(players=None, start_date=None, end_date=None):
             dbc.Label('Archetype select'),
             dcc.Dropdown(
                 id=archetype_dropdown, multi=True,
-                options=decks, value=[d['value'] for d in decks][:15]
+                options=decks, value=[d['value'] for d in decks][:15], maxHeight=400
             ),
         ], className='mb-1'),
         tier_list_tab

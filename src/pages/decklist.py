@@ -3,7 +3,7 @@ from dash import exceptions, clientside_callback, ClientsideFunction, html, dcc,
 import dash_bootstrap_components as dbc
 import pandas as pd
 
-from components import tour_filter, deck_label, card_table, matchup_table, trend_graph
+from components import tour_filter, deck_label, card_table, matchup_table, trend_graph, placement as _placement
 from utils import data, url, cards as _cards, cache
 
 dash.register_page(
@@ -82,18 +82,7 @@ def create_filter(include, exclude, granularity, placement):
                     ], md=6, lg=4, xl=3),
                     dbc.Col([
                         dbc.Label('Placement'),
-                        dcc.Dropdown(
-                            options=[
-                                {'label': 'Winner', 'value': 1},
-                                {'label': 'Finals', 'value': 2},
-                                {'label': 'Top 4', 'value': 4},
-                                {'label': 'Top 8', 'value': 8},
-                                {'label': 'Top 16', 'value': 16},
-                                {'label': 'Top 32', 'value': 32},
-                                {'label': 'Top 64', 'value': 64},
-                                {'label': 'Overall', 'value': 10_000}
-                            ], id=placement_select, value=placement, clearable=False
-                        )
+                        _placement.create_placement_dropdown(placement_select, placement)
                     ], md=6, lg=4, xl=3)
                 ], className='mb-1')
             ]),
@@ -208,7 +197,8 @@ def update_card_select_options(tour_filters):
         cards = r.json()
         formatted_cards = [{
             'value': c['card_code'],
-            'label': f'{c["name"]} {c["card_code"]}'
+            'label': f'{c["name"]} {c["card_code"]}',
+            'search': c['name']
         } for c in cards]
         return formatted_cards, formatted_cards
     return [], []

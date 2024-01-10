@@ -239,7 +239,7 @@ def download_data(clicks, data):
     Input(archetype_store, 'data')
 )
 def update_deck_options(decks):
-    deck_options = [{'label': deck_label.format_label(d), 'value': d['id']} for d in decks.values()]
+    deck_options = [{'label': deck_label.format_label(d), 'value': d['id'], 'search': d['name']} for d in decks.values()]
     return deck_options, deck_options
 
 

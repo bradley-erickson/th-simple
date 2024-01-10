@@ -18,12 +18,11 @@ def create_record_string(match):
 
 
 def create_matchup_tile(match, decks, player, against):
-    if match is None:
-        return html.Td()
+    if match is None or math.isnan(match['win_rate']):
+        return html.Td('-', className='text-center align-middle')
     id = match[player] + match[against]
     wr = match['win_rate']
     record = create_record_string(match)
-
     color = colors.win_rate_color_bar[math.floor(wr)][1]
     vs_item = html.Div([
         html.Span(deck_label.format_label(decks[match[player]], hide_text=True)),
@@ -47,11 +46,11 @@ def create_matchup_tile(match, decks, player, against):
 
 def create_matchup_table_row(deck, data, decks, player, against):
     matches = [create_matchup_tile(match, decks, player, against) for match in data]
-    row = html.Tr([html.Td(deck_label.format_label(decks[deck]), className='text-nowrap')] + matches)
+    row = html.Tr([html.Td(deck_label.format_label(decks[deck]), className='text-nowrap align-middle')] + matches)
     return row
 
 def create_matchup_tile_full(match, decks, player, against):
-    if match is None:
+    if match is None or math.isnan(match['win_rate']):
         return html.Span()
     id = match[player] + match[against]
     wr = match['win_rate']

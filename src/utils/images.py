@@ -1,7 +1,7 @@
 import base64
 
 ptcg_card_url = 'https://limitlesstcg.nyc3.digitaloceanspaces.com/tpci'
-pokemon_url = 'https://cdn.statically.io/gh/bradley-erickson/pokesprite/master/pokemon-gen8/regular'
+pokemon_url = 'https://limitlesstcg.s3.us-east-2.amazonaws.com/pokemon/gen9'
 
 logo_white_path = './assets/logo.png'
 logo_white_tunel = base64.b64encode(open(logo_white_path, 'rb').read())

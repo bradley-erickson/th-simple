@@ -69,6 +69,8 @@ def fetch_matchup_data(tour_data, decks):
     params['games_played'] = 10
     params['archetypes'] = decks
     params['ids_only'] = True
+    # TODO implement this
+    # params['placement'] = 0.25
     url = f'{data.analysis_url}/meta/matchups'
     r = data.session.post(url, params=params)
     if r.status_code == 200:
@@ -93,7 +95,7 @@ def layout(players=None, start_date=None, end_date=None):
         html.H3('Matchups', id='matchups'),
         html.Div([
             dbc.Label('Archetype select'),
-            dcc.Dropdown(id=archetype_select, multi=True),
+            dcc.Dropdown(id=archetype_select, multi=True, maxHeight=400),
         ], className='mb-1'),
         dbc.Spinner(id=matchups)
     ])
@@ -109,7 +111,8 @@ def update_options(tour_filters):
     decks_raw = data.get_decks(tour_filters)
     decks = [{
         'label': deck_label.format_label(deck),
-        'value': deck['id']
+        'value': deck['id'],
+        'search': deck['name']
     } for deck in decks_raw]
     return decks, decks_raw
 
