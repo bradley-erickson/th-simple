@@ -27,6 +27,7 @@ ENERGY = {
 
 PTCGOCODES = {
     'SSP': 'swshp',
+    'PR-SW': 'swshp',
     'SVP': 'svp',
     'SVI': 'sv1',
     'PAL': 'sv2',
@@ -50,7 +51,7 @@ def get_card(card):
     else:
         set_query = f'set.ptcgoCode:{card_set}'
 
-    if card_set == 'SSP': 
+    if card_set == 'SSP' or card_set == 'PR-SW':
         query = f'{set_query} number:SWSH{card["number"]}'
     else:
         query = f'{set_query} number:{card["number"]}'

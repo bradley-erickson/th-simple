@@ -88,7 +88,7 @@ def parse_decklist(l):
         c_num = c_split[-1]
         energy_check = c_set != 'Energy' and c_num not in _cards.ENERGY.values()
         c_set = c_set if energy_check else 'BRS'
-        c_num = c_num if energy_check else _cards.ENERGY[c_split[1]]
+        c_num = c_num if energy_check else c_split[2].replace('{', '').replace('}', '') if c_split[1] == 'Basic' else _cards.ENERGY[c_split[1]]
         deck.append({
             'card_code': f'{c_set}-{c_num.zfill(3) if energy_check else c_num}',
             'set': c_set,
@@ -134,9 +134,10 @@ def update_diff(a, b):
     in_b = []
     in_both = []
 
+    # TODO first fetch card supertypes
+    # then we can ignore card_id for trainers
     overall = set(list(a_dict.keys()) + list(b_dict.keys()))
     for card in overall:
-        # TODO fix counts
         if card in a_dict and card in b_dict:
             a_count = a_dict[card]['count']
             b_count = b_dict[card]['count']

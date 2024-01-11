@@ -50,6 +50,7 @@ submit = f'{options}-submit'
 # filters
 analysis_filter_header = f'{analysis}-filter-header'
 analysis_filter_collapse = f'{analysis}-filter-collapse'
+analysis_filter_text = f'{analysis}-filter-text'
 analysis_decompose_switch = f'{analysis}-filter-decompose-switch'
 analysis_decompose_collapse = f'{analysis}-filter-decompose-collapse'
 turn_option = f'{analysis}-filter-turn-switch'
@@ -95,6 +96,7 @@ def create_options():
 
 tag_filters = [ternary_switch.create_ternary_switch(t_id, t) for t, t_id in zip(TAG_OPTIONS, TAG_OPTIONS_IDS)]
 tag_filters.insert(0, ternary_switch.create_ternary_switch(turn_option, 'Turn', options=ternary_switch.TURN_OPTIONS))
+tag_filters.append(html.Small(id=analysis_filter_text))
 analysis_filter_component = dbc.Row([
     dbc.Col(_filter, md=6, lg=4, xl=3) for _filter in tag_filters
 ])
@@ -457,7 +459,7 @@ def handle_decompose(data, turn, tags):
             tag_set = set(new_g['tags'] if new_g['tags'] is not None else [])
             if len(set.intersection(tag_set, excluded)) > 0:
                 continue
-            if len(included) > 0 and len(set.intersection(tag_set, included)) == 0:
+            if not included.issubset(tag_set):
                 continue
             decomposed_data.append(new_g)
     return decomposed_data
@@ -465,6 +467,7 @@ def handle_decompose(data, turn, tags):
 
 @callback(
     Output(analysis, 'children'),
+    Output(analysis_filter_text, 'children'),
     Input(game_store, 'modified_timestamp'),
     State(game_store, 'data'),
     Input(archetype_store, 'modified_timestamp'),
@@ -476,15 +479,32 @@ def handle_decompose(data, turn, tags):
 def update_matchups(history_ts, data, archetype_ts, decks, decompose, turn, *tags):
     if history_ts is None or archetype_ts is None or len(decks) == 0:
         raise exceptions.PreventUpdate
+    
+    inc_turn = turn > 0
+    with_tags = any(t for t in tags if t == 1)
+    without_tags = any(t for t in tags if t == -1)
+    filter_text = 'Showing games '
+    if inc_turn:
+        filter_text += f'where you went {turn}{"st" if turn == 1 else "nd"}'
+        filter_text += ', ' if with_tags and without_tags else ' '
+        filter_text += 'and ' if with_tags ^ without_tags else ''
+    if with_tags:
+        filter_text += f'with tags [{", ".join([t for t, t_val in zip(TAG_OPTIONS, tags) if t_val == 1])}]'
+        filter_text += ', ' if inc_turn and without_tags else ''
+        filter_text += ' and ' if without_tags else ''
+    if without_tags:
+        filter_text += f'without tags [{", ".join([t for t, t_val in zip(TAG_OPTIONS, tags) if t_val == -1])}]'
+    filter_text += '.'
+
     if len(data) == 0:
-        return dbc.Alert('Please add matches before accessing analysis tools.', color='danger')
+        return dbc.Alert('Please add matches before accessing analysis tools.', color='danger'), filter_text
 
     filtered_data = data
     if decompose:
         filtered_data = handle_decompose(data, turn, tags)
 
     if len(filtered_data) == 0:
-        return dbc.Alert('No games found matching the provided filters', color='warning')
+        return dbc.Alert('No games found matching the provided filters', color='warning'), filter_text
 
     breakdown_data = create_deck_breakdown(filtered_data, decks)
     matchup_list = prep_matchup_spread(filtered_data)
@@ -495,4 +515,4 @@ def update_matchups(history_ts, data, archetype_ts, decks, decompose, turn, *tag
     return html.Div([
         breakdown_data,
         matchup_data
-    ])
+    ]), filter_text

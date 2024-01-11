@@ -23,7 +23,7 @@ def create_card(c):
             c['children'],
         ]), href=c['link']))
     ], color='light', className='home-card')
-    return dbc.Col(card, md=6, lg=4, xl=3)
+    return dbc.Col(card, sm=7, md=6, lg=5, xl=4, xxl=3)
 
 
 cards = [

@@ -30,7 +30,7 @@ def create_matchup_tile(match, decks, player, against):
         html.Span(deck_label.format_label(decks[match[against]], hide_text=True)),
     ], className='d-flex align-items-center')
     return html.Td([
-        html.Div([wr, html.Div(record)], id=id, className='text-center'),
+        html.Div([f'{wr}%', html.Div(record)], id=id, className='text-center'),
         dbc.Popover(
             dbc.PopoverBody([
                 vs_item,
@@ -85,6 +85,8 @@ def create_matchup_spread(data, decks, player='deck1', against='deck2'):
         return 'No matchup information found.'
     if 'Plays:' in player_unique_decks[0]:
         player_unique_decks = sorted(player_unique_decks, key=lambda x: int(x.split(':')[1].strip()))
+    else:
+        player_unique_decks = sorted(player_unique_decks)
     against_unique_decks = sorted(set(matchup[against] for matchup in data))
 
     rows = []

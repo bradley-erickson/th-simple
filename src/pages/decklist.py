@@ -120,7 +120,7 @@ def layout(deck=None, players=None, start_date=None, end_date=None, include=None
                 dbc.Button(dcc.Clipboard(id=table_clipboard, content='None'), className='me-1', title='Copy Skeleton Decklist'),
                 html.Span(dbc.RadioItems(
                     id=table_view,
-                    className='btn-group',
+                    className='btn-group align-baseline',
                     inputClassName='btn-check',
                     labelClassName='btn btn-outline-primary',
                     labelCheckedClassName='active',

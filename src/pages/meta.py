@@ -2,7 +2,7 @@ import dash
 from dash import html, dcc, callback, Output, Input, State
 import dash_bootstrap_components as dbc
 
-from components import tour_filter, deck_label, matchup_table
+from components import tour_filter, deck_label, matchup_table, placement
 from utils import data, cache
 
 dash.register_page(
@@ -22,6 +22,7 @@ breakdown = f'{prefix}-breakdown'
 archetype_select = f'{prefix}-archetype-select'
 archetype_store = f'{prefix}-archetype-store'
 matchups = f'{prefix}-matchups'
+placing_id = f'{prefix}-placing'
 
 def fetch_breakdown_data(tour_data):
     overall = []
@@ -93,9 +94,15 @@ def layout(players=None, start_date=None, end_date=None):
         html.H3('Breakdown', id='breakdown'),
         dbc.Spinner(id=breakdown),
         html.H3('Matchups', id='matchups'),
-        html.Div([
-            dbc.Label('Archetype select'),
-            dcc.Dropdown(id=archetype_select, multi=True, maxHeight=400),
+        dbc.Row([
+            dbc.Col([
+                dbc.Label('Placement'),
+                placement.create_placement_dropdown(placing_id, 10_000)
+            ], md=4, lg=3, xl=2),
+            dbc.Col([
+                dbc.Label('Archetype Selection'),
+                dcc.Dropdown(id=archetype_select, multi=True, maxHeight=400)
+            ], md=8, lg=9, xl=10)
         ], className='mb-1'),
         dbc.Spinner(id=matchups)
     ])
@@ -139,11 +146,13 @@ def update_breakdown(tour_filters, archetypes):
     Output(matchups, 'children'),
     Input(tour_store, 'data'),
     Input(archetype_select, 'value'),
+    Input(placing_id, 'value'),
     State(archetype_store, 'data')
 )
 @cache.cache.memoize()
-def update_matchups(tour_filters, selected, archetypes):
+def update_matchups(tour_filters, selected, place, archetypes):
     decks = {d['id']: d for d in archetypes}
+    tour_filters['placement'] = place
     matchup_data = fetch_matchup_data(tour_filters, selected)
     return matchup_table.create_matchup_spread(matchup_data, decks)
 
