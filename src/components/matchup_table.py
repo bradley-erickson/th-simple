@@ -51,7 +51,7 @@ def create_matchup_table_row(deck, data, decks, player, against):
 
 def create_matchup_tile_full(match, decks, player, against):
     if match is None or math.isnan(match['win_rate']):
-        return html.Span()
+        return html.Span(className='d-none')
     id = match[player] + match[against]
     wr = match['win_rate']
     record = create_record_string(match)

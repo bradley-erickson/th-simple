@@ -123,6 +123,14 @@ def layout():
     ]
     cont = html.Div([
         html.H2('Battle Log'),
+        dbc.Alert(html.Ul([
+            html.Li([html.Strong('Track Your Games:'), ' Log your games, view your history, and dive into detailed analysis.']),
+            html.Li([html.Strong('Filter & Analyze:'), ' Easily filter your game history for better insights.']),
+            html.Li([
+                html.Strong('Need assistance?:'), ' If you encounter an issue or have suggestions, please submit a ',
+                html.A('Feedback Form', href='/feedback', className='alert-link'), '.'
+            ])
+        ], className='mb-0'), id='battlelog-info-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
         html.Div([
             # TODO finish implementing this
             # html.Span(dcc.Upload(
