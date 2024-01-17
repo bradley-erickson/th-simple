@@ -31,9 +31,9 @@ b_only_total = f'{b_only}-total'
 layout = html.Div([
     html.H2('Deck Diff'),
     dbc.Alert(html.Ul([
-        html.Li([html.Strong('Simple to use:'), ' Input your decklists and see a Venn diagram-like comparison.']),
+        html.Li([html.Strong('Simple to Use:'), ' Input your decklists and see a Venn diagram-like comparison.']),
         html.Li([
-            html.Strong('Need assistance:'), ' Some imports may not be supported. If you encounter an issue, please submit a ',
+            html.Strong('Need Assistance:'), ' Some imports may not be supported. If you encounter an issue, please submit a ',
             html.A('Feedback Form', href='/feedback', className='alert-link'), '.'
         ])
     ], className='mb-0'), id='deckdiff-info-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),

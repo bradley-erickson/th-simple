@@ -126,10 +126,11 @@ def layout():
         dbc.Alert(html.Ul([
             html.Li([html.Strong('Track Your Games:'), ' Log your games, view your history, and dive into detailed analysis.']),
             html.Li([html.Strong('Filter & Analyze:'), ' Easily filter your game history for better insights.']),
+            html.Li([html.Strong('Data Privacy:'), " Your game data is stored locally in your browser. It's never collected. If you clear cookies or click the clear button, it'll be deleted forever."]),
             html.Li([
-                html.Strong('Need assistance:'), ' If you encounter an issue or have suggestions, please submit a ',
+                html.Strong('Need Assistance:'), ' If you encounter an issue or have suggestions, please submit a ',
                 html.A('Feedback Form', href='/feedback', className='alert-link'), '.'
-            ])
+            ]),
         ], className='mb-0'), id='battlelog-info-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
         html.Div([
             # TODO finish implementing this

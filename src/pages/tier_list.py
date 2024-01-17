@@ -104,7 +104,7 @@ def layout(players=None, start_date=None, end_date=None):
         dbc.Alert(html.Ul([
             html.Li([html.Strong('Drag n Drop:'), ' Easily create your tier list by dragging and dropping decks into tiers.']),
             html.Li([
-                html.Strong('Need assistance:'), ' If you encounter an issue or have suggestions, please submit a ',
+                html.Strong('Need Assistance:'), ' If you encounter an issue or have suggestions, please submit a ',
                 html.A('Feedback Form', href='/feedback', className='alert-link'), '.'
             ])
         ], className='mb-0'), id='tierlist-info-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
