@@ -31,6 +31,7 @@ navbar = dbc.Navbar(
                                 [
                                     dbc.DropdownMenuItem('Battle Log', href='/tools/battle-log'),
                                     dbc.DropdownMenuItem('Deck Diff', href='/tools/deck-diff'),
+                                    dbc.DropdownMenuItem('Podcast Hub', href='/tools/podcast-hub'),
                                     dbc.DropdownMenuItem('Tier List', href='/tools/tier-list'),
                                 ],
                                 label='Tools',
@@ -50,6 +51,7 @@ navbar = dbc.Navbar(
                             dbc.NavItem(html.Small('Tools')),
                             dbc.NavItem(dbc.NavLink('Battle Log', href='/tools/battle-log')),
                             dbc.NavItem(dbc.NavLink('Deck Diff', href='/tools/deck-diff')),
+                            dbc.NavItem(dbc.NavLink('Podcast Hub', href='/tools/podcast-hub')),
                             dbc.NavItem(dbc.NavLink('Tier List', href='/tools/tier-list')),
                         ],
                         navbar=True,

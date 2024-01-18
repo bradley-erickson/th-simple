@@ -35,6 +35,7 @@ cards = [
      'children': html.Ul([
         html.Li(html.A('Battle Log', href='/tools/battle-log', className='text-reset')),
         html.Li(html.A('Deck Diff', href='/tools/deck-diff', className='text-reset')),
+        html.Li(html.A('Podcast Hub', href='/tools/podcast-hub', className='text-reset')),
         html.Li(html.A('Tier List', href='/tools/tier-list', className='text-reset')),
     ])}
 ]
