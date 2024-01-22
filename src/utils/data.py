@@ -11,7 +11,7 @@ api_url = f'{BASE_URL}/api'
 analysis_url = f'{BASE_URL}/analysis'
 api_key = {'x-api-key': os.environ['TRAINER_HILL_API_KEY']}
 
-session = requests_cache.CachedSession(expire_after=datetime.timedelta(2), backend='filesystem', cache_name='.session-cache')
+session = requests_cache.CachedSession(expire_after=datetime.timedelta(1), backend='filesystem', cache_name='.session-cache')
 session.headers.update(api_key)
 
 def get_decks(tour_filter):

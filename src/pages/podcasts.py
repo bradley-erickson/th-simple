@@ -5,6 +5,8 @@ import datetime
 import requests
 import xml.etree.ElementTree as ET
 
+from utils import cache
+
 description = 'Stay tuned with our Pokémon TCG Podcast Hub: Latest episodes from top shows. Dive into insightful discussions for TCG enthusiasts.'
 
 dash.register_page(
@@ -35,6 +37,8 @@ BACKUP = {
     'Trashalanche': 'https://www.trashalanche.com/'
 }
 
+# cache for half an hour
+@cache.cache.memoize(timeout=1800)
 def download_rss_feed(url):
     response = requests.get(url)
     
