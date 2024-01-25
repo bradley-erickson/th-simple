@@ -27,7 +27,7 @@ FEEDS = {
     'Shift Gear': 'https://feeds.captivate.fm/the-shift-gear-podcast/',
     'Trashalanche': 'https://feeds.buzzsprout.com/1261064.rss',
     'Drew Too Many': 'https://anchor.fm/s/d411e804/podcast/rss',
-    'FlowTKast': 'https://anchor.fm/s/3f94e654/podcast/rss',
+    # 'FlowTKast': 'https://anchor.fm/s/3f94e654/podcast/rss',
     # 'Experience Share': '',
     # 'Lost Mine': '',
     'Pittsburgh Pokemon': 'https://anchor.fm/s/2a98f524/podcast/rss'
