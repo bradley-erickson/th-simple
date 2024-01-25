@@ -70,17 +70,15 @@ def fetch_matchup_data(tour_data, decks):
     params['games_played'] = 10
     params['archetypes'] = decks
     params['ids_only'] = True
-    # TODO implement this
-    # params['placement'] = 0.25
     url = f'{data.analysis_url}/meta/matchups'
     r = data.session.post(url, params=params)
     if r.status_code == 200:
         return r.json()['data']
     return []
 
-def layout(players=None, start_date=None, end_date=None):
-    tours = tour_filter.TourFiltersAIO(players, start_date, end_date, prefix)
-    tour_filters = tour_filter.create_tour_filter(players, start_date, end_date)
+def layout(players=None, start_date=None, end_date=None, platform=None):
+    tours = tour_filter.TourFiltersAIO(players, start_date, end_date, platform, prefix)
+    tour_filters = tour_filter.create_tour_filter(players, start_date, end_date, platform)
     
     cont = html.Div([
         html.H2('Meta Analysis'),

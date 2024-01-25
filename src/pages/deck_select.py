@@ -18,9 +18,9 @@ prefix = 'deck-select'
 tour_store = f'{prefix}-tour-store'
 table = f'{prefix}-table'
 
-def layout(players=None, start_date=None, end_date=None):
-    tours = tour_filter.TourFiltersAIO(players, start_date, end_date, prefix)
-    tour_filters = tour_filter.create_tour_filter(players, start_date, end_date)
+def layout(players=None, start_date=None, end_date=None, platform=None):
+    tours = tour_filter.TourFiltersAIO(players, start_date, end_date, platform, prefix)
+    tour_filters = tour_filter.create_tour_filter(players, start_date, end_date, platform)
     cont = html.Div([
         html.H2('Decklist Analysis'),
         tours,

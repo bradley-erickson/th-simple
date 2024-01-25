@@ -9,7 +9,7 @@ window.dash_clientside.clientside = {
         return is_open;
     },
 
-    disable_tour_filter_apply: function (players, start, end, initial) {
+    disable_tour_filter_apply: function (players, start, end, platform, initial) {
         if (players !== initial.players) {
             return false;
         }
@@ -19,12 +19,16 @@ window.dash_clientside.clientside = {
         if (end !== initial.end_date) {
             return false;
         }
+        if (platform !== initial.platform) {
+            return false;
+        }
         return true;
     },
 
-    update_tour_filter_apply_href: function (players, start, end, hash) {
+    update_tour_filter_apply_href: function (players, start, end, platform, hash) {
         const end_string = end !== null ? `&end_date=${end}` : '';
-        return `?players=${players}&start_date=${start}${end_string}#${hash}`;
+        const platform_string = platform !== null ? `&platform=${platform}`: '';
+        return `?players=${players}&start_date=${start}${end_string}${platform_string}#${hash}`;
     },
 
     return_self: function(self) {

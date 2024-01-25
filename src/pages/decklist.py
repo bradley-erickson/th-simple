@@ -2,6 +2,7 @@ import dash
 from dash import exceptions, clientside_callback, ClientsideFunction, html, dcc, callback, Output, Input, State
 import dash_bootstrap_components as dbc
 import pandas as pd
+import urllib
 
 from components import tour_filter, deck_label, card_table, matchup_table, trend_graph, placement as _placement
 from utils import data, url, cards as _cards, cache
@@ -91,9 +92,9 @@ def create_filter(include, exclude, granularity, placement):
     ])
     return filter_row
 
-def layout(deck=None, players=None, start_date=None, end_date=None, include=None, exclude=None, granularity=0.6, placement=10_000):
-    tours = tour_filter.TourFiltersAIO(players, start_date, end_date, prefix)
-    filters = tour_filter.create_tour_filter(players, start_date, end_date)
+def layout(deck=None, players=None, start_date=None, end_date=None, platform=None, include=None, exclude=None, granularity=0.6, placement=10_000):
+    tours = tour_filter.TourFiltersAIO(players, start_date, end_date, platform, prefix)
+    filters = tour_filter.create_tour_filter(players, start_date, end_date, platform)
     filters['deck'] = deck
     filters['placement'] = placement
     filters['include'] = include
@@ -180,6 +181,7 @@ def update_title(tf, current):
         raise exceptions.PreventUpdate
     deck = tf['deck']
     decks = data.get_decks(tf)
+    deck = urllib.parse.unquote(deck)
     label = deck_label.format_label(next(d for d in decks if d['id'] == deck))
     return label, decks
 

@@ -64,9 +64,9 @@ def create_tier_row(tier, color, bottom_border=False, top=False):
     )
 
 
-def layout(players=None, start_date=None, end_date=None):
-    tours = tour_filter.TourFiltersAIO(players, start_date, end_date, prefix)
-    archetype_raw = utils.data.get_decks(tour_filter.create_tour_filter(players, start_date, end_date))
+def layout(players=None, start_date=None, end_date=None, platform=None):
+    tours = tour_filter.TourFiltersAIO(players, start_date, end_date, platform, prefix)
+    archetype_raw = utils.data.get_decks(tour_filter.create_tour_filter(players, start_date, end_date, platform))
 
     decks = [{
         'label': deck_label.format_label(deck),

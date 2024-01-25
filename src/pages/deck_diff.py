@@ -96,18 +96,20 @@ def parse_decklist(l):
         energy_check = c_set != 'Energy' and c_num not in _cards.ENERGY.values()
         c_set = c_set if energy_check else 'BRS'
         c_num = c_num if energy_check else c_split[2].replace('{', '').replace('}', '') if c_split[1] == 'Basic' else _cards.ENERGY[c_split[1]]
-        deck.append({
+        card = {
             'card_code': f'{c_set}-{c_num.zfill(3) if energy_check else c_num}',
             'set': c_set,
             'number': c_num,
             'name': ' '.join(c_split[1:-2]),
-            'count': int(c_split[0])
-        })
+            'count': int(c_split[0]),
+        }
+        card['card'] = _cards.get_card(card)
+        deck.append(card)
     return deck
 
 
 def clean_list(raw, mid=False):
-    cards = [_cards.get_card(card) for card in raw]
+    cards = [c['card'] for c in raw]
     cards_sorted = _cards.sort_deck(cards)
     cards_comp = [dbc.Col([
         html.Img(src=images.get_card_image(c['card_code'], 'SM'), className='w-100'),
@@ -133,9 +135,8 @@ def clean_list(raw, mid=False):
 def update_diff(a, b):
     dl_a = parse_decklist(a)
     dl_b = parse_decklist(b)
-
-    a_dict = {c['card_code']: c for c in dl_a}
-    b_dict = {c['card_code']: c for c in dl_b}
+    a_dict = {(c['card_code'] if c['card']['supertype'] == 'Pokémon' else c['name']): c for c in dl_a}
+    b_dict = {(c['card_code'] if c['card']['supertype'] == 'Pokémon' else c['name']): c for c in dl_b}
 
     in_a = []
     in_b = []

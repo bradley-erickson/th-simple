@@ -9,6 +9,9 @@ def default_players(p):
 def default_start_date(s):
     return s if s else (date.today() - timedelta(21)).isoformat()
 
+def default_platform(p):
+    return p if p else 'all'
+
 class TourFiltersAIO(html.Div):
 
     class ids:
@@ -20,6 +23,11 @@ class TourFiltersAIO(html.Div):
         dates = lambda aio_id: {
             'component': 'TourFiltersAIO',
             'subcomponent': 'dates_range',
+            'aio_id': aio_id
+        }
+        platform = lambda aio_id: {
+            'component': 'TourFiltersAIO',
+            'subcomponent': 'platform_radio',
             'aio_id': aio_id
         }
         apply = lambda aio_id: {
@@ -50,6 +58,7 @@ class TourFiltersAIO(html.Div):
         player_count=None,
         start_date=None,
         end_date=None,
+        platform=None,
         aio_id=None
     ):
         if aio_id is None:
@@ -58,7 +67,8 @@ class TourFiltersAIO(html.Div):
         initial_data = {
             'players': default_players(player_count),
             'start_date': default_start_date(start_date),
-            'end_date': end_date
+            'end_date': end_date,
+            'platform': default_platform(platform)
         }
 
         filters = dbc.Card([
@@ -92,6 +102,18 @@ class TourFiltersAIO(html.Div):
                                 end_date_placeholder_text='Today'
                             )),
                         ], lg=4),
+                        dbc.Col([
+                            dbc.Label('Platform'),
+                            dbc.RadioItems(
+                                options=[
+                                    {'value': 'all', 'label': 'All'},
+                                    {'value': 'online', 'label': 'Online'},
+                                    {'value': 'inperson', 'label': 'In Person'},
+                                ],
+                                value=initial_data['platform'],
+                                id=self.ids.platform(aio_id)
+                            ),
+                        ], lg=4),
                     ], className='mb-1'),
                     dbc.Button(
                         'Apply',
@@ -113,6 +135,7 @@ class TourFiltersAIO(html.Div):
         Input(ids.players(MATCH), 'value'),
         Input(ids.dates(MATCH), 'start_date'),
         Input(ids.dates(MATCH), 'end_date'),
+        Input(ids.platform(MATCH), 'value'),
         State(ids.initial(MATCH), 'data')
     )
 
@@ -122,6 +145,7 @@ class TourFiltersAIO(html.Div):
         Input(ids.players(MATCH), 'value'),
         Input(ids.dates(MATCH), 'start_date'),
         Input(ids.dates(MATCH), 'end_date'),
+        Input(ids.platform(MATCH), 'value'),
         Input('_pages_location', 'hash')
     )
 
@@ -133,15 +157,16 @@ class TourFiltersAIO(html.Div):
     )
 
 
-def create_tour_filter(players=None, start_date=None, end_date=None):
+def create_tour_filter(players=None, start_date=None, end_date=None, platform=None):
     params = {}
     params['players'] = default_players(players)
-    params['organizers'] = ['all']
     params['start_date'] = default_start_date(start_date)
     params['end_date'] = end_date
+    params['platform'] = default_platform(platform)
     return params
 
 def create_param_string(tf):
-    end_string = f'&end_date{tf["end_date"]}' if 'end_date' in tf and tf['end_date'] is not None else ''
-    param_str = f'?players={tf["players"]}&start_date={tf["start_date"]}{end_string}'
+    end_string = f'&end_date={tf["end_date"]}' if 'end_date' in tf and tf['end_date'] is not None else ''
+    platform_string = f'&platform={tf["platform"]}' if 'platform' in tf and tf['platform'] in ['online', 'inperson'] else ''
+    param_str = f'?players={tf["players"]}&start_date={tf["start_date"]}{end_string}{platform_string}'
     return param_str
