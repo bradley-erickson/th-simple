@@ -1,5 +1,5 @@
 import dash
-from dash import html
+from dash import html, callback, Output, Input
 import dash_bootstrap_components as dbc
 import datetime
 import requests
@@ -17,6 +17,7 @@ dash.register_page(
 )
 
 prefix = 'podcasts'
+container = f'{prefix}-container'
 
 FEEDS = {
     'Uncommon Energy': 'https://anchor.fm/s/8755b1a8/podcast/rss',
@@ -140,23 +141,31 @@ def create_podcast_card(pod):
 
 
 def layout():
-    episodes = fetch_latest_episodes()
-    episodes = sorted(episodes, key=lambda x: x['published'], reverse=True)
-    cont = dbc.Spinner([
+    cont = html.Div([
         html.H2('Podcast Hub'),
-        dbc.Row([
-            dbc.Col(
-                create_podcast_card(pod),
-                md=6, xxl=4,
-                class_name='align-self-stretch'
-            ) for pod in episodes
-        ], class_name='g-1'),
-        html.Small([
+        dbc.Spinner(id=container),
+        html.Div(html.Small([
             'If we are ',
             html.Strong('missing'),
             ' a podcast, please submit a ',
             html.A('Feedback Form', href='/feedback'),
             " with the podcast's name and we'll get it added!"
-        ])
+        ]))
     ])
     return cont
+
+
+@callback(
+    Output(container, 'children'),
+    Input(container, 'className')
+)
+def update_podcasts(_):
+    episodes = fetch_latest_episodes()
+    episodes = sorted(episodes, key=lambda x: x['published'], reverse=True)
+    return dbc.Row([
+        dbc.Col(
+            create_podcast_card(pod),
+            md=6, xxl=4,
+            class_name='align-self-stretch'
+        ) for pod in episodes
+    ], class_name='g-1')

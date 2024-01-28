@@ -67,7 +67,7 @@ def create_overview(overall, top_8):
 
 def fetch_matchup_data(tour_data, decks):
     params = tour_data.copy()
-    params['games_played'] = 10
+    params['games_played'] = 5
     params['archetypes'] = decks
     params['ids_only'] = True
     url = f'{data.analysis_url}/meta/matchups'
@@ -160,4 +160,4 @@ def update_matchups(tour_filters, selected, place, archetypes):
     Input(archetype_select, 'options')
 )
 def update_archetypes_selected(hash, options):
-    return [opt['value'] for opt in options[0:12]]
+    return [opt['value'] for opt in options[0:15] if opt['value'] != 'other']

@@ -113,7 +113,7 @@ def layout(players=None, start_date=None, end_date=None, platform=None):
             dbc.Label('Archetype select'),
             dcc.Dropdown(
                 id=archetype_dropdown, multi=True,
-                options=decks, value=[d['value'] for d in decks][:15], maxHeight=400
+                options=decks, value=[d['value'] for d in decks if d['value'] != 'other'][:15], maxHeight=400
             ),
         ], className='mb-1'),
         tier_list_tab
