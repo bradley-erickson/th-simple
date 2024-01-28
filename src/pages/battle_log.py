@@ -138,7 +138,7 @@ def layout():
         html.Div([
             html.Span(dcc.Upload(
                 dbc.Button([html.I(className='fas fa-upload me-1'), 'Upload']),
-                id=upload_id, multiple=True
+                id=upload_id, multiple=True, accept='.json'
             ), className='d-inline-block me-1'),
             dbc.Button([html.I(className='fas fa-download me-1'), 'Download'], id=download_btn, class_name='me-1'),
             dcc.Download(id=download_comp),
