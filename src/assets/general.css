@@ -52,3 +52,8 @@
 .ternary-switch {
   width: 40px;
 }
+
+/* DECK DIFF */
+.deck-diff-input {
+  height: 250px;
+}

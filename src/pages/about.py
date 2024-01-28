@@ -12,14 +12,15 @@ dash.register_page(
 
 layout = html.Div([
     html.H2('About'),
-    html.P('Welcome to Trainer Hill, previously known as DinoData.app, your dedicated '\
+    html.P('Welcome to Trainer Hill, your dedicated '\
            'platform for in-depth competitive analysis of the Pokémon Trading Card Game (TCG).'),
-    html.P('In the realm of competitive e-sports, data analysis plays a crucial role in '\
+    html.P(['In the realm of competitive e-sports, data analysis plays a crucial role in '\
            "informing players' strategies and decisions. Until recently, the Pokémon TCG "\
            'community lacked a centralized source for such analytical insights, leaving '\
-           'players to conduct their own data research. The advent of play.limitlesstcg.com '\
-           'in 2020 marked a turning point, vastly expanding the data available to players '\
-           'and enthusiasts.'),
+           'players to conduct their own data research. The advent of the ',
+            html.A('LimitlessTCG Tournament Platform', href='https://play.limitlesstcg.com/', target='_blank'),
+           ' in 2020 marked a turning point, vastly expanding the data available to players '\
+           'and enthusiasts.']),
     html.P('Trainer Hill leverages this wealth of information to bring the Pokémon TCG '\
            'community the kind of data-driven analysis that has long been a staple in other '\
            'e-sports. Our aim is to provide players with the tools and insights they need to '\

@@ -13,22 +13,22 @@ bmc_link = 'https://www.buymeacoffee.com/trainerhill'
 footer = dbc.Navbar(
     dbc.Container([
         dbc.NavLink(
-            html.I(className='fab fa-twitter fs-5'),
+            html.I(className='fab fa-twitter fs-5', title='Follow us on Twitter'),
             href='https://twitter.com/Trainer_Hill',
             target='_blank'
         ),
         dbc.NavLink(
-            html.I(className='fab fa-discord fs-5'),
+            html.I(className='fab fa-discord fs-5', title='Join our Discord server'),
             href='https://discord.gg/tDwNSt6Z7w',
             target='_blank'
         ),
         dbc.NavLink(
-            html.I(className='fab fa-patreon fs-5'),
+            html.I(className='fab fa-patreon fs-5', title='Become a Patreon member'),
             href='https://www.patreon.com/trainerhill',
             target='_blank'
         ),
         dbc.NavLink(
-            html.I(className='fas fa-mug-hot fs-5'),
+            html.I(className='fas fa-mug-hot fs-5', title='Support the site'),
             href=bmc_link,
             target='_blank'
         ),

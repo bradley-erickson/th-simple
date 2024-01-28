@@ -43,14 +43,14 @@ layout = html.Div([
                 dbc.InputGroupText('Decklist A'),
                 dbc.Input(id=decklist_a_name, placeholder='Name', className='inputgroup-input-fix')
             ]),
-            dbc.Textarea(id=decklist_a_list, placeholder='Paste decklist here', value='')
+            dbc.Textarea(id=decklist_a_list, placeholder='Paste decklist here', size='sm', value='', class_name='deck-diff-input')
         ], md=6),
         dbc.Col([
             dbc.InputGroup([
                 dbc.InputGroupText('Decklist B'),
                 dbc.Input(id=decklist_b_name, type='text', placeholder='Name', className='inputgroup-input-fix')
             ]),
-            dbc.Textarea(id=decklist_b_list, placeholder='Paste decklist here', value='')
+            dbc.Textarea(id=decklist_b_list, placeholder='Paste decklist here', size='sm', value='', class_name='deck-diff-input')
         ], md=6)
     ], className='gy-1 mb-1'),
     dbc.Spinner(dbc.Row([
@@ -103,14 +103,13 @@ def parse_decklist(l):
             'name': ' '.join(c_split[1:-2]),
             'count': int(c_split[0]),
         }
-        card['card'] = _cards.get_card(card)
+        card = _cards.get_card(card)
         deck.append(card)
     return deck
 
 
 def clean_list(raw, mid=False):
-    cards = [c['card'] for c in raw]
-    cards_sorted = _cards.sort_deck(cards)
+    cards_sorted = _cards.sort_deck(raw)
     cards_comp = [dbc.Col([
         html.Img(src=images.get_card_image(c['card_code'], 'SM'), className='w-100'),
         dbc.Badge(
@@ -118,7 +117,7 @@ def clean_list(raw, mid=False):
             class_name='position-absolute bottom-0 end-0 m-2 rounded-circle font-monospace border border-light',
         )
     ], className='position-relative', xs=4, md=2 if mid else 4) for c in cards_sorted]
-    total = sum(c.get('count', 0) for c in cards)
+    total = sum(c.get('count', 0) for c in raw)
     return cards_comp, total
 
 
@@ -135,8 +134,8 @@ def clean_list(raw, mid=False):
 def update_diff(a, b):
     dl_a = parse_decklist(a)
     dl_b = parse_decklist(b)
-    a_dict = {(c['card_code'] if c['card']['supertype'] == 'Pokémon' else c['name']): c for c in dl_a}
-    b_dict = {(c['card_code'] if c['card']['supertype'] == 'Pokémon' else c['name']): c for c in dl_b}
+    a_dict = {(c['card_code'] if c['supertype'] == 'Pokémon' else c['name']): c for c in dl_a}
+    b_dict = {(c['card_code'] if c['supertype'] == 'Pokémon' else c['name']): c for c in dl_b}
 
     in_a = []
     in_b = []

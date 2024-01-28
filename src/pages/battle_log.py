@@ -5,6 +5,7 @@ from dash import html, dcc, exceptions, clientside_callback, ClientsideFunction,
 import dash_bootstrap_components as dbc
 import datetime
 import io
+import json
 import numpy as np
 import pandas as pd
 
@@ -32,8 +33,9 @@ archetype_store = f'{prefix}-archetype-store'
 # buttons
 download_btn = f'{prefix}-download-button'
 download_comp = f'{prefix}-download-component'
-upload_id = f'{prefix}-import'
+upload_id = f'{prefix}-upload'
 clear_id = f'{prefix}-clear'
+upload_alert = f'{prefix}-upload-alert'
 
 # options
 options = f'{prefix}-options'
@@ -126,18 +128,18 @@ def layout():
         dbc.Alert(html.Ul([
             html.Li([html.Strong('Track Your Games:'), ' Log your games, view your history, and dive into detailed analysis.']),
             html.Li([html.Strong('Filter & Analyze:'), ' Easily filter your game history for better insights.']),
-            html.Li([html.Strong('Data Privacy:'), " Your game data is stored locally in your browser. It's never collected. If you clear cookies or click the clear button, it'll be deleted forever."]),
+            html.Li([html.Strong('Data Privacy:'), " Your game data is stored locally in your browser. It's never collected. If you clear cookies or click the clear button, your data will be deleted forever."]),
             html.Li([
                 html.Strong('Need Assistance:'), ' If you encounter an issue or have suggestions, please submit a ',
                 html.A('Feedback Form', href='/feedback', className='alert-link'), '.'
             ]),
         ], className='mb-0'), id='battlelog-info-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
+        dbc.Alert(dismissable=True, id=upload_alert, is_open=False),
         html.Div([
-            # TODO finish implementing this
-            # html.Span(dcc.Upload(
-            #     dbc.Button([html.I(className='fas fa-upload me-1'), 'Upload']),
-            #     id=upload_id, multiple=True
-            # ), className='d-inline-block me-1'),
+            html.Span(dcc.Upload(
+                dbc.Button([html.I(className='fas fa-upload me-1'), 'Upload']),
+                id=upload_id, multiple=True
+            ), className='d-inline-block me-1'),
             dbc.Button([html.I(className='fas fa-download me-1'), 'Download'], id=download_btn, class_name='me-1'),
             dcc.Download(id=download_comp),
             html.Div(dcc.ConfirmDialogProvider(
@@ -175,36 +177,50 @@ clientside_callback(
 def parse_file_content(contents, filename):
     content_type, content_string = contents.split(',')
     decoded = base64.b64decode(content_string)
+    parsed_content = []
     try:
-        if 'csv' in filename:
-            # Assume that the user uploaded a CSV file
-            df = pd.read_csv(
-                io.StringIO(decoded.decode('utf-8')))
-        elif 'xls' in filename:
-            # Assume that the user uploaded an excel file
-            df = pd.read_excel(io.BytesIO(decoded))
+        if filename.endswith('.json'):
+            parsed_content = json.loads(decoded.decode('utf-8'))
+        # if 'csv' in filename:
+        #     # Assume that the user uploaded a CSV file
+        #     df = pd.read_csv(
+        #         io.StringIO(decoded.decode('utf-8')))
+        # elif 'xls' in filename:
+        #     # Assume that the user uploaded an excel file
+        #     df = pd.read_excel(io.BytesIO(decoded))
     except Exception as e:
-        print(e)
-        return []
-    print(df.head())
-    return []
+        pass
+    return parsed_content
 
 
-# @callback(
-#     Output(game_store, 'data', allow_duplicate=True),
-#     Input(upload_id, 'contents'),
-#     State(upload_id, 'filename'),
-#     prevent_initial_call=True
-# )
-# def upload_files(list_of_contents, list_of_filenames):
-#     if list_of_contents is None:
-#         raise exceptions.PreventUpdate
-#     extended_data = []
-#     for c, f in zip(list_of_contents, list_of_filenames):
-#         extended_data.extend(parse_file_content(c, f))
-#     patch = Patch()
-#     patch.extend(extended_data)
-#     return patch
+@callback(
+    Output(game_store, 'data', allow_duplicate=True),
+    Output(upload_alert, 'color'),
+    Output(upload_alert, 'is_open'),
+    Output(upload_alert, 'children'),
+    Input(upload_id, 'contents'),
+    State(upload_id, 'filename'),
+    prevent_initial_call=True
+)
+def upload_files(list_of_contents, list_of_filenames):
+    if list_of_contents is None:
+        raise exceptions.PreventUpdate
+    extended_data = []
+    uploaded_info = {}
+    for c, f in zip(list_of_contents, list_of_filenames):
+        parsed_data = parse_file_content(c, f)
+        uploaded_info[f] = len(parsed_data)
+        # TODO check for empty lists to inform user there was an error
+        extended_data.extend(parsed_data)
+    patch = Patch()
+    patch.extend(extended_data)
+    content = html.Div([
+        'Game uploaded:',
+        html.Ul([html.Li(f'{k} - {v} matches') for k, v in uploaded_info.items()], className='mb-0')
+    ])
+    empty_uploads = sum(1 for k in uploaded_info if uploaded_info[k] == 0)
+    color = 'success' if empty_uploads == 0 else 'danger' if len(uploaded_info) == empty_uploads else 'warning'
+    return patch, color, True, content
 
 
 @callback(
@@ -233,6 +249,9 @@ def update_archetype_store(ts, data, current):
 def download_data(clicks, data):
     if clicks is None:
         raise exceptions.PreventUpdate
+    return dcc.send_string(json.dumps(data, indent=2), filename=f'trainerhill-battle-log-{str(datetime.date.today())}.json')
+
+    # TODO this old code for downloading a csv, we ought to allow this in the future.
     df = pd.json_normalize(data, sep='_')
     df.replace(np.nan, None, inplace=True)
     clean_tags = lambda x: '+'.join(x) if x is not None and len(x) > 0 else ''
@@ -334,7 +353,7 @@ clientside_callback(
 # history callbacks
 def create_game(g, title):
     gtags = g['tags']
-    gturn = int(g['turn'])
+    gturn = int(g['turn']) if g['turn'] else 0
     gnote = g['notes']
     turn_text = f'went {gturn}{"st" if gturn == 1 else "nd"}' if gturn > 0 else ''
     return html.Div([
