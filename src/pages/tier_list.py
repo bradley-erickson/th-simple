@@ -12,6 +12,7 @@ dash.register_page(
     path='/tools/tier-list',
     title='Tier List Creator',
     image='tools.png',
+    icon='fa-ranking-star',
     description='Strategically categorize Pokémon TCG deck archetypes with our Tier List tool. Easily create and customize tier lists based on tournament data and personal insights. Ideal for visualizing the competitive landscape and identifying top-performing decks.'
 )
 date_format = '%B %#d, %G' if platform.system() == 'Windows' else '%B %-d, %G'

@@ -13,6 +13,7 @@ dash.register_page(
     __name__,
     path='/tools/podcast-hub',
     title='Podcast Hub',
+    icon='fa-podcast',
     description=description
 )
 

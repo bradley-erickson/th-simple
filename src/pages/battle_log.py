@@ -17,6 +17,7 @@ dash.register_page(
     path='/tools/battle-log',
     title='Battle Log',
     image='tools.png',
+    icon='fa-book',
     description='Track your Pokémon TCG matches with our tool: Record opponents, game outcomes, notes, and more. Download your data for in-depth analysis.'
 )
 

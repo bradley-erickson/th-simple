@@ -19,6 +19,7 @@ prefix = 'feedback'
 alert = f'{prefix}-alert'
 reason = f'{prefix}-reason'
 comments = f'{prefix}-comments'
+comments_message = f'{prefix}-comments-message'
 contact_method = f'{prefix}-contact-method'
 contact_user = f'{prefix}-contact-user'
 submit = f'{prefix}-submit'
@@ -49,7 +50,8 @@ layout = html.Div([
                 id=comments,
                 value='',
                 required=True
-            )
+            ),
+            dbc.FormText('Responses must be a minimum of 10 characters.', color='muted', id=comments_message)
         ]),
         html.Div([
             dbc.Label('Contact'),
@@ -73,6 +75,7 @@ layout = html.Div([
 clientside_callback(
     ClientsideFunction(namespace='clientside', function_name='update_feedback_submit_disabled'),
     Output(submit, 'disabled'),
+    Output(comments_message, 'className'),
     Input(comments, 'value')
 )
 

@@ -36,7 +36,7 @@ cache.cache.init_app(app.server)
 def serve_layout():
     return html.Div(
         [
-            navbar.navbar,
+            navbar.create_navbar(),
             dbc.Alert([
                 'This is a dev site, things may change. If you would like to see specific changes please fill out a ',
                 html.A('Feedback Form', className='alert-link', href='/feedback')

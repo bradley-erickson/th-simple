@@ -9,6 +9,7 @@ dash.register_page(
     path='/tools/deck-diff',
     title='Deck Diff Analyzer',
     image='tools.png',
+    icon='fa-code-compare',
     description='Compare and contrast two Pokémon TCG decklists with our Deck Diff tool. Generate intuitive Venn diagrams to visualize card overlaps and differences, helping you refine your deck choices and understand key strategic variations.'
 )
 

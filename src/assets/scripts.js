@@ -45,8 +45,8 @@ window.dash_clientside.clientside = {
 
     update_feedback_submit_disabled: function(arg) {
         if (arg.length > 10) {
-            return false;
+            return [false, 'd-none'];
         }
-        return true;
+        return [true, ''];
     }
 }

@@ -23,7 +23,7 @@ def create_card(c):
             c['children'],
         ]), href=c['link']))
     ], color='light', className='home-card')
-    return dbc.Col(card, sm=7, md=6, lg=5, xl=4, xxl=3)
+    return dbc.Col(card, md=6, lg=5, xl=4)
 
 
 cards = [
@@ -31,16 +31,26 @@ cards = [
      'children': html.P('Unlock the secrets of the Pokémon TCG meta - Top 8 insights, matchup analysis, and more.')},
     {'title': 'Decklists Deep Dive', 'link': '/decklist', 'image': 'decklist-analysis.png',
      'children': html.P('Explore card breakdowns, usage trends, and matchup data for your favorite Pokémon TCG archetypes.')},
-    {'title': 'Tools', 'link': '/tools', 'image': 'tools.png',
-     'children': html.Ul([
-        html.Li(html.A('Battle Log', href='/tools/battle-log', className='text-reset')),
-        html.Li(html.A('Deck Diff', href='/tools/deck-diff', className='text-reset')),
-        html.Li(html.A('Podcast Hub', href='/tools/podcast-hub', className='text-reset')),
-        html.Li(html.A('Tier List', href='/tools/tier-list', className='text-reset')),
-    ])}
 ]
 
-layout = dbc.Row([
-    create_card(c) for c in cards
-], class_name='gy-1')
-# tool list + single card for meta and single card for decklist
+def create_tool(title, t):
+    tool = html.A(dbc.Card([
+        html.H3(className=f'fas {t["icon"]}'),
+        html.Div(title, className='text-')
+    ], body=True, class_name='home-card text-center'), href=t['href'], className='text-decoration-none')
+    return dbc.Col(tool, sm=6, md=4, xl=3)
+
+def layout():
+    main_pages = dbc.Row([
+        create_card(c) for c in cards
+    ], justify='around')
+
+    tool_pages = {page['title']: {'href': page['path'], 'icon': page['icon']} for page in dash.page_registry.values() if page['path'].startswith('/tools/')}
+    sorted_tools = sorted(tool_pages.keys())
+    tools = dbc.Row([
+        create_tool(k, tool_pages[k]) for k in sorted_tools
+    ], justify='around', class_name='gy-2 mt-1')
+    return dbc.Container([
+        main_pages,
+        tools
+    ])
