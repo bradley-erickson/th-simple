@@ -34,6 +34,7 @@ PTCGOCODES = {
     'MEW': 'sv3pt5',
     'OBF': 'sv3',
     'PAR': 'sv4',
+    'PAF': 'sv4pt5'
 }
 
 @cache.cache.memoize(timeout=0)
@@ -57,7 +58,7 @@ def get_card(card):
         query = f'{set_query} number:{card["number"]}'
     obj = _query_card(query)
     if obj is None:
-        basic_energy = not any(c.isdigit() for c in card['number'])
+        basic_energy = not any(c.isdigit() for c in card['number']) or ('Energy' in card['name'] and card['name'].split(' ')[0] in ENERGY)
         card['supertype'] = 'Energy' if basic_energy else None
         card['subtype'] = 'Basic' if basic_energy else None
         card['dex'] = None
