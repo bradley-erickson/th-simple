@@ -281,7 +281,7 @@ def update_card_matchups(tf, options):
     url = f'{data.analysis_url}/decklists/{tf["deck"]}/card-matchups/{tf["include"]}'
     params = tf.copy()
     params['against_archetypes'] = [o['id'] for o in options[:15]]
-    params['against_archetypes'].remove('other')
+    if 'other' in params['against_archetypes']: params['against_archetypes'].remove('other')
     params['against_archetypes'].remove(tf['deck'])
     r = data.session.post(url, params=params)
     matchups = []
