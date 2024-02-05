@@ -30,6 +30,11 @@ class TourFiltersAIO(html.Div):
             'subcomponent': 'platform_radio',
             'aio_id': aio_id
         }
+        platform_tooltip = lambda aio_id: {
+            'component': 'TourFiltersAIO',
+            'subcomponent': 'platform_tooltip',
+            'aio_id': aio_id
+        }
         apply = lambda aio_id: {
             'component': 'TourFiltersAIO',
             'subcomponent': 'apply_btn',
@@ -103,12 +108,20 @@ class TourFiltersAIO(html.Div):
                             )),
                         ], lg=4),
                         dbc.Col([
-                            dbc.Label('Platform'),
+                            dbc.Label([
+                                'Platform',
+                                html.I(className='ms-1 fas fa-circle-info', id=self.ids.platform_tooltip(aio_id)),
+                                dbc.Tooltip([
+                                    '"Online" gathers data exclusively from the Play LimitlessTCG tournament platform.',
+                                    html.Br(),
+                                    '"Majors" compiles data from players who advanced to Day 2 in Major tournaments, including Regionals, Special Events, Internationals, and Worlds.',
+                                ], target=self.ids.platform_tooltip(aio_id))
+                            ]),
                             dbc.RadioItems(
                                 options=[
-                                    {'value': 'all', 'label': 'All'},
+                                    {'value': 'all', 'label': 'Both'},
                                     {'value': 'online', 'label': 'Online'},
-                                    {'value': 'inperson', 'label': 'In Person'},
+                                    {'value': 'inperson', 'label': 'Majors'},
                                 ],
                                 value=initial_data['platform'],
                                 id=self.ids.platform(aio_id)

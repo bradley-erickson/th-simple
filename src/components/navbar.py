@@ -10,6 +10,7 @@ toggler = f'{prefix}-toggler'
 collapse = f'{prefix}-collapse'
 image = f'{prefix}-image'
 theme = f'{prefix}-theme'
+popover = f'{prefix}-popover'
 
 def create_navbar():
     tool_pages = {page['title']: page['path'] for page in dash.page_registry.values() if page['path'].startswith('/tools/')}
@@ -40,15 +41,10 @@ def create_navbar():
                             [
                                 dbc.NavItem(dbc.NavLink('Meta', href='/meta')),
                                 dbc.NavItem(dbc.NavLink('Decklist', href='/decklist')),
-                                dbc.DropdownMenu(
-                                    [
-                                        dbc.DropdownMenuItem(k, href=tool_pages[k]) for k in sorted_tools
-                                    ],
-                                    label='Tools',
-                                    nav=True,
-                                    in_navbar=True,
-                                    class_name='me-1'
-                                ),
+                                dbc.NavItem(dbc.NavLink('Tools', href='/tools'), id=popover),
+                                dbc.Popover(dbc.Nav([
+                                    html.A(k, href=tool_pages[k], className='m-1 d-block') for k in sorted_tools
+                                ], navbar=True), target=popover, trigger='hover', body=True, placement='bottom-start')
                             ],
                             navbar=True,
                             class_name='d-none d-md-flex'
