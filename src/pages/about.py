@@ -2,6 +2,7 @@ import dash
 from dash import html
 import dash_bootstrap_components as dbc
 
+from components import footer
 
 dash.register_page(
     __name__,
@@ -10,27 +11,37 @@ dash.register_page(
     description='Discover Trainer Hill: Your Premier Source for Pokémon TCG Analytics'
 )
 
-layout = html.Div([
-    html.H2('About'),
-    html.P('Welcome to Trainer Hill, your dedicated '\
-           'platform for in-depth competitive analysis of the Pokémon Trading Card Game (TCG).'),
-    html.P(['In the realm of competitive e-sports, data analysis plays a crucial role in '\
-           "informing players' strategies and decisions. Until recently, the Pokémon TCG "\
-           'community lacked a centralized source for such analytical insights, leaving '\
-           'players to conduct their own data research. The advent of the ',
-            html.A('LimitlessTCG Tournament Platform', href='https://play.limitlesstcg.com/', target='_blank'),
-           ' in 2020 marked a turning point, vastly expanding the data available to players '\
-           'and enthusiasts.']),
-    html.P('Trainer Hill leverages this wealth of information to bring the Pokémon TCG '\
-           'community the kind of data-driven analysis that has long been a staple in other '\
-           'e-sports. Our aim is to provide players with the tools and insights they need to '\
-           'make informed, strategic decisions in their gameplay and deck building.'),
-    html.P("I'm Brad Erickson, also known as RaptorBrad, the founder and sole operator behind "\
-           'Trainer Hill. What began as a small-scale analytics project born out of personal '\
-           'interest has evolved into the comprehensive resource you see today. My passion for '\
-           'the Pokémon TCG and data analytics drives this project, and I am thrilled to share '\
-           'these insights with the community.'),
-    html.P('Thank you for visiting Trainer Hill. Your support and enthusiasm make this journey worthwhile.'),
-    html.P('Please note: Trainer Hill is an independent entity and is not affiliated with The Pokémon '\
-           'Company International (TPCi), Nintendo, Creatures, or Game Freak.')
+play_limitless_link = html.A('play.limitlesstcg', href='play.limitlesstcg.com')
+
+faq = [
+    {'q': 'What is Trainer Hill?',
+     'a': 'Trainer Hill is your dedicated platform for in-depth competitive analysis of the Pokémon Trading Card '\
+          'Game (TCG). Our aim is to provide players with the tools and insights they need to '\
+          'make informed, strategic decisions in their gameplay and deck building.'},
+    {'q': 'Where does the data come from?',
+     'a': ['Online data is collected from the ', play_limitless_link,
+           ' online tournament platform. ', 'Data from Majors tournaments is collected from both ',
+           html.A('LimitlessTCG', href='www.limitlesstcg.com'), ' and ', html.A('PokeData', href='www.pokedata.ovh'),
+           '.']},
+    {'q': 'How are deck archetypes determined?',
+     'a': ['The ', play_limitless_link, ' online tournament platform keeps an up-to-date ruleset that determines ',
+           'the deck archetype based on cards played.']},
+    {'q': 'I encountered a bug or I have an idea. What do I do?',
+     'a': ['Submit a ', html.A('Feedback form', href='/feedback'), '.']},
+    {'q': 'Who runs Trainer Hill?', 'a': "It's just me! My name is Brad."},
+    {'q': 'How can I support the site?',
+     'a': ['Become a member on ', html.A('Patreon', href=footer.patreon_link, target='_blank'), ' or ',
+           html.A('buy me a coffee', href=footer.bmc_link, target='_blank'), '.']}
+]
+
+layout = dbc.Container([
+    html.H2('About Trainer Hill'),
+    html.Div([
+        html.Div([
+            html.Strong(i['q']),
+            html.P(i['a'])
+        ]) for i in faq
+    ]),
+    html.Small('Please note: Trainer Hill is an independent entity and is not affiliated with The Pokémon '\
+               'Company International (TPCi), Nintendo, Creatures, or Game Freak.')
 ])

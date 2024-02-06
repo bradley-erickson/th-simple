@@ -9,6 +9,7 @@ prefix = 'footer'
 aff = 'TrainerHill'
 tcg_player_link = f'https://tcgplayer.com/?utm_campaign=affiliate&utm_medium={aff}&utm_source={aff}'
 bmc_link = 'https://www.buymeacoffee.com/trainerhill'
+patreon_link = 'https://www.patreon.com/trainerhill'
 
 footer = dbc.Navbar(
     dbc.Container([
@@ -24,7 +25,7 @@ footer = dbc.Navbar(
         ),
         dbc.NavLink(
             html.I(className='fab fa-patreon fs-5', title='Become a Patreon member'),
-            href='https://www.patreon.com/trainerhill',
+            href=patreon_link,
             target='_blank'
         ),
         dbc.NavLink(
