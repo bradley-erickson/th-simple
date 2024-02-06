@@ -17,6 +17,15 @@ session.headers.update(api_key)
 def get_decks(tour_filter):
     url = f'{api_url}/decks'
     r = session.get(url, params=tour_filter)
+    content = []
     if r.status_code == 200:
-        return r.json()
-    return []
+        content = r.json()
+    decks = []
+    ids = set()
+    for c in content:
+        id = c['id']
+        if id in ids:
+            continue
+        decks.append(c)
+        ids.add(id)
+    return decks
