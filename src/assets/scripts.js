@@ -48,5 +48,21 @@ window.dash_clientside.clientside = {
             return [false, 'd-none'];
         }
         return [true, ''];
+    },
+
+    download_dom_as_image: async function(clicks, id) {
+        const today = new Date();
+        const dateString = today.toISOString().substring(0, 10);
+        fileName = `trainerhill-${id}-${dateString}.png`;
+        if(clicks > 0){
+            html2canvas(document.getElementById(id), {useCORS: true}).then(function (canvas) {
+                var anchorTag = document.createElement('a');
+                document.body.appendChild(anchorTag);
+                anchorTag.download = fileName;
+                anchorTag.href = canvas.toDataURL();
+                anchorTag.target = '_blank';
+                anchorTag.click();
+            })
+        }
     }
 }

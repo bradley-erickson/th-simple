@@ -140,7 +140,7 @@ class TourFiltersAIO(html.Div):
                 id=self.ids.collapse(aio_id),
             )
         ])
-        super().__init__(filters, className='mb-1')
+        super().__init__(filters)
 
     clientside_callback(
         ClientsideFunction(namespace='clientside', function_name='disable_tour_filter_apply'),

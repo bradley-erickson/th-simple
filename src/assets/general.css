@@ -53,6 +53,12 @@
   width: 40px;
 }
 
+.tooltip {
+  .tooltip-inner {
+    color: var(--bs-light)
+  }
+}
+
 /* DECK DIFF */
 .deck-diff-input {
   height: 250px;

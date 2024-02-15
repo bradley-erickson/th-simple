@@ -2,6 +2,7 @@ import dash
 from dash import html, callback, clientside_callback, ClientsideFunction, Output, Input
 import dash_bootstrap_components as dbc
 
+from components import download_button
 from utils import images, cards as _cards
 
 dash.register_page(
@@ -30,7 +31,10 @@ b_only = f'{prefix}-b-only'
 b_only_total = f'{b_only}-total'
 
 layout = html.Div([
-    html.H2('Deck Diff'),
+    html.Div([
+        html.H2('Deck Diff', className='d-inline-block'),
+        download_button.DownloadImageAIO(dom_id=prefix, className='float-end')
+    ]),
     dbc.Alert(html.Ul([
         html.Li([html.Strong('Simple to Use:'), ' Input your decklists and see a Venn diagram-like comparison.']),
         html.Li([
@@ -67,7 +71,7 @@ layout = html.Div([
             html.H4(['Overlap', dbc.Badge(id=overlap_total, className='ms-1')], className='text-md-center'),
             dbc.Row(id=overlap, className='g-0')
         ], md=6)
-    ], className='gy-1'))
+    ], id=prefix, className='gy-1'))
 ])
 
 clientside_callback(

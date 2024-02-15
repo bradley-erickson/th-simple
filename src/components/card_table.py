@@ -6,6 +6,8 @@ import plotly.express as px
 
 from utils import colors, images
 
+color_breakdown = colors.blue
+color_inclusion = colors.red
 
 def create_grid_item(card, total):
     id = card['card_code']
@@ -23,7 +25,7 @@ def create_grid_item(card, total):
 
     figure = px.bar(
         df, x='count', y='play_rate',
-        color_discrete_sequence=[colors.green],
+        color_discrete_sequence=[color_breakdown],
         labels=dict(count='', play_rate=''),
     )
     figure.update_layout(
@@ -49,7 +51,7 @@ def create_grid_item(card, total):
             dcc.Graph(
                 figure=figure,
                 config={'staticPlot': True},
-                className='bg-light rounded h-100 w-100 bg-blur'
+                className='bg-white rounded h-100 w-100 bg-blur'
             ),
             className='position-absolute bottom-0 h-50 start-0 end-0 m-1'
         ),
@@ -57,7 +59,7 @@ def create_grid_item(card, total):
             dbc.Progress(
                 value=play_rate*100, label=f'{play_rate:.1%}',
                 class_name='w-100',
-                color=colors.green
+                color=color_inclusion
             ),
             className='position-absolute bottom-40 p-2 w-100'
         ),
@@ -80,25 +82,25 @@ def create_grid_layout(cards, total):
 
 def create_list_item(card, max_count, total):
     id = card['card_code']
-    color = colors.inclusion_bar[math.floor(card['play_rate']*100)]
+    color = colors.red_gradient[math.floor(card['play_rate']*100)]
 
     hover_bars = [
         dbc.Label('Overall'),
-        dbc.Progress(value=card['play_rate'], max=1, color=colors.green),
+        dbc.Progress(value=card['play_rate'], max=1, color=color_inclusion),
     ]
 
     counts = [html.Td()]*max_count
     for count in sorted(card['counts'], key=lambda d: d['count']):
         c = count['count']
         c_value = count["decks"] / total
-        c_color = colors.inclusion_bar[math.floor(c_value * 100)]
+        c_color = colors.blue_gradient[math.floor(c_value * 100)]
         counts[c-1] = html.Td(
             html.Span(f'{c_value:.1%}', className='d-none d-md-inline'),
             style={'backgroundColor': c_color},
             className='text-end'
         )
         hover_bars.append(dbc.Label(f'{c} cop{"ies" if c > 1 else "y"}'))
-        hover_bars.append(dbc.Progress(value=c_value, max=1, color=colors.green))
+        hover_bars.append(dbc.Progress(value=c_value, max=1, color=color_breakdown))
 
     cells = [
         dbc.Popover(

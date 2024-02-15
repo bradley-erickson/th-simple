@@ -4,7 +4,9 @@ import dash_bootstrap_components as dbc
 import pandas as pd
 import urllib
 
-from components import tour_filter, deck_label, card_table, matchup_table, trend_graph, placement as _placement
+from components import (tour_filter, deck_label,
+    card_table, matchup_table, trend_graph, download_button,
+    placement as _placement)
 from utils import data, url, cards as _cards, cache
 
 dash.register_page(
@@ -29,6 +31,8 @@ card_select = f'{decklist_filters}-card-select'
 exclude_select = f'{decklist_filters}-exclude-card-select'
 granularity_slider = f'{decklist_filters}-granularity'
 placement_select = f'{decklist_filters}-placement'
+
+list_tooltip = f'{prefix}-table-tooltip'
 
 table_view = f'{prefix}-table-view'
 table_store = f'{prefix}-table-store'
@@ -105,19 +109,28 @@ def layout(deck=None, players=None, start_date=None, end_date=None, platform=Non
     cont = html.Div([
         html.H2('Decklist Analysis'),
         tours,
+        create_filter(include, exclude, granularity, placement),
         dcc.Store(id=store, data=filters),
         dcc.Store(id=option_store, data=[]),
         dbc.Spinner(html.Div([
-            html.H3([html.Span(id=title, className='d-flex'), dbc.Badge(0, id=deck_count, className='ms-1')], className='d-flex'),
-            dbc.Button([
-                html.I(className='fas fa-list'),
-                html.Span('Change deck', className='ms-1 d-lg-inline-block d-none')
-            ], href=change_deck_url, title='Change deck')
-        ], className='d-flex justify-content-between align-items-center')),
-        create_filter(include, exclude, granularity, placement),
-        html.Div([
-            html.A(html.H4('List Overview'), id=headers[overview_header]['header']),
+            html.H3([html.Span(id=title, className='d-flex'), dbc.Badge(0, id=deck_count, className='ms-1')], className='d-flex mb-0'),
             html.Div([
+                dbc.Button([
+                    html.I(className='fas fa-list'),
+                    html.Span('Change deck', className='ms-1 d-lg-inline-block d-none')
+                ], href=change_deck_url, title='Change deck')
+            ], className='d-flex')
+        ], className='d-flex justify-content-between align-items-center mt-1')),
+        html.Div([
+            html.A(html.H4([
+                'List Overview',
+                html.I(className='ms-1 fas fa-circle-info', id=list_tooltip),
+                dbc.Tooltip([
+                    'Reprinted cards may be duplicated in the analysis. This will fix itself over time.'
+                ], target=list_tooltip)
+            ]), id=headers[overview_header]['header']),
+            html.Div([
+                download_button.DownloadImageAIO(dom_id=headers[overview_header]['collapse'], className='me-1 d-inline-block'),
                 dbc.Button(dcc.Clipboard(id=table_clipboard, content='None'), className='me-1', title='Copy Skeleton Decklist'),
                 html.Span(dbc.RadioItems(
                     id=table_view,

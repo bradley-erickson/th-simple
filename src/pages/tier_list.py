@@ -4,7 +4,7 @@ import dash_bootstrap_components as dbc
 from datetime import date
 import platform
 
-from components import tour_filter, page_too_small, deck_label
+from components import tour_filter, page_too_small, deck_label, download_button
 import utils.data
 
 dash.register_page(
@@ -19,7 +19,6 @@ date_format = '%B %#d, %G' if platform.system() == 'Windows' else '%B %-d, %G'
 
 prefix = 'tier-list'
 report_card = f'{prefix}-list-report'
-download_button = f'{prefix}-list-download'
 archetype_dropdown = f'{prefix}-archetype-dropdown'
 title_input = f'{prefix}-list-title-input'
 title_text = f'{prefix}-list-title-text'
@@ -101,7 +100,10 @@ def layout(players=None, start_date=None, end_date=None, platform=None):
     )
     cont = html.Div([
         page_too_small.alert,
-        html.H2('Tier List Creator'),
+        html.Div([
+            html.H2('Tier List Creator', className='d-inline-block'),
+            download_button.DownloadImageAIO(report_card, className='float-end'),
+        ]),
         dbc.Alert(html.Ul([
             html.Li([html.Strong('Drag n Drop:'), ' Easily create your tier list by dragging and dropping decks into tiers.']),
             html.Li([

@@ -2,7 +2,7 @@ import dash
 from dash import html, dcc, callback, Output, Input, State
 import dash_bootstrap_components as dbc
 
-from components import tour_filter, deck_label, matchup_table, placement
+from components import tour_filter, deck_label, matchup_table, placement, download_button
 from utils import data, cache
 
 dash.register_page(
@@ -91,7 +91,10 @@ def layout(players=None, start_date=None, end_date=None, platform=None):
         tours,
         html.H3('Breakdown', id='breakdown'),
         dbc.Spinner(id=breakdown),
-        html.H3('Matchups', id='matchups'),
+        html.Div([
+            html.H3('Matchups', id='matchups', className='d-inline-block'),
+            download_button.DownloadImageAIO(dom_id=matchups, className='float-end')
+        ]),
         dbc.Row([
             dbc.Col([
                 dbc.Label('Placement'),
@@ -102,7 +105,7 @@ def layout(players=None, start_date=None, end_date=None, platform=None):
                 dcc.Dropdown(id=archetype_select, multi=True, maxHeight=400)
             ], md=8, lg=9, xl=10)
         ], className='mb-1'),
-        dbc.Spinner(id=matchups)
+        dbc.Spinner(html.Div(id=matchups))
     ])
     return cont
 

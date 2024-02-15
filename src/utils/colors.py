@@ -2,6 +2,7 @@ red = '#e74c3c'
 white = '#ffffff'
 blue = '#3498db'
 green = '#18bc9c'
+primary = '#2c3e50'
 
 
 def hex_to_rgb(hex):
@@ -63,4 +64,7 @@ red_to_white_to_blue = red_to_white + white_to_blue
 
 win_rate_color_bar = create_color_map(red_to_white_to_blue)
 
-inclusion_bar = transparent_gradient(green, 101)
+inclusion_bar = transparent_gradient(primary, 101)
+green_gradient = transparent_gradient(green, 101)
+red_gradient = transparent_gradient(red, 101)
+blue_gradient = transparent_gradient(blue, 101)
