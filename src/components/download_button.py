@@ -33,7 +33,7 @@ class DownloadImageAIO(html.Div):
         
         button = [
             dbc.Button(
-                html.I(className='fas fa-download', title='Download page as image'),
+                html.I(className='fas fa-download', title='Download image (png)'),
                 id=self.ids.button(aio_id),
                 n_clicks=0
             ),

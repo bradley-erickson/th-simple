@@ -19,30 +19,32 @@ dash.register_page(
 prefix = 'meta'
 tour_store = f'{prefix}-tour-store'
 breakdown = f'{prefix}-breakdown'
+breakdown_place = f'{prefix}-breakdown-placement'
+breakdown_overall = f'{prefix}-breakdown-overall'
+breakdown_specific = f'{prefix}-breakdown-specific'
 archetype_select = f'{prefix}-archetype-select'
 archetype_store = f'{prefix}-archetype-store'
 matchups = f'{prefix}-matchups'
 placing_id = f'{prefix}-placing'
 
-def fetch_breakdown_data(tour_data):
-    overall = []
-    top_8 = []
+def fetch_breakdown_data(tour_data, placing=None):
     params = tour_data.copy()
-    params['placement'] = 10_000
+    overall = []
+    if placing is not None:
+        params['placement'] = placing
+    else:
+        params['placement'] = 10_000
+
     url = f'{data.analysis_url}/meta/breakdown'
     r = data.session.post(url, params=params)
     if r.status_code == 200:
         overall = r.json()['overall'][0:15]
-    params['placement'] = 8
-    r = data.session.post(url, params=params)
-    if r.status_code == 200:
-        top_8 = r.json()['overall'][0:15]
-    return overall, top_8
+    return overall
 
-def create_list_label(d, max_num, i, title):
+def create_list_label(d, max_num, i, placing):
     href = d['href']
-    if title == 'Top 8':
-        href += '&placement=8'
+    if placing is not None and placing != 10_000:
+        href += f'&placement={placing}'
     return html.Tr([
             html.Td(f'{i+1}.'),
             html.Td(html.A(d['label'], href=href), className='text-nowrap'),
@@ -50,20 +52,9 @@ def create_list_label(d, max_num, i, title):
             html.Td(dbc.Progress(value=d['percent'], max=max_num, class_name='bg-transparent'), className='w-100 d-none d-lg-table-cell')
         ], className=f'deck-row {"" if i < 8 else "d-none d-md-table-row"}')
 
-def create_ordered_list(l, title):
+def create_ordered_list(l, placing=None):
     max_num = max((d['percent'] for d in l), default=0)
-    return dbc.Col([
-        html.H4(title, className='text-center'),
-        dbc.Table(html.Tbody([
-            create_list_label(d, max_num, i, title) for i, d in enumerate(l)
-        ]))
-    ], lg=6)
-
-def create_overview(overall, top_8):
-    return dbc.Row([
-        create_ordered_list(overall, 'Overall'),
-        create_ordered_list(top_8, 'Top 8')
-    ])
+    return [create_list_label(d, max_num, i, placing) for i, d in enumerate(l)]
 
 def fetch_matchup_data(tour_data, decks):
     params = tour_data.copy()
@@ -90,7 +81,16 @@ def layout(players=None, start_date=None, end_date=None, platform=None):
         dcc.Store(id=archetype_store, data=[]),
         tours,
         html.H3('Breakdown', id='breakdown'),
-        dbc.Spinner(id=breakdown),
+        dbc.Row([
+            dbc.Col([
+                html.H4('Overall', className='text-center'),
+                dbc.Spinner(dbc.Table(html.Tbody(id=breakdown_overall)))
+            ], lg=6),
+            dbc.Col([
+                placement.create_placement_dropdown(breakdown_place, 8, 'text-center'),
+                dbc.Spinner(dbc.Table(html.Tbody(id=breakdown_specific)))
+            ], lg=6)
+        ]),
         html.Div([
             html.H3('Matchups', id='matchups', className='d-inline-block'),
             download_button.DownloadImageAIO(dom_id=matchups, className='float-end')
@@ -125,23 +125,37 @@ def update_options(tour_filters):
     return decks, decks_raw
 
 @callback(
-    Output(breakdown, 'children'),
+    Output(breakdown_overall, 'children'),
     Input(tour_store, 'data'),
-    Input(archetype_select, 'options')
+    Input(archetype_select, 'options'),
 )
 @cache.cache.memoize()
 def update_breakdown(tour_filters, archetypes):
     decks = {d['value']: d['label'] for d in archetypes}
 
-    overall, top_8 = fetch_breakdown_data(tour_filters)
+    overall = fetch_breakdown_data(tour_filters)
     for d in overall:
         d['label'] = decks[d['deck']]
         d['href'] = f'/decklist/{d["deck"]}{tour_filter.create_param_string(tour_filters)}'
-    for d in top_8:
-        d['label'] = decks[d['deck']]
-        d['href'] = f'/decklist/{d["deck"]}{tour_filter.create_param_string(tour_filters)}'
 
-    return create_overview(overall, top_8)
+    return create_ordered_list(overall)
+
+@callback(
+    Output(breakdown_specific, 'children'),
+    Input(tour_store, 'data'),
+    Input(archetype_select, 'options'),
+    Input(breakdown_place, 'value')
+)
+@cache.cache.memoize()
+def update_breakdown(tour_filters, archetypes, place):
+    decks = {d['value']: d['label'] for d in archetypes}
+
+    top_x = fetch_breakdown_data(tour_filters, place)
+    for d in top_x:
+        d['label'] = decks[d['deck']]
+        d['href'] = f'/decklist/{d["deck"]}{tour_filter.create_param_string(tour_filters)}&placement={place}'
+
+    return create_ordered_list(top_x)
 
 @callback(
     Output(matchups, 'children'),
