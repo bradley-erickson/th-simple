@@ -124,10 +124,6 @@ def layout(deck=None, players=None, start_date=None, end_date=None, platform=Non
         html.Div([
             html.A(html.H4([
                 'List Overview',
-                html.I(className='ms-1 fas fa-circle-info', id=list_tooltip),
-                dbc.Tooltip([
-                    'Reprinted cards may be duplicated in the analysis. This will fix itself over time.'
-                ], target=list_tooltip)
             ]), id=headers[overview_header]['header']),
             html.Div([
                 download_button.DownloadImageAIO(dom_id=headers[overview_header]['collapse'], className='me-1 d-inline-block'),
