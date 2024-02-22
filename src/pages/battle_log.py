@@ -14,8 +14,9 @@ import utils.data
 
 dash.register_page(
     __name__,
-    path='/tools/battle-log',
-    title='Battle Log',
+    path='/tools/battle-journal',
+    title='Battle Journal',
+    redirect_from=['/tools/battle-log'],
     image='tools.png',
     icon='fa-book',
     description='Track your Pokémon TCG matches with our tool: Record opponents, game outcomes, notes, and more. Download your data for in-depth analysis.'
@@ -25,7 +26,7 @@ RESULT_COLORS = {'Win': 'success', 'Loss': 'danger', 'Tie': 'warning'}
 TAG_OPTIONS = ['Ahead early', 'Behind early', 'Slow start', 'Lucky', 'Got donked', 'Donked opp', 'Quick game', 'Dead drew', 'Poor prizes']
 TAG_OPTIONS_IDS = [t.lower().replace(' ', '_') for t in TAG_OPTIONS]
 
-prefix = 'battle-log'
+prefix = 'battle-journal'
 game_store = f'{prefix}-games-store'
 history = f'{prefix}-history'
 analysis = f'{prefix}-analysis'
@@ -125,7 +126,7 @@ def layout():
         {'playing': 'other', 'against': 'other', 'time': str(datetime.datetime.now()), 'result': 'Win', 'game1': {'result': 'Win', 'turn': 1, 'tags': ['Lucky', 'Slow start'], 'notes': 'Got off to a rocky start from judge, but we top decked the out.'}},
     ]
     cont = html.Div([
-        html.H2('Battle Log'),
+        html.H2('Battle Journal'),
         dbc.Alert(html.Ul([
             html.Li([html.Strong('Track Your Games:'), ' Log your games, view your history, and dive into detailed analysis.']),
             html.Li([html.Strong('Filter & Analyze:'), ' Easily filter your game history for better insights.']),
