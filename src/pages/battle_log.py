@@ -153,9 +153,10 @@ def layout():
         dbc.Tabs([
             dbc.Tab(dbc.Spinner(create_options()), label='Add'),
             dbc.Tab(dbc.Row(id=history, class_name='flex-column-reverse'), label='History'),
-            dbc.Tab(analysis_tab, label='Analysis')
+            dbc.Tab(analysis_tab, label='Analysis'),
+            dbc.Tab(html.Div('Soon'), label='Settings')
         ], className='mb-1'),
-        dcc.Store(id=game_store, data=fake_data, storage_type='session'),
+        dcc.Store(id=game_store, data=fake_data, storage_type='local'),
         dcc.Store(id=archetype_store, data={})
     ])
     return cont

@@ -123,7 +123,6 @@ def builder_plus_built(id, other=None):
     out_div = f'{id}-out'
     layout = html.Div([
         components.archetype_builder.ArchetypeBuilderAIO(aio_id=id, other=other),
-        html.H5('Added Archetypes'),
         html.Div(id=out_div, className='mt-1 d-flex')
     ])
     return layout
