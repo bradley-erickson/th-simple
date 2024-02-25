@@ -1,8 +1,23 @@
 if (!window.dash_clientside) {
     window.dash_clientside = {};
 }
+
+function cleanStringForId(input) {
+    // Remove symbols except for whitespace (to be replaced with underscores)
+    // This regex matches any character that is not a letter, number, or whitespace
+    const cleanedInput = input.replace(/[^\w\s]/gi, '');
+
+    // Replace whitespace with underscores
+    const underscoresForSpaces = cleanedInput.replace(/\s+/g, '-');
+
+    // Convert to lowercase
+    const lowercaseOutput = underscoresForSpaces.toLowerCase();
+
+    return lowercaseOutput;
+}
+
 window.dash_clientside.clientside = {
-    toggle_with_button: function(clicks, is_open) {
+    toggle_with_button: function (clicks, is_open) {
         if (clicks > 0) {
             return !is_open;
         }
@@ -27,15 +42,15 @@ window.dash_clientside.clientside = {
 
     update_tour_filter_apply_href: function (players, start, end, platform, hash) {
         const end_string = end !== null ? `&end_date=${end}` : '';
-        const platform_string = platform !== null ? `&platform=${platform}`: '';
+        const platform_string = platform !== null ? `&platform=${platform}` : '';
         return `?players=${players}&start_date=${start}${end_string}${platform_string}#${hash}`;
     },
 
-    return_self: function(self) {
+    return_self: function (self) {
         return self;
     },
 
-    update_diff_title: function(text) {
+    update_diff_title: function (text) {
         if (typeof text === 'undefined') { return ''; }
         if (text.length > 0) {
             return ` - ${text}`;
@@ -43,19 +58,19 @@ window.dash_clientside.clientside = {
         return '';
     },
 
-    update_feedback_submit_disabled: function(arg) {
+    update_feedback_submit_disabled: function (arg) {
         if (arg.length > 10) {
             return [false, 'd-none'];
         }
         return [true, ''];
     },
 
-    download_dom_as_image: async function(clicks, id) {
+    download_dom_as_image: async function (clicks, id) {
         const today = new Date();
         const dateString = today.toISOString().substring(0, 10);
         fileName = `trainerhill-${id}-${dateString}.png`;
-        if(clicks > 0){
-            html2canvas(document.getElementById(id), {useCORS: true}).then(function (canvas) {
+        if (clicks > 0) {
+            html2canvas(document.getElementById(id), { useCORS: true }).then(function (canvas) {
                 var anchorTag = document.createElement('a');
                 document.body.appendChild(anchorTag);
                 anchorTag.download = fileName;
@@ -64,5 +79,27 @@ window.dash_clientside.clientside = {
                 anchorTag.click();
             })
         }
-    }
+    },
+
+    archetype_builder_disbaled_add: function (icons, name, curr, extra) {
+        const id = cleanStringForId(name);
+        const exists = name.length === 0 | curr.some(deck => deck.id === id) | extra.includes(id);
+
+        if (icons.length > 0 & !exists) {
+            return [false, ''];
+        }
+        if (icons.length === 0) { return [true, `Please select icons${name.length === 0 ? ' and input name' : ''}.`]}
+        if (name.length === 0) { return [true, 'Please input name.']}
+        if (exists) { return [true, 'Name already exists, please try a different name.']; }
+        return [true, 'Something is wrong.'];
+    },
+
+    archetype_builder_add_deck: function (clicks, icons, name, curr) {
+        const id = cleanStringForId(name)
+        if (clicks === 0) {
+            return window.dash_clientside.no_update;
+        }
+        const newDeck = {id, name, icons}
+        return [curr.concat([newDeck]), [], ''];
+    },
 }

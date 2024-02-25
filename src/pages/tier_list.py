@@ -1,10 +1,10 @@
 import dash
-from dash import html, dcc, clientside_callback, ClientsideFunction, callback, Output, Input, State, ALL
+from dash import html, dcc, clientside_callback, ClientsideFunction, callback, Output, Input, State, ALL, Patch
 import dash_bootstrap_components as dbc
 from datetime import date
 import platform
 
-from components import tour_filter, page_too_small, deck_label, download_button
+from components import tour_filter, page_too_small, deck_label, download_button, archetype_builder
 import utils.data
 
 dash.register_page(
@@ -19,6 +19,9 @@ date_format = '%B %#d, %G' if platform.system() == 'Windows' else '%B %-d, %G'
 
 prefix = 'tier-list'
 report_card = f'{prefix}-list-report'
+additional_archetypes = f'{prefix}-archetype-additional'
+archetype_collapse = f'{prefix}-archetype-collapse'
+custom_archetypes = f'{prefix}-archetype-custom'
 archetype_dropdown = f'{prefix}-archetype-dropdown'
 title_input = f'{prefix}-list-title-input'
 title_text = f'{prefix}-list-title-text'
@@ -74,30 +77,40 @@ def layout(players=None, start_date=None, end_date=None, platform=None):
         'search': deck['name']
     } for deck in archetype_raw]
 
-    tier_list_tab = dbc.Card(
-        html.Div(
-            [
-                create_tier_row('s', 'red', top=True),
-                create_tier_row('a', 'orange'),
-                create_tier_row('b', 'yellow'),
-                create_tier_row('c', 'teal'),
-                create_tier_row('d', 'green', bottom_border=True),
-                dbc.Row(
-                    html.Small(f'Created on {date.today().strftime(date_format)}')
-                ),
-                dbc.Spinner(dbc.Row(
-                    id={
-                        'index': archetype_tray,
-                        'type': drag_container
-                    },
-                    class_name='g-1 pb-1'
-                ))
-            ],
-            id=drag_wrapper
+
+    additional_decks = dbc.Card([
+        html.A(
+            dbc.CardHeader([
+                html.I(className='fas fa-filter me-1'),
+                'Custom Deck Archetypes'
+            ]),
+            id=additional_archetypes
         ),
-        id=report_card,
-        class_name='mt-1 border-0',
-    )
+        dbc.Collapse(
+            dbc.CardBody([
+                archetype_builder.builder_plus_built(custom_archetypes, other=[d['value'] for d in decks])
+            ]),
+            id=archetype_collapse
+        )
+    ])
+
+    tier_list_tab = html.Div([
+        dbc.Card(html.Div([
+            create_tier_row('s', 'red', top=True),
+            create_tier_row('a', 'orange'),
+            create_tier_row('b', 'yellow'),
+            create_tier_row('c', 'teal'),
+            create_tier_row('d', 'green', bottom_border=True),
+        dbc.Row(html.Small(f'Created on {date.today().strftime(date_format)}', className='ms-1')),
+        ]), id=report_card),
+        dbc.Spinner(dbc.Row(
+            id={
+                'index': archetype_tray,
+                'type': drag_container
+            },
+            class_name='g-1 pb-1'
+        ))
+    ], id=drag_wrapper)
     cont = html.Div([
         page_too_small.alert,
         html.Div([
@@ -112,6 +125,7 @@ def layout(players=None, start_date=None, end_date=None, platform=None):
             ])
         ], className='mb-0'), id='tierlist-info-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
         tours,
+        additional_decks,
         html.Div([
             dbc.Label('Archetype select'),
             dcc.Dropdown(
@@ -129,6 +143,46 @@ clientside_callback(
     Output(drag_wrapper, 'data-drag'),
     Input({'type': drag_container, 'index': ALL}, 'id')
 )
+
+clientside_callback(
+    ClientsideFunction(namespace='clientside', function_name='toggle_with_button'),
+    Output(archetype_collapse, 'is_open'),
+    Input(additional_archetypes, 'n_clicks'),
+    State(archetype_collapse, 'is_open')
+)
+
+archetype_builder.register_callbacks(custom_archetypes)
+
+@callback(
+    Output(archetype_dropdown, 'value'),
+    Output(archetype_dropdown, 'options'),
+    Input(archetype_builder.ArchetypeBuilderAIO.ids.store(custom_archetypes), 'data'),
+    State(archetype_dropdown, 'value'),
+    State(archetype_dropdown, 'options'),
+)
+def add_new_archetypes_to_dropdown(data, curr_val, curr_opt):
+    p_val = Patch()
+    p_opt = Patch()
+    all_ids = [d['value'] for d in curr_opt]
+    new_ids = [d['id'] for d in data]
+    curr_custom = [d for d in curr_opt if d.get('title', '').startswith('custom')]
+    for c in curr_custom:
+        if c['value'] not in new_ids:
+            p_opt.remove(c)
+            if c['value'] in curr_val:
+                p_val.remove(c['value'])
+    new_decks = [{
+        'label': deck_label.format_label(deck),
+        'value': deck['id'],
+        'search': deck['name'],
+        'title': f'custom {deck["name"]}'
+    } for deck in data if deck['id'] not in all_ids]
+    new_values = [d['value'] for d in new_decks]
+    if len(new_decks) > 0 and len(new_values) > 0:
+        p_val.prepend(new_values[0])
+        p_opt.prepend(new_decks[0])
+    return p_val, p_opt
+
 
 @callback(
     Output({'type': drag_container, 'index': archetype_tray}, 'children'),

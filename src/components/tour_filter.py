@@ -131,6 +131,7 @@ class TourFiltersAIO(html.Div):
                     dbc.Button(
                         'Apply',
                         id=self.ids.apply(aio_id),
+                        class_name='float-end'
                     ),
                     dcc.Store(
                         id=self.ids.initial(aio_id),
