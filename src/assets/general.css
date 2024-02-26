@@ -59,7 +59,29 @@
   }
 }
 
+.dbc input {
+  border-color: rgba(100, 100, 100, .4) !important;
+}
+
 /* DECK DIFF */
 .deck-diff-input {
   height: 250px;
+}
+
+/* Battle log */
+.notes-template textarea {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.notes-template .accordion-item {
+  border-top: 0;
+  border-color: rgba(100, 100, 100, .4) !important;
+}
+
+.notes-template .accordion-item:first-of-type,
+.notes-template .accordion-button,
+.notes-template .accordion-header {
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
 }

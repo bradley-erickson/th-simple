@@ -88,7 +88,7 @@ def layout(players=None, start_date=None, end_date=None, platform=None):
         ),
         dbc.Collapse(
             dbc.CardBody([
-                archetype_builder.builder_plus_built(custom_archetypes, other=[d['value'] for d in decks])
+                archetype_builder.builder_plus_built(custom_archetypes, other=[d['value'] for d in decks], persistance='session')
             ]),
             id=archetype_collapse
         )
@@ -132,6 +132,7 @@ def layout(players=None, start_date=None, end_date=None, platform=None):
                 id=archetype_dropdown, multi=True,
                 options=decks, value=[d['value'] for d in decks if d['value'] != 'other'][:15], maxHeight=400
             ),
+            html.Small('* Removing selected decks already placed in a tier may cause the page to crash.')
         ], className='mb-1'),
         tier_list_tab
     ])

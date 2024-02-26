@@ -9,7 +9,7 @@ import json
 import numpy as np
 import pandas as pd
 
-from components import deck_label, matchup_table, ternary_switch
+from components import deck_label, matchup_table, ternary_switch, archetype_builder, tags as tag_settings
 import utils.data
 
 dash.register_page(
@@ -24,7 +24,6 @@ dash.register_page(
 
 RESULT_COLORS = {'Win': 'success', 'Loss': 'danger', 'Tie': 'warning'}
 TAG_OPTIONS = ['Ahead early', 'Behind early', 'Slow start', 'Lucky', 'Got donked', 'Donked opp', 'Quick game', 'Dead drew', 'Poor prizes']
-TAG_OPTIONS_IDS = [t.lower().replace(' ', '_') for t in TAG_OPTIONS]
 
 prefix = 'battle-journal'
 game_store = f'{prefix}-games-store'
@@ -57,7 +56,20 @@ analysis_filter_collapse = f'{analysis}-filter-collapse'
 analysis_filter_text = f'{analysis}-filter-text'
 analysis_decompose_switch = f'{analysis}-filter-decompose-switch'
 analysis_decompose_collapse = f'{analysis}-filter-decompose-collapse'
+analysis_filter_toggle = f'{analysis}-filter-toggle'
 turn_option = f'{analysis}-filter-turn-switch'
+
+# settings
+settings_pref = f'{prefix}-settings-tab'
+settings_archetype_builder = f'{settings_pref}-archetype-builder'
+settings_tags_built_in = f'{settings_pref}-tags-built-in'
+settings_tags_custom = f'{settings_pref}-tags-custom'
+settings_note_template = f'{settings_pref}-notes-template'
+settings_reset = f'{settings_pref}-reset'
+
+
+def create_default_deck(id):
+    return {'id': id, 'name': id.title(), 'icons': ['substitute']}
 
 
 def create_options():
@@ -97,13 +109,30 @@ def create_options():
     ], class_name='mb-5')
     return add_round
 
-
-tag_filters = [ternary_switch.create_ternary_switch(t_id, t) for t, t_id in zip(TAG_OPTIONS, TAG_OPTIONS_IDS)]
-tag_filters.insert(0, ternary_switch.create_ternary_switch(turn_option, 'Turn', options=ternary_switch.TURN_OPTIONS))
-tag_filters.append(html.Small(id=analysis_filter_text))
-analysis_filter_component = dbc.Row([
-    dbc.Col(_filter, md=6, lg=4, xl=3) for _filter in tag_filters
+# TODO set settings persistance
+settings_tab = html.Div([
+    archetype_builder.builder_plus_built(settings_archetype_builder, title='Custom Archetypes', persistance='local'),
+    html.Div([
+        html.H5('Tag Options'),
+        dbc.Checklist(id=settings_tags_built_in, options=TAG_OPTIONS, value=TAG_OPTIONS, inline=True),
+        tag_settings.create_tag_input(settings_tags_custom, existing_tags=TAG_OPTIONS, persistance='local')
+    ], className='mt-2'),
+    html.Div([
+        html.H5('Notes Template'),
+        dbc.Textarea(id=settings_note_template, persistence_type='local', persistence=True),
+        dbc.Accordion(dbc.AccordionItem(html.Ol([
+            html.Li('What could I have done better?'),
+            html.Li('What misplays did I make?'),
+        ]), title='Examples'), start_collapsed=True)
+    ], className='notes-template mt-2'),
+    html.Div(dcc.ConfirmDialogProvider(
+        dbc.Button([html.I(className='far fa-trash-can me-1'), 'Reset Settings'], color='danger'),
+        id=settings_reset,
+        message='Are you sure you want to reset settings to default? This cannot be undone. Removing custom archetypes allows them to be overwritten under the same name.'
+    ), className='d-inline-block float-end mt-1'),
 ])
+archetype_builder.register_callbacks(settings_archetype_builder)
+tag_settings.register_callbacks(settings_tags_custom)
 
 def layout():
     analysis_tab = html.Div([
@@ -117,7 +146,8 @@ def layout():
             ),
             dbc.Collapse(dbc.CardBody([
                 dbc.Switch(label='Decompose Best of 3s', id=analysis_decompose_switch),
-                dbc.Collapse(analysis_filter_component, id=analysis_decompose_collapse)
+                dbc.Collapse([], id=analysis_decompose_collapse),
+                html.Small(id=analysis_filter_text)
             ]), id=analysis_filter_collapse)
         ]),
         dbc.Spinner(id=analysis)
@@ -145,16 +175,16 @@ def layout():
             dbc.Button([html.I(className='fas fa-download me-1'), 'Download'], id=download_btn, class_name='me-1'),
             dcc.Download(id=download_comp),
             html.Div(dcc.ConfirmDialogProvider(
-                dbc.Button([html.I(className='far fa-trash-can me-1'), 'Clear']),
+                dbc.Button([html.I(className='far fa-trash-can me-1'), 'Clear history']),
                 id=clear_id,
-                message='Are you sure you want to remove your data? This cannot be undone.'
-            ), className='d-inline-block')
+                message='Are you sure you want to remove your gaming history? This cannot be undone.'
+            ), className='d-inline-block'),
         ], className='mb-1'),
         dbc.Tabs([
             dbc.Tab(dbc.Spinner(create_options()), label='Add'),
             dbc.Tab(dbc.Row(id=history, class_name='flex-column-reverse'), label='History'),
             dbc.Tab(analysis_tab, label='Analysis'),
-            dbc.Tab(html.Div('Soon'), label='Settings')
+            dbc.Tab(settings_tab, label='Settings')
         ], className='mb-1'),
         dcc.Store(id=game_store, data=fake_data, storage_type='local'),
         dcc.Store(id=archetype_store, data={})
@@ -166,7 +196,6 @@ clientside_callback(
     ClientsideFunction(namespace='battle_log', function_name='clear_history'),
     Output(game_store, 'data', allow_duplicate=True),
     Input(clear_id, 'submit_n_clicks'),
-    allow_duplicate=True,
     prevent_initial_call=True
 )
 
@@ -229,19 +258,21 @@ def upload_files(list_of_contents, list_of_filenames):
 @callback(
     Output(archetype_store, 'data'),
     Input(game_store, 'modified_timestamp'),
+    Input(archetype_builder.ArchetypeBuilderAIO.ids.store(settings_archetype_builder), 'data'),
     State(game_store, 'data'),
     State(archetype_store, 'data')
 )
-def update_archetype_store(ts, data, current):
-    if ts is None or len(current) > 0:
+def update_archetype_store(ts, extra_archetypes, data, current):
+    if ts is None or (len(current) > 0 and ctx.triggered_id == game_store):
         raise exceptions.PreventUpdate
     today = datetime.date.today()
     weeks_ago_3 = str(today - datetime.timedelta(21))
     min_game = min(d['time'] for d in data).split(' ')[0] if len(data) > 0 else str(today)
     start_date = min(min_game, weeks_ago_3)
-    archetypes = utils.data.get_decks({'start_date': start_date})
+    api_archetypes = utils.data.get_decks({'start_date': start_date})
+    archetypes = extra_archetypes + api_archetypes
     decks = {d['id']: d for d in archetypes}
-    return decks
+    return current | decks
 
 
 @callback(
@@ -349,8 +380,10 @@ clientside_callback(
     Output({'type': result, 'index': ALL}, 'value'),
     Output({'type': turn, 'index': ALL}, 'value'),
     Output({'type': tags, 'index': ALL}, 'value'),
-    Output({'type': notes, 'index': ALL}, 'value'),
-    Input(submit, 'n_clicks')
+    Output({'type': notes, 'index': ALL}, 'value', allow_duplicate=True),
+    Input(submit, 'n_clicks'),
+    State(settings_note_template, 'value'),
+    prevent_initial_call=True
 )
 
 # history callbacks
@@ -367,10 +400,18 @@ def create_game(g, title):
 
 
 def create_match(g, decks):
+    g_playing = g['playing']
+    g_against = g['against']
     matchup = dbc.Row([
-        html.Div(deck_label.format_label(decks[g['playing']], hide_text_small=True), className='d-flex w-auto'),
+        html.Div(
+            deck_label.format_label(decks.get(
+                g_playing, create_default_deck(g_playing)
+            ), hide_text_small=True), className='d-flex w-auto'),
         html.Div('vs.', className='d-flex w-auto'),
-        html.Div(deck_label.format_label(decks[g['against']], hide_text_small=True), className='d-flex w-auto')
+        html.Div(
+            deck_label.format_label(decks.get(
+                g_against, create_default_deck(g_against)
+            ), hide_text_small=True), className='d-flex w-auto'),
     ], align='center')
     games = html.Div([
         html.Div([
@@ -436,7 +477,7 @@ def create_deck_breakdown(data, decks):
             ])),
             html.Tbody([
                 html.Tr([
-                    html.Td(deck_label.format_label(decks[b])),
+                    html.Td(deck_label.format_label(decks.get(b, create_default_deck(b)))),
                     html.Td(f"{breakdown[b]['Win']}-{breakdown[b]['Loss']}-{breakdown[b]['Tie']}")
                 ]) for b in sort_breakdown
             ])
@@ -469,9 +510,9 @@ def prep_matchup_spread(data):
     return matchup_list
 
 
-def handle_decompose(data, turn, tags):
-    included = set([t for t, t_val in zip(TAG_OPTIONS, tags) if t_val == 1])
-    excluded = set([t for t, t_val in zip(TAG_OPTIONS, tags) if t_val == -1])
+def handle_decompose(data, turn, tags, options):
+    included = set([t for t, t_val in zip(options, tags) if t_val == 1])
+    excluded = set([t for t, t_val in zip(options, tags) if t_val == -1])
     decomposed_data = []
     for d in data:
         # handle the filtering
@@ -504,13 +545,15 @@ def handle_decompose(data, turn, tags):
     Input(archetype_store, 'modified_timestamp'),
     State(archetype_store, 'data'),
     Input(analysis_decompose_switch, 'value'),
-    Input(turn_option, 'value'),
-    *[Input(t_id, 'value') for t_id in TAG_OPTIONS_IDS]
+    Input({'type': analysis_filter_toggle, 'index': ALL}, 'value'),
+    Input({'type': tags, 'index': 0}, 'options')
 )
-def update_matchups(history_ts, data, archetype_ts, decks, decompose, turn, *tags):
+def update_matchups(history_ts, data, archetype_ts, decks, decompose, tags, options):
     if history_ts is None or archetype_ts is None or len(decks) == 0:
         raise exceptions.PreventUpdate
     
+    turn = tags.pop(0)
+
     inc_turn = turn > 0
     with_tags = any(t for t in tags if t == 1)
     without_tags = any(t for t in tags if t == -1)
@@ -520,19 +563,23 @@ def update_matchups(history_ts, data, archetype_ts, decks, decompose, turn, *tag
         filter_text += ', ' if with_tags and without_tags else ' '
         filter_text += 'and ' if with_tags ^ without_tags else ''
     if with_tags:
-        filter_text += f'with tags [{", ".join([t for t, t_val in zip(TAG_OPTIONS, tags) if t_val == 1])}]'
+        filter_text += f'with tags [{", ".join([t for t, t_val in zip(options, tags) if t_val == 1])}]'
         filter_text += ', ' if inc_turn and without_tags else ''
         filter_text += ' and ' if without_tags else ''
     if without_tags:
-        filter_text += f'without tags [{", ".join([t for t, t_val in zip(TAG_OPTIONS, tags) if t_val == -1])}]'
+        filter_text += f'without tags [{", ".join([t for t, t_val in zip(options, tags) if t_val == -1])}]'
     filter_text += '.'
+    if not inc_turn and not with_tags and not without_tags:
+        filter_text = 'Showing all.'
 
     if len(data) == 0:
         return dbc.Alert('Please add matches before accessing analysis tools.', color='danger'), filter_text
 
     filtered_data = data
     if decompose:
-        filtered_data = handle_decompose(data, turn, tags)
+        filtered_data = handle_decompose(data, turn, tags, options)
+    else:
+        filter_text = 'Showing all.'
 
     if len(filtered_data) == 0:
         return dbc.Alert('No games found matching the provided filters', color='warning'), filter_text
@@ -547,3 +594,43 @@ def update_matchups(history_ts, data, archetype_ts, decks, decompose, turn, *tag
         breakdown_data,
         matchup_data
     ]), filter_text
+
+
+# settings callbacks
+clientside_callback(
+    ClientsideFunction(namespace='battle_log', function_name='clear_settings'),
+    Output(archetype_builder.ArchetypeBuilderAIO.ids.store(settings_archetype_builder), 'data', allow_duplicate=True),
+    Output(settings_tags_built_in, 'values', allow_duplicate=True),
+    Output(f'{settings_tags_custom}-store', 'data', allow_duplicate=True),
+    Output(settings_note_template, 'value', allow_duplicate=True),
+    Input(settings_reset, 'submit_n_clicks'),
+    State(settings_tags_built_in, 'options'),
+    prevent_initial_call=True
+)
+
+clientside_callback(
+    ClientsideFunction(namespace='battle_log', function_name='update_notes_template'),
+    Output({'type': notes, 'index': ALL}, 'value'),
+    Input(settings_note_template, 'value'),
+)
+
+clientside_callback(
+    ClientsideFunction(namespace='battle_log', function_name='add_tag_to_options'),
+    Output({'type': tags, 'index': ALL}, 'options'),
+    Input(settings_tags_built_in, 'value'),
+    Input(f'{settings_tags_custom}-store', 'data')
+)
+
+@callback(
+    Output(analysis_decompose_collapse, 'children'),
+    Input(settings_tags_built_in, 'options'),
+    Input(f'{settings_tags_custom}-store', 'data')
+)
+def update_analysis_filters(built_in, custom):
+    overall = built_in + custom
+    tag_filters = [ternary_switch.create_ternary_switch({'type': analysis_filter_toggle, 'index': t}, t) for t in overall]
+    tag_filters.insert(0, ternary_switch.create_ternary_switch({'type': analysis_filter_toggle, 'index': turn_option}, 'Turn', options=ternary_switch.TURN_OPTIONS))
+    analysis_filter_component = dbc.Row([
+        dbc.Col(_filter, md=6, lg=4, xl=3) for _filter in tag_filters
+    ])
+    return analysis_filter_component

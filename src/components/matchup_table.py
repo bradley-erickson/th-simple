@@ -94,7 +94,7 @@ def create_matchup_spread(data, decks, player='deck1', against='deck2'):
     # Organize the data
     for deck in player_unique_decks:
         if deck not in decks:
-            decks[deck] = {'name': deck}
+            decks[deck] = {'id': deck, 'name': deck.title(), 'icons': ['substitute']}
         matchups = sorted(
             (matchup for matchup in data if matchup[player] == deck),
             key=lambda x: x[against]

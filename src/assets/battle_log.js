@@ -21,14 +21,14 @@ window.dash_clientside.battle_log = {
         return Array(3).fill('mt-1');
     },
 
-    clear_battle_log_options: function(clicks) {
+    clear_battle_log_options: function(clicks, template) {
         if (typeof clicks === 'undefined') { return window.dash_clientside.no_update; }
         return [
             undefined,
             Array(3).fill(undefined),
             Array(3).fill(undefined),
             Array(3).fill([]),
-            Array(3).fill('')
+            Array(3).fill(template)
         ];
     },
 
@@ -38,4 +38,20 @@ window.dash_clientside.battle_log = {
         if (typeof result === 'undefined') { return true; }
         return false;
     },
+
+    clear_settings: function(clicks, opts) {
+        if (typeof clicks === 'undefined') { return window.dash_clientside.no_update; }
+        return [
+            [], opts, [], ''
+        ];
+    },
+
+    update_notes_template: function(value) {
+        return [value, value, value]
+    },
+
+    add_tag_to_options: function(builtIn, custom) {
+        const full = builtIn.concat(custom);
+        return Array(3).fill(full)
+    }
 }

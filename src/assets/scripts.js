@@ -102,4 +102,9 @@ window.dash_clientside.clientside = {
         const newDeck = {id, name, icons}
         return [curr.concat([newDeck]), [], ''];
     },
+
+    tag_disable_add: function(val, curr, others) {
+        const exists = val.length === 0 | curr.some(v => v === val) | others.includes(val);
+        return exists;
+    }
 }
