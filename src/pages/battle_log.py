@@ -9,7 +9,7 @@ import json
 import numpy as np
 import pandas as pd
 
-from components import deck_label, matchup_table, ternary_switch, archetype_builder, tags as tag_settings
+from components import deck_label, matchup_table, ternary_switch, archetype_builder, tags as tag_settings, download_button as _download
 import utils.data
 
 dash.register_page(
@@ -150,7 +150,8 @@ def layout():
                 html.Small(id=analysis_filter_text)
             ]), id=analysis_filter_collapse)
         ]),
-        dbc.Spinner(id=analysis)
+        _download.DownloadImageAIO(analysis, className='float-end'),
+        dbc.Spinner(html.Div(id=analysis))
     ])
     fake_data = [
         {'playing': 'other', 'against': 'other', 'time': str(datetime.datetime.now()), 'result': 'Win', 'game1': {'result': 'Win', 'turn': 1, 'tags': ['Lucky', 'Slow start'], 'notes': 'Got off to a rocky start from judge, but we top decked the out.'}},
@@ -169,10 +170,10 @@ def layout():
         dbc.Alert(dismissable=True, id=upload_alert, is_open=False),
         html.Div([
             html.Span(dcc.Upload(
-                dbc.Button([html.I(className='fas fa-upload me-1'), 'Upload']),
+                dbc.Button([html.I(className='fas fa-file-import me-1'), 'Import']),
                 id=upload_id, multiple=True, accept='.json'
             ), className='d-inline-block me-1'),
-            dbc.Button([html.I(className='fas fa-download me-1'), 'Download'], id=download_btn, class_name='me-1'),
+            dbc.Button([html.I(className='fas fa-file-export me-1'), 'Export'], id=download_btn, class_name='me-1'),
             dcc.Download(id=download_comp),
             html.Div(dcc.ConfirmDialogProvider(
                 dbc.Button([html.I(className='far fa-trash-can me-1'), 'Clear history']),
@@ -552,7 +553,7 @@ def update_matchups(history_ts, data, archetype_ts, decks, decompose, tags, opti
     if history_ts is None or archetype_ts is None or len(decks) == 0:
         raise exceptions.PreventUpdate
     
-    turn = tags.pop(0)
+    turn = tags.pop(0) if len(tags) > 0 else 0
 
     inc_turn = turn > 0
     with_tags = any(t for t in tags if t == 1)

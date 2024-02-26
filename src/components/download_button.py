@@ -1,5 +1,6 @@
 from dash import html, clientside_callback, ClientsideFunction, Output, Input, State, MATCH
 import dash_bootstrap_components as dbc
+import dash_bootstrap_templates as dbt
 import uuid
 
 class DownloadImageAIO(html.Div):
@@ -46,6 +47,7 @@ class DownloadImageAIO(html.Div):
         ClientsideFunction(namespace='clientside', function_name='download_dom_as_image'),
         Output(ids.dummy(MATCH), 'className'),
         Input(ids.button(MATCH), 'n_clicks'),
-        State(ids.dom_id(MATCH), 'value')
+        State(ids.dom_id(MATCH), 'value'),
+        State(dbt.ThemeSwitchAIO.ids.switch('navbar-theme'), 'value')
     )
         

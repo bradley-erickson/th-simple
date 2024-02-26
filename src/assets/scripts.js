@@ -65,12 +65,12 @@ window.dash_clientside.clientside = {
         return [true, ''];
     },
 
-    download_dom_as_image: async function (clicks, id) {
+    download_dom_as_image: async function (clicks, id, theme) {
         const today = new Date();
         const dateString = today.toISOString().substring(0, 10);
         fileName = `trainerhill-${id}-${dateString}.png`;
         if (clicks > 0) {
-            html2canvas(document.getElementById(id), { useCORS: true }).then(function (canvas) {
+            html2canvas(document.getElementById(id), { useCORS: true, backgroundColor: theme ? '#222222' : '#ffffff' }).then(function (canvas) {
                 var anchorTag = document.createElement('a');
                 document.body.appendChild(anchorTag);
                 anchorTag.download = fileName;
