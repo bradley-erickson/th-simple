@@ -23,7 +23,11 @@ dash.register_page(
 )
 
 RESULT_COLORS = {'Win': 'success', 'Loss': 'danger', 'Tie': 'warning'}
-TAG_OPTIONS = ['Ahead early', 'Behind early', 'Slow start', 'Lucky', 'Got donked', 'Donked opp', 'Quick game', 'Dead drew', 'Poor prizes']
+TAG_OPTIONS = [
+    'Ahead early', 'Behind early', 'Slow start', 'Lucky', 'Got donked',
+    'Donked opp', 'Quick game', 'Dead drew', 'Poor prizes',
+    'Punished opponent', 'Never punished', 'gg'
+]
 
 prefix = 'battle-journal'
 game_store = f'{prefix}-games-store'
@@ -111,10 +115,11 @@ def create_options():
 
 # TODO set settings persistance
 settings_tab = html.Div([
-    archetype_builder.builder_plus_built(settings_archetype_builder, title='Custom Archetypes', persistance='local'),
+    html.H4('Game Settings'),
+    archetype_builder.builder_plus_built(settings_archetype_builder, title='Add Custom Archetypes', persistance='local'),
     html.Div([
         html.H5('Tag Options'),
-        dbc.Checklist(id=settings_tags_built_in, options=TAG_OPTIONS, value=TAG_OPTIONS, inline=True),
+        dbc.Checklist(id=settings_tags_built_in, options=TAG_OPTIONS, value=TAG_OPTIONS, inline=True, persistence_type='local', persistence=True),
         tag_settings.create_tag_input(settings_tags_custom, existing_tags=TAG_OPTIONS, persistance='local')
     ], className='mt-2'),
     html.Div([
@@ -130,9 +135,20 @@ settings_tab = html.Div([
         id=settings_reset,
         message='Are you sure you want to reset settings to default? This cannot be undone. Removing custom archetypes allows them to be overwritten under the same name.'
     ), className='d-inline-block float-end mt-1'),
+    html.Div(className='mb-5')
 ])
 archetype_builder.register_callbacks(settings_archetype_builder)
 tag_settings.register_callbacks(settings_tags_custom)
+
+tip_tab = html.Div([
+    html.Ol([
+        html.Li('Try out some opening turns without an opponent to get a feel for your deck.'),
+        html.Li('Formulate and write down a plan for going first and going second.'),
+        html.Li('Think about your strategy against the core meta decks.'),
+        html.Li('Practice checking your prizes during your first deck search.'),
+    ]),
+])
+
 
 def layout():
     analysis_tab = html.Div([
@@ -185,6 +201,7 @@ def layout():
             dbc.Tab(dbc.Spinner(create_options()), label='Add'),
             dbc.Tab(dbc.Row(id=history, class_name='flex-column-reverse'), label='History'),
             dbc.Tab(analysis_tab, label='Analysis'),
+            # dbc.Tab(tip_tab, label='Tips'),
             dbc.Tab(settings_tab, label='Settings')
         ], className='mb-1'),
         dcc.Store(id=game_store, data=fake_data, storage_type='local'),
@@ -632,6 +649,6 @@ def update_analysis_filters(built_in, custom):
     tag_filters = [ternary_switch.create_ternary_switch({'type': analysis_filter_toggle, 'index': t}, t) for t in overall]
     tag_filters.insert(0, ternary_switch.create_ternary_switch({'type': analysis_filter_toggle, 'index': turn_option}, 'Turn', options=ternary_switch.TURN_OPTIONS))
     analysis_filter_component = dbc.Row([
-        dbc.Col(_filter, md=6, lg=4, xl=3) for _filter in tag_filters
+        dbc.Col(_filter, md=6, lg=4, xxl=3) for _filter in tag_filters
     ])
     return analysis_filter_component
