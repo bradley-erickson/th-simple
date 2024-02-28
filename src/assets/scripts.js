@@ -88,8 +88,8 @@ window.dash_clientside.clientside = {
         if (icons.length > 0 & !exists) {
             return [false, ''];
         }
-        if (icons.length === 0) { return [true, `Please select icons${name.length === 0 ? ' and input name' : ''}.`]}
-        if (name.length === 0) { return [true, 'Please input name.']}
+        if (icons.length === 0) { return [true, `Please select icons${name.length === 0 ? ' and input name' : ''}.`] }
+        if (name.length === 0) { return [true, 'Please input name.'] }
         if (exists) { return [true, 'Name already exists, please try a different name.']; }
         return [true, 'Something is wrong.'];
     },
@@ -99,12 +99,58 @@ window.dash_clientside.clientside = {
         if (clicks === 0) {
             return window.dash_clientside.no_update;
         }
-        const newDeck = {id, name, icons}
+        const newDeck = { id, name, icons }
         return [curr.concat([newDeck]), [], ''];
     },
 
-    tag_disable_add: function(val, curr, others) {
+    tag_disable_add: function (val, curr, others) {
         const exists = val.length === 0 | curr.some(v => v === val) | others.includes(val);
         return exists;
+    },
+
+    testing: function (id) {
+        const carousel = document.querySelector('.deck-stack');
+        console.log(carousel);
+
+        // document.querySelector('.prev').addEventListener('click', () => {
+        //     carousel.scrollBy(-200, 0);
+        // });
+
+        // document.querySelector('.next').addEventListener('click', () => {
+        //     carousel.scrollBy(200, 0);
+        // });
+
+        let touchStartX = 0;
+        let touchEndX = 0;
+        const width = 274;
+
+        carousel.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, false);
+
+        carousel.addEventListener('touchmove', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+        }, false);
+
+        carousel.addEventListener('touchend', (e) => {
+            if (touchEndX < touchStartX) {
+                carousel.scrollBy(width, 0);
+            }
+            if (touchEndX > touchStartX) {
+                carousel.scrollBy(width*-1, 0);
+            }
+        }, false);
+
+        // Mousewheel events
+        carousel.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (e.deltaY < 0) {
+                carousel.scrollBy(width, 0);
+            }
+            else {
+                carousel.scrollBy(width*-1, 0);
+            }
+        }, false);
+
     }
 }

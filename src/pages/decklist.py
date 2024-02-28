@@ -1,5 +1,5 @@
 import dash
-from dash import exceptions, clientside_callback, ClientsideFunction, html, dcc, callback, Output, Input, State
+from dash import exceptions, clientside_callback, ClientsideFunction, html, dcc, callback, Output, Input, State, ALL, ctx
 import dash_bootstrap_components as dbc
 import pandas as pd
 import urllib
@@ -7,7 +7,7 @@ import urllib
 from components import (tour_filter, deck_label,
     card_table, matchup_table, trend_graph, download_button,
     placement as _placement)
-from utils import data, url, cards as _cards, cache
+from utils import data, url, cards as _cards, cache, images
 
 dash.register_page(
     __name__,
@@ -34,6 +34,7 @@ placement_select = f'{decklist_filters}-placement'
 
 list_tooltip = f'{prefix}-table-tooltip'
 
+skel_loading = f'{prefix}-skeleton-loading'
 table_view = f'{prefix}-table-view'
 table_store = f'{prefix}-table-store'
 table_clipboard = f'{prefix}-table-clipboard'
@@ -43,14 +44,10 @@ card_matchups = f'{prefix}-card-matchups'
 card_trend = f'{prefix}-card-trend'
 
 overview_header = f'{prefix}-list-overview-header'
-matchup_header = f'{prefix}-matchup-header'
-trend_header = f'{prefix}-trend-header'
+individual_card_header = f'{prefix}-matchup-header'
 headers = {
-    k: {'header': k, 'collapse': f'{k}-collapse'} for k in [overview_header, matchup_header, trend_header]
+    k: {'header': k, 'collapse': f'{k}-collapse'} for k in [overview_header, individual_card_header]
 }
-
-select_card_text = 'Select a card to include in the decklist filters above. '\
-    'Excluded cards are NOT included in this analysis.'
 
 def create_filter(include, exclude, granularity, placement):
 
@@ -67,7 +64,7 @@ def create_filter(include, exclude, granularity, placement):
                 dbc.Row([
                     dbc.Col([
                         dbc.Label('Includes Card'),
-                        dcc.Dropdown(id=card_select, searchable=True, value=include)
+                        dcc.Dropdown(id={'type': card_select, 'index': 'include'}, searchable=True, value=include)
                     ], md=6, lg=4, xl=3),
                     dbc.Col([
                         dbc.Label('Excludes Card'),
@@ -97,6 +94,7 @@ def create_filter(include, exclude, granularity, placement):
     return filter_row
 
 def layout(deck=None, players=None, start_date=None, end_date=None, platform=None, include=None, exclude=None, granularity=0.6, placement=10_000):
+    include = None if include == 'None' else include
     tours = tour_filter.TourFiltersAIO(players, start_date, end_date, platform, prefix)
     filters = tour_filter.create_tour_filter(players, start_date, end_date, platform)
     filters['deck'] = deck
@@ -143,21 +141,35 @@ def layout(deck=None, players=None, start_date=None, end_date=None, platform=Non
             ]),
             dcc.Store(id=table_store, data={'total': 0, 'cards': []})
         ], className='d-flex justify-content-between align-items-center'),
-        dbc.Collapse(
+        dbc.Collapse([
+            dbc.Alert(['Loading skeleton analysis.'], id=skel_loading, is_open=False, color='warning'),
             dbc.Spinner(id=card_table_id),
-            id=headers[overview_header]['collapse'],
-            is_open=True
-        ),
-        html.A(html.H4('Card Matchups'), id=headers[matchup_header]['header']),
+        ], id=headers[overview_header]['collapse'], is_open=True),
+        html.A(html.H4('Individual Card Analysis'), id=headers[individual_card_header]['header']),
         dbc.Collapse(
-            dbc.Spinner(id=card_matchups),
-            id=headers[matchup_header]['collapse'],
-            is_open=True
-        ),
-        html.A(html.H4('Card Trend'), id=headers[trend_header]['header']),
-        dbc.Collapse(
-            dbc.Spinner(id=card_trend),
-            id=headers[trend_header]['collapse'],
+            dbc.Row([
+                dbc.Col([
+                    dbc.Row([
+                        dbc.Col(
+                            dcc.Dropdown(id={'type': card_select, 'index': 'individual'}, searchable=True, value=include),
+                            xs={'order': 'last', 'size': 9},
+                            lg={'order': 'first', 'size': 12}
+                        ),
+                        dbc.Col(
+                            html.Img(src=images.get_card_image(include, 'SM'), className='w-100') if include else [],
+                            xs=3, lg=12
+                        )
+                    ]),
+                ], lg=2),
+                dbc.Col([
+                    dbc.Tabs([
+                        dbc.Tab(dbc.Spinner(id=card_trend), label='Trend'),
+                        dbc.Tab(dbc.Spinner(id=card_matchups), label='Matchups')
+                    ], id='individual-card-tabs', active_tab='tab-0'),
+                    html.Small('* Excluded cards are NOT included in this analysis.')
+                ], lg=10)
+            ]),
+            id=headers[individual_card_header]['collapse'],
             is_open=True
         )
     ])
@@ -183,7 +195,7 @@ for k in headers.keys():
     Output(title, 'children'),
     Output(option_store, 'data'),
     Input(store, 'data'),
-    State(option_store, 'data'),
+    State(option_store, 'data')
 )
 def update_title(tf, current):
     if len(current) > 0:
@@ -196,11 +208,11 @@ def update_title(tf, current):
 
 
 @callback(
-    Output(card_select, 'options'),
+    Output({'type': card_select, 'index': ALL}, 'options'),
     Output(exclude_select, 'options'),
     Input(store, 'data')
 )
-@cache.cache.memoize()
+# @cache.cache.memoize()
 def update_card_select_options(tour_filters):
     url = f'{data.api_url}/cards/{tour_filters["deck"]}'
     r = data.session.get(url, params=tour_filters)
@@ -211,13 +223,13 @@ def update_card_select_options(tour_filters):
             'label': f'{c["name"]} {c["card_code"]}',
             'search': c['name']
         } for c in cards]
-        return formatted_cards, formatted_cards
-    return [], []
+        return [formatted_cards, formatted_cards], formatted_cards
+    return [[], []], []
 
 
 @callback(
     Output('_pages_location', 'search'),
-    Input(card_select, 'value'),
+    Input({'type': card_select, 'index': ALL}, 'value'),
     Input(exclude_select, 'value'),
     Input(granularity_slider, 'value'),
     Input(placement_select, 'value'),
@@ -227,8 +239,11 @@ def update_search(include, exclude, granularity, placement, tf):
     params = tf.copy()
     params_str = tour_filter.create_param_string(params)
     
-    if include is not None:
-        params_str += f'&include={include}'
+    if ctx.triggered_id.get('index', '') in ['include', 'individual']:
+        if ctx.triggered_id['index'] == 'include':
+            params_str += f'&include={include[0]}'
+        else:
+            params_str += f'&include={include[1]}'
     if exclude is not None:
         params_str += f'&exclude={exclude}'
     if granularity is not None:
@@ -240,10 +255,17 @@ def update_search(include, exclude, granularity, placement, tf):
 @callback(
     Output(table_store, 'data'),
     Output(deck_count, 'children'),
-    Input(store, 'data')
+    Input(store, 'data'),
+    background=True,
+    running=[
+        (Output(skel_loading, 'is_open', allow_duplicate=True), True, False)
+    ],
+    progress=Output(skel_loading, 'children')
+    # prevent_initial_call=True
 )
-@cache.cache.memoize()
-def update_table_store(tf):
+# @cache.cache.memoize()
+def update_table_store(set_progress, tf):
+    set_progress('Fetching lots of data from the server. Please be patient.')
     url = f'{data.analysis_url}/decklists/{tf["deck"]}/skeleton-counts'
     params = tf.copy()
     if 'include' in tf:
@@ -254,6 +276,7 @@ def update_table_store(tf):
     r = data.session.post(url, params=params)
     out = {'cards': [], 'total': 0}
     if r.status_code == 200:
+        set_progress('Organizing the data for your consumption.')
         resp = r.json()
         cards = [_cards.get_card(card) for card in resp['data']]
         cards = _cards.sort_deck(cards)
@@ -266,7 +289,7 @@ def update_table_store(tf):
     Output(card_table_id, 'children'),
     Output(table_clipboard, 'content'),
     Input(table_view, 'value'),
-    Input(table_store, 'data'),
+    Input(table_store, 'data')
 )
 def update_card_table(view, data):
     skeleton = [c for c in data['cards'] if c['skeleton']]
@@ -282,11 +305,10 @@ def update_card_table(view, data):
 @cache.cache.memoize()
 def update_card_matchups(tf, options):
     if tf['include'] is None:
-        return html.P(select_card_text)
+        return html.Div()
     
     if len(options) == 0:
         raise exceptions.PreventUpdate
-
     url = f'{data.analysis_url}/decklists/{tf["deck"]}/card-matchups/{tf["include"]}'
     params = tf.copy()
     params['against_archetypes'] = [o['id'] for o in options[:15]]
@@ -308,7 +330,7 @@ def update_card_matchups(tf, options):
 @cache.cache.memoize()
 def update_card_matchups(tf):
     if tf['include'] is None:
-        return html.P(select_card_text)
+        return html.Div()
     
     url = f'{data.analysis_url}/decklists/{tf["deck"]}/trend/{tf["include"]}'
     r = data.session.post(url, params=tf)

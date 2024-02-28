@@ -1,7 +1,7 @@
-import dash_bootstrap_components as dbc
+from dash import dcc
 
 def create_placement_dropdown(id, placement, className=''):
-    return dbc.Select(
+    return dcc.Dropdown(
         options=[
             {'label': 'Winner', 'value': 1},
             {'label': 'Finals', 'value': 2},
@@ -15,5 +15,5 @@ def create_placement_dropdown(id, placement, className=''):
             {'label': 'Upper 10%', 'value': 0.1},
             {'label': 'Upper 25%', 'value': 0.25},
             {'label': 'Upper 50%', 'value': 0.5}
-        ], id=id, value=placement, class_name=className
+        ], id=id, value=placement, className=className
     )

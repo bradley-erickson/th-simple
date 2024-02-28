@@ -1,5 +1,5 @@
 import dash
-from dash import html
+from dash import html, DiskcacheManager
 import dash_bootstrap_components as dbc
 
 from components import navbar, footer
@@ -7,6 +7,10 @@ from utils import cache
 
 dbc_css = ("https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates@V1.0.2/dbc.min.css")
 html2canvas = {'src': 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'}
+
+import diskcache
+_diskcache = diskcache.Cache("./.diskcache")
+background_callback_manager = DiskcacheManager(_diskcache)
 
 app = dash.Dash(
     __name__,
@@ -29,6 +33,7 @@ app = dash.Dash(
     ],
     suppress_callback_exceptions=True,
     title='Trainer Hill',
+    background_callback_manager=background_callback_manager
 )
 cache.cache.init_app(app.server)
 

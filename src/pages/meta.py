@@ -17,6 +17,7 @@ dash.register_page(
 )
 
 prefix = 'meta'
+loading = f'{prefix}-loading'
 tour_store = f'{prefix}-tour-store'
 breakdown = f'{prefix}-breakdown'
 breakdown_place = f'{prefix}-breakdown-placement'
@@ -77,6 +78,7 @@ def layout(players=None, start_date=None, end_date=None, platform=None):
             'The Tier List Creator has moved to its own ',
             html.A('Tool', href='/tools/tier-list', className='alert-link')
         ], id='tierlist-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
+        dbc.Alert(['Loading data from server, this may take a moment...'], id=loading, is_open=False, color='warning'),
         dcc.Store(id=tour_store, data=tour_filters),
         dcc.Store(id=archetype_store, data=[]),
         tours,
@@ -144,7 +146,12 @@ def update_breakdown(tour_filters, archetypes):
     Output(breakdown_specific, 'children'),
     Input(tour_store, 'data'),
     Input(archetype_select, 'options'),
-    Input(breakdown_place, 'value')
+    Input(breakdown_place, 'value'),
+    background=True,
+    running=[
+        (Output(loading, 'is_open', allow_duplicate=True), True, False)
+    ],
+    prevent_initial_call=True
 )
 @cache.cache.memoize()
 def update_breakdown(tour_filters, archetypes, place):
@@ -162,7 +169,12 @@ def update_breakdown(tour_filters, archetypes, place):
     Input(tour_store, 'data'),
     Input(archetype_select, 'value'),
     Input(placing_id, 'value'),
-    State(archetype_store, 'data')
+    State(archetype_store, 'data'),
+    background=True,
+    running=[
+        (Output(loading, 'is_open', allow_duplicate=True), True, False)
+    ],
+    prevent_initial_call=True
 )
 @cache.cache.memoize()
 def update_matchups(tour_filters, selected, place, archetypes):

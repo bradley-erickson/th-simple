@@ -22,22 +22,22 @@
 }
 
 .radio-group .form-check {
-    padding-left: 0;
-  }
-  
-  .radio-group .btn-group > .form-check:not(:last-child) > .btn {
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-  }
-  
-  .radio-group .btn-group > .form-check:not(:first-child) > .btn {
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
-    margin-left: -1px;
-  }
-  
+  padding-left: 0;
+}
+
+.radio-group .btn-group>.form-check:not(:last-child)>.btn {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.radio-group .btn-group>.form-check:not(:first-child)>.btn {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  margin-left: -1px;
+}
+
 .bottom-40 {
-    bottom: 40% !important;
+  bottom: 40% !important;
 }
 
 .bg-blur {
@@ -62,13 +62,16 @@
 .dbc input {
   border-color: rgba(100, 100, 100, .4) !important;
 }
+.dbc input::placeholder {
+  color: var(--bs-secondary-color) !important;
+}
 
 /* DECK DIFF */
 .deck-diff-input {
   height: 250px;
 }
 
-/* Battle log */
+/* BATTLE JOURNAL */
 .notes-template textarea {
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
@@ -84,4 +87,22 @@
 .notes-template .accordion-header {
   border-top-left-radius: 0 !important;
   border-top-right-radius: 0 !important;
+}
+
+/* PRIZING CHECKING */
+.deck-stack {
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+}
+
+.card-in-stack {
+  flex: none;
+  width: 274px;
+  /* transform: scale(0.8); */
+  transition: transform 0.5s ease;
+}
+
+.card-in-stack:target {
+  transform: scale(1);
 }
