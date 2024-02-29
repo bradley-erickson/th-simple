@@ -17,3 +17,6 @@ def format_label(deck, hide_text=False, hide_text_small=False):
         children, title=name,
         className='d-flex flex-row align-items-center'
     )
+
+def create_default_deck(id):
+    return {'id': id, 'name': id.title(), 'icons': ['substitute']}

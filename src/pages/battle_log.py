@@ -72,10 +72,6 @@ settings_note_template = f'{settings_pref}-notes-template'
 settings_reset = f'{settings_pref}-reset'
 
 
-def create_default_deck(id):
-    return {'id': id, 'name': id.title(), 'icons': ['substitute']}
-
-
 def create_options():
     games = [dbc.Col([
         dbc.Card([
@@ -423,12 +419,12 @@ def create_match(g, decks):
     matchup = dbc.Row([
         html.Div(
             deck_label.format_label(decks.get(
-                g_playing, create_default_deck(g_playing)
+                g_playing, deck_label.create_default_deck(g_playing)
             ), hide_text_small=True), className='d-flex w-auto'),
         html.Div('vs.', className='d-flex w-auto'),
         html.Div(
             deck_label.format_label(decks.get(
-                g_against, create_default_deck(g_against)
+                g_against, deck_label.create_default_deck(g_against)
             ), hide_text_small=True), className='d-flex w-auto'),
     ], align='center')
     games = html.Div([
@@ -495,7 +491,7 @@ def create_deck_breakdown(data, decks):
             ])),
             html.Tbody([
                 html.Tr([
-                    html.Td(deck_label.format_label(decks.get(b, create_default_deck(b)))),
+                    html.Td(deck_label.format_label(decks.get(b, deck_label.create_default_deck(b)))),
                     html.Td(f"{breakdown[b]['Win']}-{breakdown[b]['Loss']}-{breakdown[b]['Tie']}")
                 ]) for b in sort_breakdown
             ])
