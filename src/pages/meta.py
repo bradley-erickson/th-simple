@@ -147,11 +147,11 @@ def update_breakdown(tour_filters, archetypes):
     Input(tour_store, 'data'),
     Input(archetype_select, 'options'),
     Input(breakdown_place, 'value'),
-    background=True,
-    running=[
-        (Output(loading, 'is_open', allow_duplicate=True), True, False)
-    ],
-    prevent_initial_call=True
+    # background=True,
+    # running=[
+    #     (Output(loading, 'is_open', allow_duplicate=True), True, False)
+    # ],
+    # prevent_initial_call=True
 )
 @cache.cache.memoize()
 def update_breakdown(tour_filters, archetypes, place):
@@ -170,11 +170,11 @@ def update_breakdown(tour_filters, archetypes, place):
     Input(archetype_select, 'value'),
     Input(placing_id, 'value'),
     State(archetype_store, 'data'),
-    background=True,
-    running=[
-        (Output(loading, 'is_open', allow_duplicate=True), True, False)
-    ],
-    prevent_initial_call=True
+    # background=True,
+    # running=[
+    #     (Output(loading, 'is_open', allow_duplicate=True), True, False)
+    # ],
+    # prevent_initial_call=True
 )
 @cache.cache.memoize()
 def update_matchups(tour_filters, selected, place, archetypes):

@@ -256,16 +256,15 @@ def update_search(include, exclude, granularity, placement, tf):
     Output(table_store, 'data'),
     Output(deck_count, 'children'),
     Input(store, 'data'),
-    background=True,
-    running=[
-        (Output(skel_loading, 'is_open', allow_duplicate=True), True, False)
-    ],
-    progress=Output(skel_loading, 'children')
+    # background=True,
+    # running=[
+    #     (Output(skel_loading, 'is_open', allow_duplicate=True), True, False)
+    # ],
+    # progress=Output(skel_loading, 'chil   dren')
     # prevent_initial_call=True
 )
-# @cache.cache.memoize()
-def update_table_store(set_progress, tf):
-    set_progress('Fetching lots of data from the server. Please be patient.')
+@cache.cache.memoize()
+def update_table_store(tf):
     url = f'{data.analysis_url}/decklists/{tf["deck"]}/skeleton-counts'
     params = tf.copy()
     if 'include' in tf:
@@ -276,7 +275,6 @@ def update_table_store(set_progress, tf):
     r = data.session.post(url, params=params)
     out = {'cards': [], 'total': 0}
     if r.status_code == 200:
-        set_progress('Organizing the data for your consumption.')
         resp = r.json()
         cards = [_cards.get_card(card) for card in resp['data']]
         cards = _cards.sort_deck(cards)
