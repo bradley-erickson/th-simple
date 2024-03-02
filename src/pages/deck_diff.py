@@ -4,6 +4,7 @@ import dash_bootstrap_components as dbc
 
 from components import download_button
 from utils import images, cards as _cards
+import utils.decklists
 
 dash.register_page(
     __name__,
@@ -48,14 +49,14 @@ layout = html.Div([
                 dbc.InputGroupText('Decklist A'),
                 dbc.Input(id=decklist_a_name, placeholder='Name', className='inputgroup-input-fix')
             ]),
-            dbc.Textarea(id=decklist_a_list, placeholder='Paste decklist here', size='sm', value='', class_name='deck-diff-input')
+            dbc.Textarea(id=decklist_a_list, placeholder='Paste decklist here', size='sm', value='', class_name='deck-diff-input', spellcheck='false')
         ], md=6),
         dbc.Col([
             dbc.InputGroup([
                 dbc.InputGroupText('Decklist B'),
                 dbc.Input(id=decklist_b_name, type='text', placeholder='Name', className='inputgroup-input-fix')
             ]),
-            dbc.Textarea(id=decklist_b_list, placeholder='Paste decklist here', size='sm', value='', class_name='deck-diff-input')
+            dbc.Textarea(id=decklist_b_list, placeholder='Paste decklist here', size='sm', value='', class_name='deck-diff-input', spellcheck='false')
         ], md=6)
     ], className='gy-1 mb-1'),
     dbc.Spinner(dbc.Row([
@@ -86,33 +87,6 @@ clientside_callback(
     Input(decklist_b_name, 'value')
 )
 
-def parse_decklist(l):
-    deck = []
-    if not l:
-        return deck
-    for c in l.split('\n'):
-        if len(c.strip()) == 0:
-            continue
-        if not c[0].isdigit():
-            continue
-        c_split = c.split(' ')
-        c_set = c_split[-2]
-        c_num = c_split[-1]
-        energy_check = c_set != 'Energy' and c_num not in _cards.ENERGY.values()
-        c_set = c_set if energy_check else 'BRS'
-        c_num = c_num if energy_check else c_split[2].replace('{', '').replace('}', '') if c_split[1] == 'Basic' else _cards.ENERGY[c_split[1]]
-        card = {
-            'card_code': f'{c_set}-{c_num.zfill(3) if energy_check else c_num}',
-            'set': c_set,
-            'number': c_num,
-            'name': ' '.join(c_split[1:-2]),
-            'count': int(c_split[0]),
-        }
-        card = _cards.get_card(card)
-        deck.append(card)
-    return deck
-
-
 def clean_list(raw, mid=False):
     cards_sorted = _cards.sort_deck(raw)
     cards_comp = [dbc.Col([
@@ -137,8 +111,8 @@ def clean_list(raw, mid=False):
     Input(decklist_b_list, 'value')
 )
 def update_diff(a, b):
-    dl_a = parse_decklist(a)
-    dl_b = parse_decklist(b)
+    dl_a = utils.decklists.parse_decklist(a)
+    dl_b = utils.decklists.parse_decklist(b)
     a_dict = {(c['card_code'] if c['supertype'] == 'Pokémon' else c['name']): c for c in dl_a}
     b_dict = {(c['card_code'] if c['supertype'] == 'Pokémon' else c['name']): c for c in dl_b}
 

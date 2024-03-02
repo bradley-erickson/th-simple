@@ -108,49 +108,4 @@ window.dash_clientside.clientside = {
         return exists;
     },
 
-    testing: function (id) {
-        const carousel = document.querySelector('.deck-stack');
-        console.log(carousel);
-
-        // document.querySelector('.prev').addEventListener('click', () => {
-        //     carousel.scrollBy(-200, 0);
-        // });
-
-        // document.querySelector('.next').addEventListener('click', () => {
-        //     carousel.scrollBy(200, 0);
-        // });
-
-        let touchStartX = 0;
-        let touchEndX = 0;
-        const width = 274;
-
-        carousel.addEventListener('touchstart', (e) => {
-            touchStartX = e.changedTouches[0].screenX;
-        }, false);
-
-        carousel.addEventListener('touchmove', (e) => {
-            touchEndX = e.changedTouches[0].screenX;
-        }, false);
-
-        carousel.addEventListener('touchend', (e) => {
-            if (touchEndX < touchStartX) {
-                carousel.scrollBy(width, 0);
-            }
-            if (touchEndX > touchStartX) {
-                carousel.scrollBy(width*-1, 0);
-            }
-        }, false);
-
-        // Mousewheel events
-        carousel.addEventListener('wheel', (e) => {
-            e.preventDefault();
-            if (e.deltaY < 0) {
-                carousel.scrollBy(width, 0);
-            }
-            else {
-                carousel.scrollBy(width*-1, 0);
-            }
-        }, false);
-
-    }
 }

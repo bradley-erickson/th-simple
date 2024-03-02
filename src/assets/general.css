@@ -8,6 +8,12 @@
   padding-bottom: 100px;
 }
 
+@media (min-width:768px) {
+  .w-md-12 {
+    width: 12.5% !important;
+  }
+}
+
 .app .footer {
   bottom: 0;
   right: 0;
@@ -90,19 +96,27 @@
 }
 
 /* PRIZING CHECKING */
+.prize-check-row td {
+  vertical-align: middle;
+}
+
 .deck-stack {
   display: flex;
   overflow-x: auto;
-  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+.deck-stack::-webkit-scrollbar {
+  display: none;
 }
 
 .card-in-stack {
-  flex: none;
-  width: 274px;
-  /* transform: scale(0.8); */
-  transition: transform 0.5s ease;
+  flex: 0 0 auto; /* Do not grow, do not shrink, basis auto */
+  scroll-snap-align: center; /* Snap align */
+  transform: scale(0.97);
 }
 
-.card-in-stack:target {
+.card-in-stack.target {
   transform: scale(1);
 }
