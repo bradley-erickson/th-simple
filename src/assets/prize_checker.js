@@ -9,11 +9,8 @@ window.dash_clientside.prize_checker = {
     },
 
     update_index: function (n, e, idx, children) {
-        const ids = children.length;
         if (typeof e === 'undefined') { return window.dash_clientside.no_update; }
-        const size = ids.length
-        // const carousel = document.querySelector('.deck-stack');
-        // const width = document.querySelector('.card-in-stack').clientWidth;
+        const size = children.length
         if (e.wheelDelta < 0) {
             return Math.max(idx - 1, 0)
         } else {
@@ -32,7 +29,7 @@ window.dash_clientside.prize_checker = {
     check_status: function(value, prizes) {
         if (value === null) { return ''; }
         const trig = window.dash_clientside.callback_context.triggered_id.index
-        const match = prizes.filter(obj => obj.id === trig)
+        const match = prizes.filter(obj => obj.card_code === trig)
         return match.length === value ? 'fas fa-check text-success' : 'fas fa-xmark text-danger'
     }
 

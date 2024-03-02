@@ -12,7 +12,7 @@ description = 'Hone your Pokémon TCG skills with our tool. Practice figuring ou
 
 dash.register_page(
     __name__,
-    path='/tests/prize-checker',
+    path='/tools/prize-checker',
     title='Prize Checker',
     icon='fa-magnifying-glass',
     description=description
@@ -76,21 +76,22 @@ decklist_tab = html.Div([
         dbc.Collapse(dbc.CardBody([
             dbc.Textarea(
                 id=d_input, placeholder='Paste decklist here', size='sm',
-                value=EXAMPLE, class_name='deck-diff-input', spellcheck='false'),
+                value='', class_name='deck-diff-input', spellcheck='false'),
             dbc.Button('Import', class_name='float-end my-1', disabled=True, id=d_import)
         ]), id=d_collapse, is_open=True)
     ]),
     html.H4('Set Priority'),
-    dbc.Table([
-        html.Thead(html.Tr([
-            html.Th('#', title='Card count'),
-            html.Th('Card', title='Card name'),
-            html.Th('Priority', title='Priority')
-        ])),
-        html.Tbody([], id=d_output)
-    ]),
-    # dcc.Store(data=[{'card_code': f'MEW-{str(i+1).zfill(3)}', 'count': 2, 'name': 'Charmander this is an even longer name', 'set': 'MEW', 'number': i} for i in range(30)], id=d_store)
-    dcc.Store(data=[], id=d_store)
+    dbc.Spinner([
+        dbc.Table([
+            html.Thead(html.Tr([
+                html.Th('#', title='Card count'),
+                html.Th('Card', title='Card name'),
+                html.Th('Priority', title='Priority')
+            ])),
+            html.Tbody([], id=d_output)
+        ]),
+        dcc.Store(data=[], id=d_store)
+    ])
 ])
 
 # practice tab
@@ -156,6 +157,14 @@ settings_tab = html.Div([
 
 layout = html.Div([
     html.H2('Prize Checking Practice'),
+    dbc.Alert(html.Ul([
+        html.Li([html.Strong('Set Card Priorities:'), ' Input your decklists and set card priorities.']),
+        html.Li([html.Strong('Determine Prize Cards:'), ' Scroll through your deck to figure out which cards are prized.']),
+        html.Li([
+            html.Strong('Need Assistance:'), ' Some imports may not be supported. If you encounter an issue, please submit a ',
+            html.A('Feedback Form', href='/feedback', className='alert-link'), '.'
+        ])
+    ], className='mb-0'), id='prizechecker-info-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
     dbc.Tabs([
         dbc.Tab(decklist_tab, label='List'),
         dbc.Tab(practice_tab, label='Practice'),
