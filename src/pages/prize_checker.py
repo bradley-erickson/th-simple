@@ -118,8 +118,8 @@ practice_tab = html.Div([
     dbc.Input(id=p_index, value=0, class_name='d-none'),
     EventListener(
         html.Div([], className='deck-stack', id=p_deck),
-        id=p_wheel,
-        events=[{'event': 'wheel', 'props': ['wheelDelta']}], 
+        id=p_wheel, logging=True,
+        events=[{'event': 'wheel', 'props': ['wheelDelta']}],
     ),
     html.H4('Cards known', className='d-inline-block'),
     html.I(className='ms-1 fas fa-circle-info', id='known'),
@@ -234,6 +234,12 @@ def update_decklist_deck(data):
 
 
 # practice tab callbacks
+clientside_callback(
+    ClientsideFunction(namespace='prize_checker', function_name='update_event_listener'),
+    Output(p_deck, 'id'),
+    Input(p_deck, 'id')
+)
+
 clientside_callback(
     ClientsideFunction(namespace='prize_checker', function_name='update_index'),
     Output(p_index, 'value'),

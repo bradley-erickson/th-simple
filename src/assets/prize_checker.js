@@ -8,6 +8,16 @@ window.dash_clientside.prize_checker = {
         return true;
     },
 
+    update_event_listener: function (id) {
+        console.log(id);
+        const element = document.querySelector(`#${id}`);
+        console.log(element);
+        element.addEventListener('wheel', function(event) {
+            event.preventDefault();
+        }, true)
+        return window.dash_clientside.no_update;
+    },
+
     update_index: function (n, e, idx, children) {
         if (typeof e === 'undefined') { return window.dash_clientside.no_update; }
         const size = children.length
@@ -22,7 +32,7 @@ window.dash_clientside.prize_checker = {
         const items = document.querySelectorAll('.card-in-stack');
         for (let item of items) { item.classList.remove('target'); }
         items[i].classList.add('target');
-        items[i].scrollIntoView({ behavior: 'smooth' });
+        items[i].scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
         return '';
     },
 
