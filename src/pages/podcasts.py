@@ -32,7 +32,8 @@ FEEDS = {
     # 'FlowTKast': 'https://anchor.fm/s/3f94e654/podcast/rss',
     # 'Experience Share': '',
     # 'Lost Mine': '',
-    'Pittsburgh Pokemon': 'https://anchor.fm/s/2a98f524/podcast/rss'
+    'Pittsburgh Pokemon': 'https://anchor.fm/s/2a98f524/podcast/rss',
+    'Dead Draw Gaming': 'https://feeds.buzzsprout.com/1187012.rss'
 }
 
 BACKUP = {
