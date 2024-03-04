@@ -37,7 +37,8 @@ FEEDS = {
 }
 
 BACKUP = {
-    'Trashalanche': 'https://www.trashalanche.com/'
+    'Trashalanche': 'https://www.trashalanche.com/',
+    'Dead Draw Gaming': 'https://feeds.buzzsprout.com/1187012.rss'
 }
 
 # cache for half an hour
