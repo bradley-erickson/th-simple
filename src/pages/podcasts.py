@@ -14,6 +14,7 @@ dash.register_page(
     path='/tools/podcast-hub',
     title='Podcast Hub',
     icon='fa-podcast',
+    image='tools.png',
     description=description
 )
 
