@@ -239,7 +239,7 @@ def update_search(include, exclude, granularity, placement, tf):
     params = tf.copy()
     params_str = tour_filter.create_param_string(params)
     
-    if ctx.triggered_id.get('index', '') in ['include', 'individual']:
+    if ctx.triggered_id == dict and ctx.triggered_id.get('index', '') in ['include', 'individual']:
         if ctx.triggered_id['index'] == 'include':
             params_str += f'&include={include[0]}'
         else:

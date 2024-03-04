@@ -15,6 +15,7 @@ dash.register_page(
     path='/tools/prize-checker',
     title='Prize Checker',
     icon='fa-magnifying-glass',
+    image='tools.png',
     description=description
 )
 
