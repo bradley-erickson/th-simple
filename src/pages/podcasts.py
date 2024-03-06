@@ -34,7 +34,8 @@ FEEDS = {
     # 'Experience Share': '',
     # 'Lost Mine': '',
     'Pittsburgh Pokemon': 'https://anchor.fm/s/2a98f524/podcast/rss',
-    'Dead Draw Gaming': 'https://feeds.buzzsprout.com/1187012.rss'
+    'Dead Draw Gaming': 'https://feeds.buzzsprout.com/1187012.rss',
+    'PCS Pokemon': 'https://anchor.fm/s/beaa6040/podcast/rss'
 }
 
 BACKUP = {

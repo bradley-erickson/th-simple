@@ -212,7 +212,7 @@ def update_title(tf, current):
     Output(exclude_select, 'options'),
     Input(store, 'data')
 )
-# @cache.cache.memoize()
+@cache.cache.memoize()
 def update_card_select_options(tour_filters):
     url = f'{data.api_url}/cards/{tour_filters["deck"]}'
     r = data.session.get(url, params=tour_filters)
@@ -239,7 +239,7 @@ def update_search(include, exclude, granularity, placement, tf):
     params = tf.copy()
     params_str = tour_filter.create_param_string(params)
     
-    if ctx.triggered_id == dict and ctx.triggered_id.get('index', '') in ['include', 'individual']:
+    if isinstance(ctx.triggered_id, dict) and ctx.triggered_id.get('index', '') in ['include', 'individual']:
         if ctx.triggered_id['index'] == 'include':
             params_str += f'&include={include[0]}'
         else:
