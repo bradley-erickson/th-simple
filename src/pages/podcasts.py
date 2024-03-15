@@ -35,12 +35,14 @@ FEEDS = {
     # 'Lost Mine': '',
     'Pittsburgh Pokemon': 'https://anchor.fm/s/2a98f524/podcast/rss',
     'Dead Draw Gaming': 'https://feeds.buzzsprout.com/1187012.rss',
-    'PCS Pokemon': 'https://anchor.fm/s/beaa6040/podcast/rss'
+    'PCS Pokemon': 'https://anchor.fm/s/beaa6040/podcast/rss',
+    'PokeBeach': 'https://feeds.buzzsprout.com/2248143.rss'
 }
 
 BACKUP = {
     'Trashalanche': 'https://www.trashalanche.com/',
-    'Dead Draw Gaming': 'https://feeds.buzzsprout.com/1187012'
+    'Dead Draw Gaming': 'https://feeds.buzzsprout.com/1187012',
+    'PokeBeach': 'https://feeds.buzzsprout.com/2248143'
 }
 
 # cache for half an hour
