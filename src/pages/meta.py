@@ -1,6 +1,8 @@
 import dash
 from dash import html, dcc, callback, Output, Input, State
 import dash_bootstrap_components as dbc
+import datetime
+import pandas as pd
 
 from components import tour_filter, deck_label, matchup_table, placement, download_button
 from utils import data, cache
@@ -25,6 +27,9 @@ breakdown_overall = f'{prefix}-breakdown-overall'
 breakdown_specific = f'{prefix}-breakdown-specific'
 archetype_select = f'{prefix}-archetype-select'
 archetype_store = f'{prefix}-archetype-store'
+download_matchups_btn = f'{prefix}-download-matchup-btn'
+download_matchups = f'{prefix}-download-matchup-data'
+matchup_data_store = f'{prefix}-matchup-data-store'
 matchups = f'{prefix}-matchups'
 placing_id = f'{prefix}-placing'
 
@@ -95,8 +100,15 @@ def layout(players=None, start_date=None, end_date=None, platform=None):
         ]),
         html.Div([
             html.H3('Matchups', id='matchups', className='d-inline-block'),
-            download_button.DownloadImageAIO(dom_id=matchups, className='float-end')
+            dbc.Button(
+                html.I(className='fas fa-file-export'),
+                id=download_matchups_btn,
+                className='float-end ms-1',
+                title='Export matchup data (csv)'),
+            download_button.DownloadImageAIO(dom_id=matchups, className='float-end'),
+            dcc.Download(id=download_matchups)
         ]),
+        dcc.Store(id=matchup_data_store, data=[]),
         dbc.Row([
             dbc.Col([
                 dbc.Label('Placement'),
@@ -165,23 +177,40 @@ def update_breakdown(tour_filters, archetypes, place):
     return create_ordered_list(top_x)
 
 @callback(
-    Output(matchups, 'children'),
+    Output(matchup_data_store, 'data'),
     Input(tour_store, 'data'),
     Input(archetype_select, 'value'),
     Input(placing_id, 'value'),
-    State(archetype_store, 'data'),
-    # background=True,
-    # running=[
-    #     (Output(loading, 'is_open', allow_duplicate=True), True, False)
-    # ],
-    # prevent_initial_call=True
 )
 @cache.cache.memoize()
-def update_matchups(tour_filters, selected, place, archetypes):
-    decks = {d['id']: d for d in archetypes}
+def update_matchups(tour_filters, selected, place):
     tour_filters['placement'] = place
     matchup_data = fetch_matchup_data(tour_filters, selected)
-    return matchup_table.create_matchup_spread(matchup_data, decks)
+    return matchup_data
+
+@callback(
+    Output(matchups, 'children'),
+    Input(matchup_data_store, 'data'),
+    State(archetype_store, 'data'),
+)
+def update_matchup_children(data, archetypes):
+    decks = {d['id']: d for d in archetypes}
+    return matchup_table.create_matchup_spread(data, decks)
+
+@callback(
+    Output(download_matchups, 'data'),
+    Input(download_matchups_btn, 'n_clicks'),
+    State(matchup_data_store, 'data')
+)
+def download_matchup_as_csv(n_clicks, data):
+    if n_clicks is None:
+        raise dash.exceptions.PreventUpdate
+    df = pd.DataFrame.from_records(
+        data,
+        columns=['deck1', 'deck2', 'wins', 'losses', 'ties', 'total', 'win_rate']
+    )
+    return dcc.send_data_frame(df.to_csv, filename=f'trainerhill-meta-matchups-{str(datetime.date.today())}.csv', index=False)
+
 
 @callback(
     Output(archetype_select, 'value'),

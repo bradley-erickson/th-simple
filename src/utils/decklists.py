@@ -30,7 +30,6 @@ def parse_decklist(l):
         }
         try:
             card = _cards.get_card(card)
-            print(card)
         except PokemonTcgException:
             unable_to_parse.append(c)
             continue
