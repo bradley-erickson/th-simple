@@ -24,6 +24,8 @@ decklist_b_name = f'{prefix}-decklist-b-name'
 decklist_b_list = f'{prefix}-decklist-b-list'
 decklist_b_title = f'{prefix}-decklist-b-title'
 
+parse_alert = f'{prefix}-parse-alert'
+
 a_only = f'{prefix}-a-only'
 a_only_total = f'{a_only}-total'
 overlap = f'{prefix}-overlap'
@@ -43,6 +45,7 @@ layout = html.Div([
             html.A('Feedback Form', href='/feedback', className='alert-link'), '.'
         ])
     ], className='mb-0'), id='deckdiff-info-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
+    dbc.Alert(is_open=False, color='warning', id=parse_alert),
     dbc.Row([
         dbc.Col([
             dbc.InputGroup([
@@ -107,14 +110,17 @@ def clean_list(raw, mid=False):
     Output(overlap_total, 'children'),
     Output(b_only, 'children'),
     Output(b_only_total, 'children'),
+    Output(parse_alert, 'is_open'),
+    Output(parse_alert, 'children'),
     Input(decklist_a_list, 'value'),
     Input(decklist_b_list, 'value')
 )
 def update_diff(a, b):
-    dl_a = utils.decklists.parse_decklist(a)
-    dl_b = utils.decklists.parse_decklist(b)
-    a_dict = {(c['card_code'] if c['supertype'] == 'Pokémon' else c['name']): c for c in dl_a}
-    b_dict = {(c['card_code'] if c['supertype'] == 'Pokémon' else c['name']): c for c in dl_b}
+    dl_a, dl_a_issues = utils.decklists.parse_decklist(a)
+    dl_b, dl_b_issues = utils.decklists.parse_decklist(b)
+
+    a_dict = {(c['card_code'] if c.get('supertype') == 'Pokémon' else c['name']): c for c in dl_a}
+    b_dict = {(c['card_code'] if c.get('supertype') == 'Pokémon' else c['name']): c for c in dl_b}
 
     in_a = []
     in_b = []
@@ -149,4 +155,11 @@ def update_diff(a, b):
     in_b, total_b = clean_list(in_b)
     in_both, total_both = clean_list(in_both, True)
 
-    return in_a, total_a, in_both, total_both, in_b, total_b
+    parse_error = len(dl_a_issues) + len(dl_b_issues) > 0
+    overall_parse_errors = dl_a_issues + dl_b_issues
+    parse_child = [
+        html.Div('Could not parse the following cards:'),
+        html.Ul([html.Li(o) for o in overall_parse_errors])
+    ]
+
+    return in_a, total_a, in_both, total_both, in_b, total_b, parse_error, parse_child

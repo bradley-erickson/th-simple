@@ -13,13 +13,15 @@ description = 'Hone your Pokémon TCG skills with our tool. Practice figuring ou
 dash.register_page(
     __name__,
     path='/tools/prize-checker',
-    title='Prize Checker',
+    title='Prize Checker (beta)',
     icon='fa-magnifying-glass',
     image='tools.png',
     description=description
 )
 
 prefix = 'prize-checker'
+parse_alert = f'{prefix}-parse-alert'
+
 EXAMPLE = '''Pokémon (18)
 2 Charmander MEW 4
 1 Charmander PR-SV 47
@@ -157,7 +159,7 @@ settings_tab = html.Div([
 ])
 
 layout = html.Div([
-    html.H2('Prize Checking Practice'),
+    html.H2('Prize Checking Practicer (beta)'),
     dbc.Alert(html.Ul([
         html.Li([html.Strong('Set Card Priorities:'), ' Input your decklists and set card priorities.']),
         html.Li([html.Strong('Determine Prize Cards:'), ' Scroll through your deck to figure out which cards are prized.']),
@@ -166,6 +168,7 @@ layout = html.Div([
             html.A('Feedback Form', href='/feedback', className='alert-link'), '.'
         ])
     ], className='mb-0'), id='prizechecker-info-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
+    dbc.Alert(is_open=False, color='warning', id=parse_alert),
     dbc.Tabs([
         dbc.Tab(decklist_tab, label='List'),
         dbc.Tab(practice_tab, label='Practice'),
@@ -192,15 +195,21 @@ clientside_callback(
 @callback(
     Output(d_store, 'data'),
     Output(d_collapse, 'is_open'),
+    Output(parse_alert, 'is_open'),
+    Output(parse_alert, 'children'),
     Input(d_import, 'n_clicks'),
     State(d_input, 'value')
 )
 def update_decklist_store(clicks, value):
     if clicks is None:
         raise dash.exceptions.PreventUpdate
-    deck = utils.decklists.parse_decklist(value)
+    deck, parse_error = utils.decklists.parse_decklist(value)
     deck = utils.cards.sort_deck(deck)
-    return deck, False
+    parse_child = [
+        html.Div('Could not parse the following cards:'),
+        html.Ul([html.Li(o) for o in parse_error])
+    ]
+    return deck, False or len(parse_error) > 0, len(parse_error) > 0, parse_child
 
 
 @callback(
@@ -311,7 +320,7 @@ def ask_about_prizes(prios, data):
         output.append(html.Tr([
             html.Td(f"{card['name']} {id}"),
             html.Td(dbc.RadioItems(
-                list(range(min(6, card['count']+1))),
+                list(range(min(7, card['count']+1))),
                 className='btn-group btn-group-sm',
                 inputClassName='btn-check',
                 labelClassName='btn btn-outline-primary',

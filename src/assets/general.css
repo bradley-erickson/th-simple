@@ -104,11 +104,6 @@
   display: flex;
   overflow-x: auto;
   scroll-snap-type: x proximity;
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
-}
-.deck-stack::-webkit-scrollbar {
-  display: none;
 }
 
 .card-in-stack {

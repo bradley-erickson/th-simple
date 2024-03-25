@@ -9,9 +9,7 @@ window.dash_clientside.prize_checker = {
     },
 
     update_event_listener: function (id) {
-        console.log(id);
         const element = document.querySelector(`#${id}`);
-        console.log(element);
         element.addEventListener('wheel', function(event) {
             event.preventDefault();
         }, true)

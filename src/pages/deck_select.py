@@ -46,6 +46,6 @@ def update_table(tf):
                     href=f'/decklist/{deck["id"]}{params}'
                 )
             )
-        ], className='deck-row') for i, deck in enumerate(decks_raw[:30])
+        ], className='deck-row') for i, deck in enumerate(decks_raw[:50])
     ])
     return body

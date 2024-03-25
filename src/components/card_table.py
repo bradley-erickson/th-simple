@@ -8,6 +8,7 @@ from utils import colors, images
 
 color_breakdown = colors.blue
 color_inclusion = colors.red
+color_winrate = colors.green
 
 def create_grid_item(card, total):
     id = card['card_code']
@@ -86,10 +87,11 @@ def create_list_item(card, max_count, total):
 
     hover_bars = [
         dbc.Label('Overall'),
-        dbc.Progress(value=card['play_rate'], max=1, color=color_inclusion),
+        dbc.Progress(value=card['play_rate'], max=1, color=color_inclusion, label=f"{card['play_rate']:.1%}"),
     ]
 
     counts = [html.Td()]*max_count
+    win_rates = [html.Td()]*max_count
     for count in sorted(card['counts'], key=lambda d: d['count']):
         c = count['count']
         c_value = count["decks"] / total
@@ -99,29 +101,38 @@ def create_list_item(card, max_count, total):
             style={'backgroundColor': c_color},
             className='text-end'
         )
+        win_rate_value = count['win_rate']
+        win_rates[c-1] = html.Td(
+            html.Span(f'{win_rate_value:.1%}', className='d-none d-md-inline'),
+            style={'backgroundColor': colors.green_gradient[math.floor(win_rate_value * 100)]},
+            className='text-end')
         hover_bars.append(dbc.Label(f'{c} cop{"ies" if c > 1 else "y"}'))
         hover_bars.append(dbc.Progress(value=c_value, max=1, color=color_breakdown))
+        hover_bars.append(dbc.Progress(value=win_rate_value, max=1, color=color_winrate))
 
     cells = [
         dbc.Popover(
             dbc.PopoverBody(dbc.Row([
-                dbc.Col(
+                dbc.Col([
                     html.Img(src=images.get_card_image(id, 'SM'), className='w-100'),
-                    width=6
-                ),
-                dbc.Col(hover_bars)
+                    dbc.Badge('Overall play-rate %', color=color_inclusion),
+                    dbc.Badge('Play-rate %', color=color_breakdown),
+                    dbc.Badge('Win-rate %', color=color_winrate),
+                ], width=5),
+                dbc.Col(hover_bars, width=7)
             ])),
             target=id,
-            trigger='hover',
+            trigger='hover legacy',
             placement='bottom'
         ),
         html.Td(f"{card['name']} {card['card_code']}", className='w-100'),
         html.Td(
-            html.Span(f'{card["play_rate"]:.1%}', className='d-none d-md-inline'),
+            html.Span(f'{card["play_rate"]:.1%}'),
             style={'backgroundColor': color},
             className='text-end')
     ]
     cells.extend(counts[:4])
+    cells.extend(win_rates[:4])
     row = html.Tr(cells, id=id)
     return row
 
@@ -136,12 +147,17 @@ def create_list_layout(cards, total):
         else:
             other.append(create_list_item(card, max_count, total))
 
-    headers = [html.Th('Card'), html.Th('Overall')] + [html.Th(i, className='text-end') for i in range(1, 5)]
+    headers = [html.Th('Card'),
+        html.Th('Play-rate %', colSpan=5, className='text-center small'),
+        html.Th('Win-rate %', colSpan=4, className='text-center small')]
+    subheaders = [html.Th(), html.Th('Overall', className='small')] +\
+        [html.Th(i, className='text-end small') for i in range(1, 5)] +\
+        [html.Th(i, className='text-end small') for i in range(1, 5)]
 
     body = [html.Tr(html.Td(['Skeleton', dbc.Badge(skeleton_count, className='ms-1')]))] + skeleton + [html.Tr(html.Td('Other'))] + other
 
     table = dbc.Table([
-        html.Thead(html.Tr(headers)),
+        html.Thead([html.Tr(headers), html.Tr(subheaders)]),
         html.Tbody(body)
     ])
     return table
