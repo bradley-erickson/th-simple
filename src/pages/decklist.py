@@ -6,7 +6,7 @@ import urllib
 
 from components import (tour_filter, deck_label,
     card_table, matchup_table, trend_graph, download_button,
-    placement as _placement)
+    placement as _placement, loading)
 from utils import data, url, cards as _cards, cache, images
 
 dash.register_page(
@@ -256,12 +256,6 @@ def update_search(include, exclude, granularity, placement, tf):
     Output(table_store, 'data'),
     Output(deck_count, 'children'),
     Input(store, 'data'),
-    # background=True,
-    # running=[
-    #     (Output(skel_loading, 'is_open', allow_duplicate=True), True, False)
-    # ],
-    # progress=Output(skel_loading, 'chil   dren')
-    # prevent_initial_call=True
 )
 @cache.cache.memoize()
 def update_table_store(tf):
@@ -276,9 +270,10 @@ def update_table_store(tf):
     out = {'cards': [], 'total': 0}
     if r.status_code == 200:
         resp = r.json()
-        cards = [_cards.get_card(card) for card in resp['data']]
-        cards = _cards.sort_deck(cards)
-        out['cards'] = cards
+        # TODO this should be handled serverside
+        # cards = [_cards.get_card(card) for card in resp['data']]
+        # cards = _cards.sort_deck(cards)
+        out['cards'] = resp['data']
         out['total'] = resp['total']
     return out, out['total']
 
