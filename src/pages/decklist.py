@@ -93,7 +93,7 @@ def create_filter(include, exclude, granularity, placement):
     ])
     return filter_row
 
-def layout(deck=None, players=None, start_date=None, end_date=None, platform=None, include=None, exclude=None, granularity=0.6, placement=10_000):
+def layout(deck=None, players=None, start_date=None, end_date=None, platform=None, include=None, exclude=None, granularity=0.6, placement=0.5):
     include = None if include == 'None' else include
     tours = tour_filter.TourFiltersAIO(players, start_date, end_date, platform, prefix)
     filters = tour_filter.create_tour_filter(players, start_date, end_date, platform)
