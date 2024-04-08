@@ -1,3 +1,5 @@
+import random
+
 loading_messages = [
     "Fetching the requested data... Please hold on!",
     "Running analysis, this might take a moment. Your patience is appreciated!",
@@ -7,3 +9,6 @@ loading_messages = [
     "Loading your personalized insights. Just a bit longer!",
     "Thank you for waiting. We're making sure everything is perfect!",
 ]
+
+def random_message():
+    return random.choice(loading_messages)

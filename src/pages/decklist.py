@@ -35,13 +35,20 @@ placement_select = f'{decklist_filters}-placement'
 list_tooltip = f'{prefix}-table-tooltip'
 
 skel_loading = f'{prefix}-skeleton-loading'
+loading_text = f'{prefix}-loading-text'
 table_view = f'{prefix}-table-view'
 table_store = f'{prefix}-table-store'
 table_clipboard = f'{prefix}-table-clipboard'
+table_clip_btn = f'{prefix}-table-clipboard-btn'
+download_image = f'{prefix}-download-image'
 card_table_id = f'{prefix}-card-table'
 
 card_matchups = f'{prefix}-card-matchups'
 card_trend = f'{prefix}-card-trend'
+
+skel_disable = f'{prefix}-skeleton-disable'
+trend_disable = f'{prefix}-trend-disable'
+matchup_disable = f'{prefix}-matchup-disable'
 
 overview_header = f'{prefix}-list-overview-header'
 individual_card_header = f'{prefix}-matchup-header'
@@ -110,22 +117,26 @@ def layout(deck=None, players=None, start_date=None, end_date=None, platform=Non
         create_filter(include, exclude, granularity, placement),
         dcc.Store(id=store, data=filters),
         dcc.Store(id=option_store, data=[]),
-        dbc.Spinner(html.Div([
-            html.H3([html.Span(id=title, className='d-flex'), dbc.Badge(0, id=deck_count, className='ms-1')], className='d-flex mb-0'),
+        html.Div([
+            html.H3([
+                html.Span(deck, id=title, className='d-flex'),
+                dbc.Spinner(dbc.Badge(0, id=deck_count, className='ms-1'), type='grow')
+            ], className='d-flex mb-0'),
             html.Div([
                 dbc.Button([
                     html.I(className='fas fa-list'),
                     html.Span('Change deck', className='ms-1 d-lg-inline-block d-none')
                 ], href=change_deck_url, title='Change deck')
             ], className='d-flex')
-        ], className='d-flex justify-content-between align-items-center mt-1')),
+        ], className='d-flex justify-content-between align-items-center mt-1'),
+        html.Span(loading.random_message(), id=loading_text),
         html.Div([
             html.A(html.H4([
                 'List Overview',
             ]), id=headers[overview_header]['header']),
             html.Div([
-                download_button.DownloadImageAIO(dom_id=headers[overview_header]['collapse'], className='me-1 d-inline-block'),
-                dbc.Button(dcc.Clipboard(id=table_clipboard, content='None'), className='me-1', title='Copy Skeleton Decklist'),
+                download_button.DownloadImageAIO(aio_id=download_image, dom_id=headers[overview_header]['collapse'], className='me-1 d-inline-block'),
+                dbc.Button(dcc.Clipboard(id=table_clipboard, content='None'), className='me-1', title='Copy Skeleton Decklist', id=table_clip_btn),
                 html.Span(dbc.RadioItems(
                     id=table_view,
                     className='btn-group align-baseline',
@@ -139,7 +150,8 @@ def layout(deck=None, players=None, start_date=None, end_date=None, platform=Non
                     value='grid',
                 ), className='radio-group'),
             ]),
-            dcc.Store(id=table_store, data={'total': 0, 'cards': []})
+            dcc.Store(id=table_store, data={'total': 0, 'cards': []}),
+            html.Button(id=skel_disable, className='d-none')
         ], className='d-flex justify-content-between align-items-center'),
         dbc.Collapse([
             dbc.Alert(['Loading skeleton analysis.'], id=skel_loading, is_open=False, color='warning'),
@@ -167,7 +179,9 @@ def layout(deck=None, players=None, start_date=None, end_date=None, platform=Non
                         dbc.Tab(dbc.Spinner(id=card_matchups), label='Matchups')
                     ], id='individual-card-tabs', active_tab='tab-0'),
                     html.Small('* Excluded cards are NOT included in this analysis.')
-                ], lg=10)
+                ], lg=10),
+                html.Button(id=trend_disable, className='d-none'),
+                html.Button(id=matchup_disable, className='d-none')
             ]),
             id=headers[individual_card_header]['collapse'],
             is_open=True
@@ -203,7 +217,10 @@ def update_title(tf, current):
     deck = tf['deck']
     decks = data.get_decks(tf)
     deck = urllib.parse.unquote(deck)
-    label = deck_label.format_label(next(d for d in decks if d['id'] == deck))
+    try:
+        label = deck_label.format_label(next(d for d in decks if d['id'] == deck))
+    except StopIteration:
+        label = f'Deck {deck} not found.'
     return label, decks
 
 
@@ -248,16 +265,18 @@ def update_search(include, exclude, granularity, placement, tf):
         params_str += f'&exclude={exclude}'
     if granularity is not None:
         params_str += f'&granularity={granularity}'
-    if placement != 10_000:
-        params_str += f'&placement={placement}'
+    params_str += f'&placement={placement}'
     return params_str
 
 @callback(
     Output(table_store, 'data'),
     Output(deck_count, 'children'),
     Input(store, 'data'),
+    running=[
+        (Output(skel_disable, 'disabled'), True, False),
+    ],
+    background=True
 )
-@cache.cache.memoize()
 def update_table_store(tf):
     url = f'{data.analysis_url}/decklists/{tf["deck"]}/skeleton-counts'
     params = tf.copy()
@@ -270,9 +289,6 @@ def update_table_store(tf):
     out = {'cards': [], 'total': 0}
     if r.status_code == 200:
         resp = r.json()
-        # TODO this should be handled serverside
-        # cards = [_cards.get_card(card) for card in resp['data']]
-        # cards = _cards.sort_deck(cards)
         out['cards'] = resp['data']
         out['total'] = resp['total']
     return out, out['total']
@@ -293,7 +309,11 @@ def update_card_table(view, data):
 @callback(
     Output(card_matchups, 'children'),
     Input(store, 'data'),
-    Input(option_store, 'data')
+    Input(option_store, 'data'),
+    running=[
+        (Output(matchup_disable, 'disabled'), True, False)
+    ],
+    background=True
 )
 @cache.cache.memoize()
 def update_card_matchups(tf, options):
@@ -318,10 +338,13 @@ def update_card_matchups(tf, options):
 
 @callback(
     Output(card_trend, 'children'),
-    Input(store, 'data')
+    Input(store, 'data'),
+    running=[
+        (Output(trend_disable, 'disabled'), True, False)
+    ],
+    background=True
 )
-@cache.cache.memoize()
-def update_card_matchups(tf):
+def update_card_trends(tf):
     if tf['include'] is None:
         return html.Div()
     
@@ -337,3 +360,19 @@ def update_card_matchups(tf):
     )
 
     return trend_graph.create_trend_graph(df)
+
+
+@callback(
+    Output({'type': card_select, 'index': ALL}, 'disabled'),
+    Output(exclude_select, 'disabled'),
+    Output(granularity_slider, 'disabled'),
+    Output(placement_select, 'disabled'),
+    Output(loading_text, 'className'),
+    Input(skel_disable, 'disabled'),
+    Input(trend_disable, 'disabled'),
+    Input(matchup_disable, 'disabled'),
+)
+def disable_inputs(s, t, m):
+    disabled = s or t or m
+    classname = 'd-none' if not disabled else 'fs-6'
+    return [disabled, disabled], disabled, disabled, disabled, classname

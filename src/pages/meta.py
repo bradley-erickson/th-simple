@@ -108,7 +108,6 @@ def layout(players=None, start_date=None, end_date=None, platform=None):
             download_button.DownloadImageAIO(dom_id=matchups, className='float-end'),
             dcc.Download(id=download_matchups)
         ]),
-        dcc.Store(id=matchup_data_store, data=[]),
         dbc.Row([
             dbc.Col([
                 dbc.Label('Placement'),
@@ -119,7 +118,10 @@ def layout(players=None, start_date=None, end_date=None, platform=None):
                 dcc.Dropdown(id=archetype_select, multi=True, maxHeight=400)
             ], md=8, lg=9, xl=10)
         ], className='mb-1'),
-        dbc.Spinner(html.Div(id=matchups))
+        dbc.Spinner([
+            html.Div(id=matchups),
+            dcc.Store(id=matchup_data_store, data=[])
+        ])
     ])
     return cont
 
@@ -144,7 +146,7 @@ def update_options(tour_filters):
     Input(archetype_select, 'options'),
 )
 @cache.cache.memoize()
-def update_breakdown(tour_filters, archetypes):
+def update_breakdown_overall(tour_filters, archetypes):
     decks = {d['value']: d['label'] for d in archetypes}
 
     overall = fetch_breakdown_data(tour_filters)
@@ -159,13 +161,11 @@ def update_breakdown(tour_filters, archetypes):
     Input(tour_store, 'data'),
     Input(archetype_select, 'options'),
     Input(breakdown_place, 'value'),
-    # background=True,
-    # running=[
-    #     (Output(loading, 'is_open', allow_duplicate=True), True, False)
-    # ],
-    # prevent_initial_call=True
+    background=True,
+    running=[
+        (Output(breakdown_place, 'disabled'), True, False)
+    ]
 )
-@cache.cache.memoize()
 def update_breakdown(tour_filters, archetypes, place):
     decks = {d['value']: d['label'] for d in archetypes}
 
@@ -181,8 +181,12 @@ def update_breakdown(tour_filters, archetypes, place):
     Input(tour_store, 'data'),
     Input(archetype_select, 'value'),
     Input(placing_id, 'value'),
+    background=True,
+    running=[
+        (Output(placing_id, 'disabled'), True, False),
+        (Output(archetype_select, 'disabled'), True, False)
+    ]
 )
-@cache.cache.memoize()
 def update_matchups(tour_filters, selected, place):
     tour_filters['placement'] = place
     matchup_data = fetch_matchup_data(tour_filters, selected)
