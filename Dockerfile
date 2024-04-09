@@ -8,4 +8,4 @@ COPY . /app
 WORKDIR /app/src
 EXPOSE 8000
 ENV TH_DEPLOY True
-CMD ["supervisord", "-c", "supervisord.conf"]
+CMD ["supervisord", "-c", "supervisord.conf", "-e", "debug"]
