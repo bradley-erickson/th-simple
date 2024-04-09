@@ -16,10 +16,14 @@ html2canvas = {'src': 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/
 launch_uid = uuid.uuid4()
 
 if os.environ.get('TH_DEPLOY', False) == 'True':
-    from celery import Celery
-    celery_app = Celery(__name__, broker='redis://localhost:6379/', backend='redis://localhost:6379/')
-    background_callback_manager = CeleryManager(celery_app, cache_by=[lambda: launch_uid], expire=1800)
-    celery_app.conf.broker_connection_retry_on_startup = True
+    # from celery import Celery
+    # celery_app = Celery(__name__, broker='redis://localhost:6379/', backend='redis://localhost:6379/')
+    # background_callback_manager = CeleryManager(celery_app, cache_by=[lambda: launch_uid], expire=1800)
+    # celery_app.conf.broker_connection_retry_on_startup = True
+
+    import diskcache
+    _diskcache = diskcache.Cache("./.cache")
+    background_callback_manager = DiskcacheManager(_diskcache)
 else:
     # import diskcache
     # _diskcache = diskcache.Cache("./.cache")

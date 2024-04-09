@@ -8,4 +8,4 @@ COPY . /app
 WORKDIR /app/src
 EXPOSE 8000
 ENV TH_DEPLOY True
-CMD ["supervisord", "-c", "supervisord.conf", "-e", "debug"]
+CMD ["gunicorn", "--worker-tmp-dir", "/dev/shm", "--timeout", "120", "app:server"]
