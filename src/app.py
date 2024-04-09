@@ -23,7 +23,7 @@ if os.environ.get('TH_DEPLOY', False) == 'True':
 
     import diskcache
     _diskcache = diskcache.Cache("./.cache")
-    background_callback_manager = DiskcacheManager(_diskcache)
+    background_callback_manager = DiskcacheManager(_diskcache, cache_by=[lambda: launch_uid], expire=1800)
 else:
     # import diskcache
     # _diskcache = diskcache.Cache("./.cache")

@@ -275,7 +275,7 @@ def update_search(include, exclude, granularity, placement, tf):
     running=[
         (Output(skel_disable, 'disabled'), True, False),
     ],
-    background=True
+    # background=True
 )
 def update_table_store(tf):
     url = f'{data.analysis_url}/decklists/{tf["deck"]}/skeleton-counts'
@@ -313,7 +313,7 @@ def update_card_table(view, data):
     running=[
         (Output(matchup_disable, 'disabled'), True, False)
     ],
-    background=True
+    # background=True
 )
 @cache.cache.memoize()
 def update_card_matchups(tf, options):
@@ -342,7 +342,7 @@ def update_card_matchups(tf, options):
     running=[
         (Output(trend_disable, 'disabled'), True, False)
     ],
-    background=True
+    # background=True
 )
 def update_card_trends(tf):
     if tf['include'] is None:
