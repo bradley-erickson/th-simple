@@ -17,7 +17,7 @@ launch_uid = uuid.uuid4()
 
 if os.environ.get('TH_DEPLOY', False) == 'True':
     # from celery import Celery
-    # celery_app = Celery(__name__, broker='redis://localhost:6379/', backend='redis://localhost:6379/')
+    # celery_app = Celery(__name__, broker=os.environ['REDIS_URL'], backend=os.environ['REDIS_URL'])
     # background_callback_manager = CeleryManager(celery_app, cache_by=[lambda: launch_uid], expire=1800)
     # celery_app.conf.broker_connection_retry_on_startup = True
 
@@ -54,6 +54,27 @@ app = dash.Dash(
     background_callback_manager=background_callback_manager
 )
 cache.cache.init_app(app.server)
+
+app.index_string = '''
+<!DOCTYPE html>
+<html>
+    <head>
+        {%metas%}
+        <title>{%title%}</title>
+        <link rel="manifest" href="./assets/manifest.json" />
+        {%favicon%}
+        {%css%}
+    </head>
+    <body>
+        {%app_entry%}
+        <footer>
+            {%config%}
+            {%scripts%}
+            {%renderer%}
+        </footer>
+    </body>
+</html>
+'''
 
 
 def serve_layout():
