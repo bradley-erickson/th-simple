@@ -326,7 +326,8 @@ def update_card_matchups(tf, options):
     params = tf.copy()
     params['against_archetypes'] = [o['id'] for o in options[:15]]
     if 'other' in params['against_archetypes']: params['against_archetypes'].remove('other')
-    params['against_archetypes'].remove(tf['deck'])
+    if tf['deck'] in params['against_archetypes']:
+        params['against_archetypes'].remove(tf['deck'])
     r = data.session.post(url, params=params)
     matchups = []
     if r.status_code == 200:
