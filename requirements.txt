@@ -1,7 +1,9 @@
 aiohttp==3.9.1
+aiorwlock==1.4.0
 aiosignal==1.3.1
 amqp==5.2.0
 ansi2html==1.8.0
+anyio==3.7.1
 async-timeout==4.0.3
 attrs==23.1.0
 billiard==4.2.0
@@ -16,7 +18,7 @@ click-didyoumean==0.3.0
 click-plugins==1.1.1
 click-repl==0.3.0
 dacite==1.8.1
-dash==2.15.0
+dash==2.16.1
 dash-bootstrap-components==1.4.2
 dash-bootstrap-templates==1.0.8
 dash-core-components==2.0.0
@@ -29,10 +31,17 @@ discord.py==2.3.2
 diskcache==5.6.3
 EditorConfig==0.12.4
 exceptiongroup==1.2.0
+fasteners==0.17.3
 Flask==2.2.5
 Flask-Caching==2.1.0
 frozenlist==1.4.1
+gevent==24.2.1
+greenlet==3.0.3
 gunicorn==21.2.0
+h11==0.14.0
+httpcore==1.0.5
+httpx==0.27.0
+httpx-cache==0.13.0
 idna==3.4
 importlib-metadata==7.0.1
 itsdangerous==2.1.2
@@ -41,6 +50,7 @@ jsbeautifier==1.15.1
 kombu==5.3.4
 MarkupSafe==2.1.3
 more-itertools==9.1.0
+msgpack==1.0.8
 multidict==6.0.4
 multiprocess==0.70.15
 nest-asyncio==1.5.7
@@ -61,6 +71,7 @@ requests==2.31.0
 requests-cache==1.1.1
 retrying==1.3.4
 six==1.16.0
+sniffio==1.3.1
 tenacity==8.2.3
 typing_extensions==4.7.1
 tzdata==2023.3
@@ -71,3 +82,5 @@ wcwidth==0.2.12
 Werkzeug==2.2.3
 yarl==1.9.4
 zipp==3.17.0
+zope.event==5.0
+zope.interface==6.2
