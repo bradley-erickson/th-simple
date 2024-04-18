@@ -47,13 +47,24 @@ def fetch_breakdown_data(tour_data, placing=None):
         overall = r.json()['overall'][0:15]
     return overall
 
+
+def create_deck_delta(d):
+    if d > 0:
+        return html.I(className='fas fa-arrow-trend-up text-success', title='Trending upward')
+    elif d < 0:
+        return html.I(className='fas fa-arrow-trend-down text-danger', title='Trending downward')
+    return None
+
+
 def create_list_label(d, max_num, i, placing):
     href = d['href']
     if placing is not None and placing != 10_000:
         href += f'&placement={placing}'
+
     return html.Tr([
-            html.Td(f'{i+1}.'),
-            html.Td(html.A(d['label'], href=href), className='text-nowrap'),
+            html.Td(f'{i+1}.', className='text-center'),
+            html.Td(create_deck_delta(d['delta'])),
+            html.Td(html.A(d['label'], href=href), className='breakdown-deck-label'),
             html.Td(f'{d["percent"]:.1%}', className='text-end'),
             html.Td(dbc.Progress(value=d['percent'], max=max_num, class_name='bg-transparent'), className='w-100 d-none d-lg-table-cell')
         ], className=f'deck-row {"" if i < 8 else "d-none d-md-table-row"}')
@@ -87,7 +98,11 @@ def layout(players=None, start_date=None, end_date=None, platform=None):
         dcc.Store(id=tour_store, data=tour_filters),
         dcc.Store(id=archetype_store, data=[]),
         tours,
-        html.H3('Breakdown', id='breakdown'),
+        html.Div([
+            html.H3('Breakdown', id='breakdown', className='d-inline-block mb-0'),
+            html.I(className='ms-1 fas fa-circle-info', id='breakdown-info')
+        ], className='d-flex align-items-center'),
+        dbc.Tooltip('The trends are based on usage during the last third of the selected time period.', target='breakdown-info'),
         dbc.Row([
             dbc.Col([
                 html.H4('Overall', className='text-center'),
@@ -145,7 +160,7 @@ def update_options(tour_filters):
     Input(tour_store, 'data'),
     Input(archetype_select, 'options'),
 )
-@cache.cache.memoize()
+@cache.cache.memoize(21600)
 def update_breakdown_overall(tour_filters, archetypes):
     decks = {d['value']: d['label'] for d in archetypes}
 
@@ -161,7 +176,7 @@ def update_breakdown_overall(tour_filters, archetypes):
     Input(tour_store, 'data'),
     Input(archetype_select, 'options'),
     Input(breakdown_place, 'value'),
-    # background=True,
+    background=True,
     running=[
         (Output(breakdown_place, 'disabled'), True, False)
     ]
@@ -181,7 +196,7 @@ def update_breakdown(tour_filters, archetypes, place):
     Input(tour_store, 'data'),
     Input(archetype_select, 'value'),
     Input(placing_id, 'value'),
-    # background=True,
+    background=True,
     running=[
         (Output(placing_id, 'disabled'), True, False),
         (Output(archetype_select, 'disabled'), True, False)

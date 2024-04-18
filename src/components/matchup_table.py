@@ -40,13 +40,13 @@ def create_matchup_tile(match, decks, player, against):
                 vs_item,
                 html.Div(f'{wr}%'),
                 html.Div(record)
-            ], class_name='text-dark text-center'),
+            ], class_name='text-black text-center'),
             style={'backgroundColor': color},
             target=id,
             trigger='hover',
             placement='bottom'
         ),
-    ], style={'backgroundColor': color, 'width': '112px'}, className='text-center text-dark align-middle')
+    ], style={'backgroundColor': color, 'width': '112px'}, className='text-center text-black align-middle')
 
 def create_matchup_table_row(deck, data, decks, player, against):
     matches = [create_matchup_tile(match, decks, player, against) for match in data]
@@ -71,7 +71,7 @@ def create_matchup_tile_full(match, decks, player, against):
             vs_item,
             html.Div(f'{match["win_rate"]}%'),
             html.Div(record)
-        ], class_name='text-dark text-center p-1'),
+        ], class_name='text-black text-center p-1'),
         style={'backgroundColor': color},
         className='w-auto',
         id=id
@@ -129,9 +129,9 @@ def create_matchup_spread(data, decks, player='deck1', against='deck2'):
     table = dbc.Table([
         headers,
         html.Tbody(rows)
-    ], className='d-none d-lg-block')
+    ], className='d-none d-xl-block')
 
     small_view = html.Div([
         html.Div(small_rows)
-    ], className='d-lg-none')
+    ], className='d-xl-none')
     return html.Div([table, small_view])

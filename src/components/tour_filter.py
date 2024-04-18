@@ -9,6 +9,9 @@ def default_players(p):
 def default_start_date(s):
     return s if s else (date.today() - timedelta(21)).isoformat()
 
+def default_end_date(s):
+    return s if s else date.today().isoformat()
+
 def default_platform(p):
     return p if p else 'all'
 
@@ -176,7 +179,7 @@ def create_tour_filter(players=None, start_date=None, end_date=None, platform=No
     params = {}
     params['players'] = default_players(players)
     params['start_date'] = default_start_date(start_date)
-    params['end_date'] = end_date
+    params['end_date'] = default_end_date(end_date)
     params['platform'] = default_platform(platform)
     return params
 
