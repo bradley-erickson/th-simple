@@ -41,16 +41,6 @@ footer = dbc.Navbar(
             'Feedback',
             href='/feedback'
         ),
-        dbc.NavLink(
-            'Limitless',
-            href='https://play.limitlesstcg.com/',
-            target='_blank'
-        ),
-        dbc.NavLink(
-            'TCGplayer Affiliate',
-            href=tcg_player_link,
-            target='_blank'
-        ),
     ], class_name='justify-content-start', fluid=True),
     class_name='footer',
     id=prefix

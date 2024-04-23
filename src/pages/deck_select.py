@@ -41,7 +41,7 @@ def update_table(tf):
         html.Tr([
             html.Td(f'{i+1}.'),
             html.Td(
-                html.A(
+                dcc.Link(
                     deck_label.format_label(deck),
                     href=f'/decklist/{deck["id"]}{params}'
                 )

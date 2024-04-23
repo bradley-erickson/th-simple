@@ -5,6 +5,7 @@ import datetime
 import requests
 import xml.etree.ElementTree as ET
 
+from components import feedback_link
 from utils import cache
 
 description = 'Stay tuned with our Pokémon TCG Podcast Hub: Latest episodes from top shows. Dive into insightful discussions for TCG enthusiasts.'
@@ -155,7 +156,7 @@ def layout():
             'If we are ',
             html.Strong('missing'),
             ' a podcast, please submit a ',
-            html.A('Feedback Form', href='/feedback'),
+            feedback_link.link_item,
             " with the podcast's name and we'll get it added!"
         ]))
     ])

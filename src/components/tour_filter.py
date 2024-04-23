@@ -135,7 +135,6 @@ class TourFiltersAIO(html.Div):
                         'Apply',
                         id=self.ids.apply(aio_id),
                         class_name='float-end',
-                        external_link=True
                     ),
                     dcc.Store(
                         id=self.ids.initial(aio_id),

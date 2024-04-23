@@ -4,6 +4,7 @@ import dash_bootstrap_components as dbc
 from dash_extensions import EventListener
 import random
 
+from components import feedback_link
 import utils.cards
 import utils.decklists
 import utils.images
@@ -163,10 +164,7 @@ layout = html.Div([
     dbc.Alert(html.Ul([
         html.Li([html.Strong('Set Card Priorities:'), ' Input your decklists and set card priorities.']),
         html.Li([html.Strong('Determine Prize Cards:'), ' Scroll through your deck to figure out which cards are prized.']),
-        html.Li([
-            html.Strong('Need Assistance:'), ' Some imports may not be supported. If you encounter an issue, please submit a ',
-            html.A('Feedback Form', href='/feedback', className='alert-link'), '.'
-        ])
+        feedback_link.list_item
     ], className='mb-0'), id='prizechecker-info-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
     dbc.Alert(is_open=False, color='warning', id=parse_alert),
     dbc.Tabs([

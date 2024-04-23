@@ -9,7 +9,9 @@ import json
 import numpy as np
 import pandas as pd
 
-from components import deck_label, matchup_table, ternary_switch, archetype_builder, tags as tag_settings, download_button as _download
+from components import (deck_label, matchup_table, ternary_switch,
+                        archetype_builder, tags as tag_settings,
+                        download_button as _download, feedback_link)
 import utils.data
 
 dash.register_page(
@@ -174,10 +176,7 @@ def layout():
             html.Li([html.Strong('Track Your Games:'), ' Log your games, view your history, and dive into detailed analysis.']),
             html.Li([html.Strong('Filter & Analyze:'), ' Easily filter your game history for better insights.']),
             html.Li([html.Strong('Data Privacy:'), " Your game data is stored locally in your browser. It's never collected. If you clear cookies or click the clear button, your data will be deleted forever."]),
-            html.Li([
-                html.Strong('Need Assistance:'), ' If you encounter an issue or have suggestions, please submit a ',
-                html.A('Feedback Form', href='/feedback', className='alert-link'), '.'
-            ]),
+            feedback_link.list_item,
         ], className='mb-0'), id='battlelog-info-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
         dbc.Alert(dismissable=True, id=upload_alert, is_open=False),
         html.Div([

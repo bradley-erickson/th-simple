@@ -1,5 +1,5 @@
 import dash
-from dash import html
+from dash import html, dcc
 import dash_bootstrap_components as dbc
 
 description = 'Discover Trainer Hill: The ultimate Pokémon '\
@@ -18,7 +18,7 @@ dash.register_page(
 def create_card(c):
     card = dbc.Card([
         dbc.CardImg(src=f'/assets/{c["image"]}'),
-        dbc.CardImgOverlay(html.A(dbc.CardBody([
+        dbc.CardImgOverlay(dcc.Link(dbc.CardBody([
             html.H3(c['title']),
             c['children'],
         ]), href=c['link']))
@@ -34,7 +34,7 @@ cards = [
 ]
 
 def create_tool(title, t):
-    tool = html.A(dbc.Card([
+    tool = dcc.Link(dbc.Card([
         html.H3(className=f'fas {t["icon"]}'),
         html.Div(title, className='text-')
     ], body=True, class_name='home-card text-center'), href=t['href'], className='text-decoration-none')

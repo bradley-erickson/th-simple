@@ -4,7 +4,7 @@ import dash_bootstrap_components as dbc
 from datetime import date
 import platform
 
-from components import tour_filter, page_too_small, deck_label, download_button, archetype_builder
+from components import tour_filter, page_too_small, deck_label, download_button, archetype_builder, feedback_link
 import utils.data
 
 dash.register_page(
@@ -119,10 +119,7 @@ def layout(players=None, start_date=None, end_date=None, platform=None):
         ]),
         dbc.Alert(html.Ul([
             html.Li([html.Strong('Drag n Drop:'), ' Easily create your tier list by dragging and dropping decks into tiers.']),
-            html.Li([
-                html.Strong('Need Assistance:'), ' If you encounter an issue or have suggestions, please submit a ',
-                html.A('Feedback Form', href='/feedback', className='alert-link'), '.'
-            ])
+            feedback_link.list_item
         ], className='mb-0'), id='tierlist-info-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
         tours,
         additional_decks,

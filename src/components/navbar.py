@@ -1,5 +1,5 @@
 import dash
-from dash import html, Output, Input, State, callback, clientside_callback, ClientsideFunction
+from dash import html, dcc, Output, Input, State, callback, clientside_callback, ClientsideFunction
 import dash_bootstrap_components as dbc
 import dash_bootstrap_templates as dbt
 
@@ -43,7 +43,7 @@ def create_navbar():
                                 dbc.NavItem(dbc.NavLink('Decklist', href='/decklist')),
                                 dbc.NavItem(dbc.NavLink('Tools', href='/tools'), id=popover),
                                 dbc.Popover(dbc.Nav([
-                                    html.A(k, href=tool_pages[k], className='m-1 d-block') for k in sorted_tools
+                                    dcc.Link(k, href=tool_pages[k], className='m-1 d-block') for k in sorted_tools
                                 ], navbar=True), target=popover, trigger='hover', body=True, placement='bottom-start')
                             ],
                             navbar=True,

@@ -64,7 +64,7 @@ def create_list_label(d, max_num, i, placing):
     return html.Tr([
             html.Td(f'{i+1}.', className='text-center'),
             html.Td(create_deck_delta(d['delta'])),
-            html.Td(html.A(d['label'], href=href), className='breakdown-deck-label'),
+            html.Td(dcc.Link(d['label'], href=href), className='breakdown-deck-label'),
             html.Td(f'{d["percent"]:.1%}', className='text-end'),
             html.Td(dbc.Progress(value=d['percent'], max=max_num, class_name='bg-transparent'), className='w-100 d-none d-lg-table-cell')
         ], className=f'deck-row {"" if i < 8 else "d-none d-md-table-row"}')
@@ -92,7 +92,7 @@ def layout(players=None, start_date=None, end_date=None, platform=None):
         html.H2('Meta Analysis'),
         dbc.Alert([
             'The Tier List Creator has moved to its own ',
-            html.A('Tool', href='/tools/tier-list', className='alert-link')
+            dcc.Link('Tool', href='/tools/tier-list', className='alert-link')
         ], id='tierlist-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
         dbc.Alert(['Loading data from server, this may take a moment...'], id=loading, is_open=False, color='warning'),
         dcc.Store(id=tour_store, data=tour_filters),

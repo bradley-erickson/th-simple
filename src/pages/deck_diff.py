@@ -2,7 +2,7 @@ import dash
 from dash import html, callback, clientside_callback, ClientsideFunction, Output, Input
 import dash_bootstrap_components as dbc
 
-from components import download_button
+from components import download_button, feedback_link
 from utils import images, cards as _cards
 import utils.decklists
 
@@ -40,10 +40,7 @@ layout = html.Div([
     ]),
     dbc.Alert(html.Ul([
         html.Li([html.Strong('Simple to Use:'), ' Input your decklists and see a Venn diagram-like comparison.']),
-        html.Li([
-            html.Strong('Need Assistance:'), ' Some imports may not be supported. If you encounter an issue, please submit a ',
-            html.A('Feedback Form', href='/feedback', className='alert-link'), '.'
-        ])
+        feedback_link.list_item
     ], className='mb-0'), id='deckdiff-info-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
     dbc.Alert(is_open=False, color='warning', id=parse_alert),
     dbc.Row([
