@@ -43,8 +43,7 @@ def create_tool(title, t):
 def layout():
     main_pages = dbc.Row([
         create_card(c) for c in cards
-    ], justify='around')
-
+    ], justify='around', class_name='g-1')
     tool_pages = {page['title']: {'href': page['path'], 'icon': page['icon']} for page in dash.page_registry.values() if page['path'].startswith('/tools/')}
     sorted_tools = sorted(tool_pages.keys())
     tools = dbc.Row([

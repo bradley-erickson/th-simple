@@ -58,11 +58,14 @@ window.dash_clientside.clientside = {
         return '';
     },
 
-    update_feedback_submit_disabled: function (arg) {
-        if (arg.length > 10) {
-            return [false, 'd-none'];
-        }
-        return [true, ''];
+    update_feedback_submit_disabled: function (arg, contactType, contactUser) {
+        const messageCheck = arg.length > 10
+        const contactCheck = contactType === 'None' | contactUser.length > 0
+        return [
+            !messageCheck | !contactCheck,
+            messageCheck ? 'd-none' : '',
+            contactCheck ? 'd-none' : ''
+        ];
     },
 
     download_dom_as_image: async function (clicks, id, theme) {
@@ -108,4 +111,8 @@ window.dash_clientside.clientside = {
         return exists;
     },
 
+    clear_tour_report_data: function(clicks) {
+        if (typeof clicks === 'undefined') { return window.dash_clientside.no_update; }
+        return [{}, {}, 'tour-meta-report-upload-tab'];
+    }
 }

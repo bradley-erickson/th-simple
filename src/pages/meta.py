@@ -4,7 +4,10 @@ import dash_bootstrap_components as dbc
 import datetime
 import pandas as pd
 
-from components import tour_filter, deck_label, matchup_table, placement, download_button
+from components import (
+    tour_filter, deck_label, matchup_table, placement,
+    download_button, breakdown as _breakdown
+)
 from utils import data, cache
 
 dash.register_page(
@@ -48,31 +51,6 @@ def fetch_breakdown_data(tour_data, placing=None):
     return overall
 
 
-def create_deck_delta(d):
-    if d > 0:
-        return html.I(className='fas fa-arrow-trend-up text-success', title='Trending upward')
-    elif d < 0:
-        return html.I(className='fas fa-arrow-trend-down text-danger', title='Trending downward')
-    return None
-
-
-def create_list_label(d, max_num, i, placing):
-    href = d['href']
-    if placing is not None and placing != 10_000:
-        href += f'&placement={placing}'
-
-    return html.Tr([
-            html.Td(f'{i+1}.', className='text-center'),
-            html.Td(create_deck_delta(d['delta'])),
-            html.Td(dcc.Link(d['label'], href=href), className='breakdown-deck-label'),
-            html.Td(f'{d["percent"]:.1%}', className='text-end'),
-            html.Td(dbc.Progress(value=d['percent'], max=max_num, class_name='bg-transparent'), className='w-100 d-none d-lg-table-cell')
-        ], className=f'deck-row {"" if i < 8 else "d-none d-md-table-row"}')
-
-def create_ordered_list(l, placing=None):
-    max_num = max((d['percent'] for d in l), default=0)
-    return [create_list_label(d, max_num, i, placing) for i, d in enumerate(l)]
-
 def fetch_matchup_data(tour_data, decks):
     params = tour_data.copy()
     params['games_played'] = 5
@@ -83,6 +61,7 @@ def fetch_matchup_data(tour_data, decks):
     if r.status_code == 200:
         return r.json()['data']
     return []
+
 
 def layout(players=None, start_date=None, end_date=None, platform=None):
     tours = tour_filter.TourFiltersAIO(players, start_date, end_date, platform, prefix)
@@ -106,11 +85,11 @@ def layout(players=None, start_date=None, end_date=None, platform=None):
         dbc.Row([
             dbc.Col([
                 html.H4('Overall', className='text-center'),
-                dbc.Spinner(dbc.Table(html.Tbody(id=breakdown_overall)))
+                dbc.Spinner(id=breakdown_overall)
             ], lg=6),
             dbc.Col([
                 placement.create_placement_dropdown(breakdown_place, 8, 'text-center'),
-                dbc.Spinner(dbc.Table(html.Tbody(id=breakdown_specific)))
+                dbc.Spinner(id=breakdown_specific)
             ], lg=6)
         ]),
         html.Div([
@@ -169,7 +148,7 @@ def update_breakdown_overall(tour_filters, archetypes):
         d['label'] = decks[d['deck']]
         d['href'] = f'/decklist/{d["deck"]}{tour_filter.create_param_string(tour_filters)}'
 
-    return create_ordered_list(overall)
+    return _breakdown.create_ordered_list(overall)
 
 @callback(
     Output(breakdown_specific, 'children'),
@@ -189,7 +168,7 @@ def update_breakdown(tour_filters, archetypes, place):
         d['label'] = decks[d['deck']]
         d['href'] = f'/decklist/{d["deck"]}{tour_filter.create_param_string(tour_filters)}&placement={place}'
 
-    return create_ordered_list(top_x)
+    return _breakdown.create_ordered_list(top_x)
 
 @callback(
     Output(matchup_data_store, 'data'),

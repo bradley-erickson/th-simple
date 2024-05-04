@@ -1,5 +1,5 @@
 import dash
-from dash import html, callback, clientside_callback, ClientsideFunction, Output, Input, State, exceptions, no_update
+from dash import html, dcc, callback, clientside_callback, ClientsideFunction, Output, Input, State, exceptions, no_update
 import dash_bootstrap_components as dbc
 import discord
 import os
@@ -22,6 +22,7 @@ comments = f'{prefix}-comments'
 comments_message = f'{prefix}-comments-message'
 contact_method = f'{prefix}-contact-method'
 contact_user = f'{prefix}-contact-user'
+contact_message = f'{prefix}-contact-message'
 submit = f'{prefix}-submit'
 webhook_url = os.environ['FEEDBACK_URL']
 
@@ -56,17 +57,21 @@ layout = html.Div([
         html.Div([
             dbc.Label('Contact'),
             dbc.Row([
-                dbc.Col(dbc.Select(
-                    ['Twitter', 'Discord'],
+                dbc.Col(dcc.Dropdown(
+                    ['None', 'Twitter', 'Discord'],
                     placeholder='Preference',
+                    value='None',
                     id=contact_method,
+                    clearable=False
                 ),xs=6, sm=5, md=4, lg=3, xl=2),
                 dbc.Col(dbc.Input(
                     placeholder='Contact',
                     id=contact_user,
-                    class_name='inputgroup-input-fix'
+                    class_name='inputgroup-input-fix',
+                    value=''
                 ),xs=6, sm=7, md=8, lg=9, xl=10)
-            ])
+            ]),
+            dbc.FormText('Please provide a username to contact.', color='muted', id=contact_message)
         ]),
         dbc.Button('Submit', id=submit, type='submit', disabled=True, class_name='mt-1'),
     ])
@@ -76,7 +81,10 @@ clientside_callback(
     ClientsideFunction(namespace='clientside', function_name='update_feedback_submit_disabled'),
     Output(submit, 'disabled'),
     Output(comments_message, 'className'),
-    Input(comments, 'value')
+    Output(contact_message, 'className'),
+    Input(comments, 'value'),
+    Input(contact_method, 'value'),
+    Input(contact_user, 'value')
 )
 
 @callback(
