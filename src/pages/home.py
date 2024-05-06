@@ -2,6 +2,8 @@ import dash
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 
+import components.patreon
+
 description = 'Discover Trainer Hill: The ultimate Pokémon '\
     'TCG analytics platform. Dive into meta analysis, deck '\
     'insights, and unique strategy tools for players.'
@@ -48,8 +50,9 @@ def layout():
     sorted_tools = sorted(tool_pages.keys())
     tools = dbc.Row([
         create_tool(k, tool_pages[k]) for k in sorted_tools
-    ], justify='around', class_name='gy-2 mt-1')
+    ], justify='around', class_name='gy-2 mt-1 mb-2')
     return dbc.Container([
         main_pages,
-        tools
+        tools,
+        components.patreon.patreon_banner
     ])

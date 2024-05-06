@@ -2,14 +2,13 @@ from dash import html, Output, Input, callback
 import dash_bootstrap_components as dbc
 import dash_bootstrap_templates as dbt
 
-from components import navbar
+from components import navbar, patreon
 
 prefix = 'footer'
 
 aff = 'TrainerHill'
 tcg_player_link = f'https://tcgplayer.com/?utm_campaign=affiliate&utm_medium={aff}&utm_source={aff}'
 bmc_link = 'https://www.buymeacoffee.com/trainerhill'
-patreon_link = 'https://www.patreon.com/trainerhill'
 
 footer = dbc.Navbar(
     dbc.Container([
@@ -25,7 +24,7 @@ footer = dbc.Navbar(
         ),
         dbc.NavLink(
             html.I(className='fab fa-patreon fs-5', title='Become a Patreon member'),
-            href=patreon_link,
+            href=patreon.patreon_link,
             target='_blank'
         ),
         dbc.NavLink(

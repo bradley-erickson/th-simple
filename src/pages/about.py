@@ -2,7 +2,7 @@ import dash
 from dash import html
 import dash_bootstrap_components as dbc
 
-from components import footer
+from components import footer, patreon
 
 dash.register_page(
     __name__,
@@ -32,7 +32,7 @@ faq = [
     {'q': 'How long has this website been online?',
      'a': 'Trainer Hill first went online in December 2020.'},
     {'q': 'How can I support the site?',
-     'a': ['Become a member on ', html.A('Patreon', href=footer.patreon_link, target='_blank'), ' or ',
+     'a': ['Become a member on ', html.A('Patreon', href=patreon.patreon_link, target='_blank'), ' or ',
            html.A('buy me a coffee', href=footer.bmc_link, target='_blank'), '.']}
 ]
 
