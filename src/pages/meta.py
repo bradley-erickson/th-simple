@@ -94,14 +94,15 @@ def layout(players=None, start_date=None, end_date=None, platform=None):
         ]),
         html.Div([
             html.H3('Matchups', id='matchups', className='d-inline-block'),
-            dbc.Button(
-                html.I(className='fas fa-file-export'),
-                id=download_matchups_btn,
-                className='float-end ms-1',
-                title='Export matchup data (csv)'),
-            download_button.DownloadImageAIO(dom_id=matchups, className='float-end'),
-            dcc.Download(id=download_matchups)
-        ]),
+            html.Span([
+                download_button.DownloadImageAIO(dom_id=matchups, className='me-1 d-inline-block'),
+                dbc.Button(
+                    html.I(className='fas fa-file-export'),
+                    id=download_matchups_btn,
+                    title='Export matchup data (csv)'),
+                dcc.Download(id=download_matchups)
+            ], className='')
+        ], className='d-flex justify-content-between'),
         dbc.Row([
             dbc.Col([
                 dbc.Label('Placement'),

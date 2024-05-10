@@ -315,7 +315,6 @@ def update_card_table(view, data):
     ],
     background=True
 )
-@cache.cache.memoize()
 def update_card_matchups(tf, options):
     if tf['include'] is None:
         return html.Div()

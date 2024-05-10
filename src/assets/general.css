@@ -82,6 +82,10 @@
   }
 }
 
+.win-rate-calc > span > mjx-container {
+  margin: 0.25em 0 !important;
+}
+
 /* DECK DIFF */
 .deck-diff-input {
   height: 250px;
@@ -124,4 +128,9 @@
 
 .card-in-stack.target {
   transform: scale(1);
+}
+
+/* Tournament Meta Report */
+.tour-meta-report-row td {
+  vertical-align: middle;
 }

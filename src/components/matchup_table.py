@@ -1,9 +1,20 @@
-from dash import html
+from dash import html, dcc
 import dash_bootstrap_components as dbc
 import math
 
 from components import deck_label
 from utils import colors
+
+
+win_rate_calc_comp = dcc.Markdown(
+    '''
+    $$
+    \% = \\frac{wins + \\frac{ties}{3}}{total}
+    $$
+    ''',
+    mathjax=True, className='win-rate-calc'
+)
+
 
 def create_record_string(match):
     if 'Win' in match and 'Loss' in match:
@@ -124,7 +135,7 @@ def create_matchup_spread(data, decks, player='deck1', against='deck2'):
         for deck in against_unique_decks
     ]
     headers = html.Thead(html.Tr([
-        html.Th(deck) for deck in [''] + header_labels
+        html.Th(deck) for deck in [win_rate_calc_comp] + header_labels
     ]))
     table = dbc.Table([
         headers,
@@ -132,6 +143,7 @@ def create_matchup_spread(data, decks, player='deck1', against='deck2'):
     ], className='d-none d-xl-block')
 
     small_view = html.Div([
+        win_rate_calc_comp,
         html.Div(small_rows)
     ], className='d-xl-none')
     return html.Div([table, small_view])

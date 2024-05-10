@@ -518,7 +518,7 @@ def prep_matchup_spread(data):
             matchup['playing'] = m
             matchup['against'] = a
             matchup['total'] = total
-            matchup['win_rate'] = round(matchup_dict[m][a]['Win'] / total * 100, 1)
+            matchup['win_rate'] = round((matchup_dict[m][a]['Win'] + matchup_dict[m][a]['Tie']/3) / total * 100, 1)
             matchup_list.append(matchup)
     return matchup_list
 
