@@ -68,3 +68,20 @@ inclusion_bar = transparent_gradient(primary, 101)
 green_gradient = transparent_gradient(green, 101)
 red_gradient = transparent_gradient(red, 101)
 blue_gradient = transparent_gradient(blue, 101)
+
+
+def text_color_for_background(rgb):
+    r, g, b = rgb
+
+    def convert(color):
+        color /= 255.0
+        if color <= 0.03928:
+            return color / 12.92
+        return ((color + 0.055) / 1.055) ** 2.4
+
+    R = convert(r)
+    G = convert(g)
+    B = convert(b)
+
+    Y = 0.2126 * R + 0.7152 * G + 0.0722 * B
+    return 'black' if Y > 0.5 else 'white'

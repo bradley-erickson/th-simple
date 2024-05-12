@@ -2,9 +2,12 @@ import dash
 from dash import html, dcc, callback, clientside_callback, ClientsideFunction, Output, Input, State
 import dash_bootstrap_components as dbc
 import datetime
+import Pylette
 
 from components import download_button, deck_label, feedback_link
+import utils.colors
 import utils.data
+import utils.images
 
 dash.register_page(
     __name__,
@@ -56,7 +59,7 @@ def layout():
         dbc.Row([
             dbc.Col(
                 dbc.Form(options),
-                md=5, lg=6, xl=4
+                md=5, lg=6, xl=5, xxl=4
             ),
             dbc.Col(
                 dbc.Card([
@@ -65,7 +68,7 @@ def layout():
                     html.H4(id=output_deck, className='d-flex justify-content-around'),
                     html.Div(['badge at ', html.Strong(id=output_store), ' on ', datetime.datetime.now().strftime("%B %d, %Y")]),
                 ],id=output, class_name='text-center', body=True),
-                md=7, lg=6, xl=4
+                md=7, lg=6, xl=5, xxl=4
             )
         ], justify='around')
     ])
@@ -94,6 +97,7 @@ def update_deck_options(decks):
 
 @callback(
     Output(output_deck, 'children'),
+    Output(output, 'style'),
     Input(deck_select, 'value'),
     State(deck_store, 'data')
 )
@@ -101,4 +105,14 @@ def update_deck_options(deck, decks):
     if deck is None:
         raise dash.exceptions.PreventUpdate
     deck_options = deck_label.format_label(decks[deck])
-    return deck_options
+    palette = []
+    for icon in decks[deck]['icons']:
+        url = utils.images.get_pokemon_icon(icon) if icon != 'substitute' else 'https://www.trainerhill.com/assets/substitute.png'
+        local_palette = Pylette.extract_colors(image_url=url, sort_mode='frequency')
+        local_palette = [l.rgb for l in local_palette]
+        palette.append(local_palette)
+    style = {
+        'backgroundColor': f'rgb{palette[0][1]}',
+        'color': utils.colors.text_color_for_background(palette[0][1])
+    }
+    return deck_options, style
