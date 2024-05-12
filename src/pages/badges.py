@@ -2,7 +2,7 @@ import dash
 from dash import html, dcc, callback, clientside_callback, ClientsideFunction, Output, Input, State
 import dash_bootstrap_components as dbc
 import datetime
-import Pylette
+# import Pylette
 
 from components import download_button, deck_label, feedback_link
 import utils.cache
@@ -96,17 +96,17 @@ def update_deck_options(decks):
     return deck_options
 
 
-@utils.cache.cache.memoize(timeout=0)
-def extract_color(icon):
-    url = utils.images.get_pokemon_icon(icon) if icon != 'substitute' else 'https://www.trainerhill.com/assets/substitute.png'
-    local_palette = Pylette.extract_colors(image_url=url, sort_mode='frequency', mode='MC')
-    local_palette = [l.rgb for l in local_palette]
-    return local_palette
+# @utils.cache.cache.memoize(timeout=0)
+# def extract_color(icon):
+#     url = utils.images.get_pokemon_icon(icon) if icon != 'substitute' else 'https://www.trainerhill.com/assets/substitute.png'
+#     local_palette = Pylette.extract_colors(image_url=url, sort_mode='frequency', mode='MC')
+#     local_palette = [l.rgb for l in local_palette]
+#     return local_palette
 
 
 @callback(
     Output(output_deck, 'children'),
-    Output(output, 'style'),
+    # Output(output, 'style'),
     Input(deck_select, 'value'),
     State(deck_store, 'data')
 )
@@ -114,11 +114,11 @@ def update_deck_options(deck, decks):
     if deck is None:
         raise dash.exceptions.PreventUpdate
     deck_options = deck_label.format_label(decks[deck])
-    palette = []
-    for icon in decks[deck]['icons']:
-        palette.append(extract_color(icon))
-    style = {
-        'backgroundColor': f'rgb{palette[0][1]}',
-        'color': utils.colors.text_color_for_background(palette[0][1])
-    }
-    return deck_options, style
+    # palette = []
+    # for icon in decks[deck]['icons']:
+    #     palette.append(extract_color(icon))
+    # style = {
+    #     'backgroundColor': f'rgb{palette[0][1]}',
+    #     'color': utils.colors.text_color_for_background(palette[0][1])
+    # }
+    return deck_options

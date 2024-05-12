@@ -63,7 +63,6 @@ plotly==5.16.0
 pokemontcgsdk==3.4.0
 prompt-toolkit==3.0.43
 psutil==5.9.7
-pylette==2.0.1
 python-dateutil==2.8.2
 python-dotenv==1.0.0
 pytz==2023.3.post1
