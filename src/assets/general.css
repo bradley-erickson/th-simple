@@ -86,6 +86,35 @@
   margin: 0.25em 0 !important;
 }
 
+/* Badges */
+.gym-badge {
+  position: relative;
+  overflow: hidden;
+}
+.gym-badge::before {
+  content: "";
+  position: absolute;
+  width: 150%;
+  height: 250%;
+  left: -50%;
+  top: -20%;
+  background-repeat: space;
+  background-size: 108px 72px;
+  background-position: center;
+  transform: rotate(-30deg);
+}
+.gym-badge.grass::before {background-image: url('/assets/energy_types/grass.svg');}
+.gym-badge.fire::before {background-image: url('/assets/energy_types/fire.svg');}
+.gym-badge.water::before {background-image: url('/assets/energy_types/water.svg');}
+.gym-badge.lightning::before {background-image: url('/assets/energy_types/lightning.svg');}
+.gym-badge.psychic::before {background-image: url('/assets/energy_types/psychic.svg');}
+.gym-badge.fighting::before {background-image: url('/assets/energy_types/fighting.svg');}
+.gym-badge.dark::before {background-image: url('/assets/energy_types/dark.svg');}
+.gym-badge.metal::before {background-image: url('/assets/energy_types/metal.svg');}
+.gym-badge.dragon::before {background-image: url('/assets/energy_types/dragon.svg');}
+.gym-badge.fairy::before {background-image: url('/assets/energy_types/fairy.svg');}
+.gym-badge.colorless::before {background-image: url('/assets/energy_types/colorless.svg');}
+
 /* DECK DIFF */
 .deck-diff-input {
   height: 250px;
