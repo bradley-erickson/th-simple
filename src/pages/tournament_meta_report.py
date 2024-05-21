@@ -336,6 +336,6 @@ def update_report_matchups(roster_ts, roster, tdf_ts, tdf, decks):
             matchup['playing'] = m
             matchup['against'] = a
             matchup['total'] = total
-            matchup['win_rate'] = round(matchups[m][a]['wins'] / total * 100, 1)
+            matchup['win_rate'] = round((matchups[m][a]['wins'] + matchups[m][a]['ties']/3) / total * 100, 1)
             matchup_list.append(matchup)
     return matchup_table.create_matchup_spread(matchup_list, decks, player='playing', against='against')

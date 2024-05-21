@@ -14,6 +14,11 @@ def hex_to_rgb(hex):
 
 def rgb_to_hex(rgb):
     """ Convert a list of rgb triplets to a hex list """
+    if isinstance(rgb, str) and rgb.startswith('rgb'):
+        matches = re.findall(r'\d+', rgb)
+        if matches:
+            # Convert the extracted numbers to integers
+            rgb = tuple(map(int, matches))
     RGB = [int(x) for x in rgb]
     return '#' + ''.join(['0{0:x}'.format(v) if v < 16 else '{0:x}'.format(v) for v in RGB])
 
@@ -73,11 +78,7 @@ blue_gradient = transparent_gradient(blue, 101)
 
 
 def text_color_for_background(rgb):
-    if rgb.startswith('rgb'):
-        matches = re.findall(r'\d+', rgb)
-        if matches:
-            # Convert the extracted numbers to integers
-            rgb = tuple(map(int, matches))
+    rgb = rgb if not isinstance(rgb, str) and rgb.startswith('#') else hex_to_rgb(rgb)
     r, g, b = rgb
 
     def convert(color):

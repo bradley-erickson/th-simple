@@ -25,6 +25,7 @@ player_input = f'{prefix}-player-input'
 deck_store = f'{prefix}-deck-store'
 deck_select = f'{prefix}-deck-select'
 store_input = f'{prefix}-store-input'
+color_input = f'{prefix}-color-input'
 type_input = f'{prefix}-type-input'
 pronouns = f'{prefix}-pronouns'
 output = f'{prefix}-output'
@@ -47,6 +48,8 @@ def layout():
         dcc.Store(id=deck_store, data=decks),
         dbc.Label('Location'),
         dbc.Input(id=store_input, value='Locals', placeholder=''),
+        dbc.Label('Background Color'),
+        dbc.Input(id=color_input, value=None, type='color'),
         dbc.Label('Type'),
         dcc.Dropdown(id=type_input,
                      options=['Grass', 'Fire', 'Water', 'Lightning',
@@ -103,19 +106,29 @@ def update_deck_options(decks):
 
 
 @callback(
+    Output(color_input, 'value'),
+    Input(deck_select, 'value'),
+    State(deck_store, 'data'),
+)
+def update_color_on_new_deck(deck, decks):
+    icon = decks[deck]['icons'][0]
+    color = ICON_COLOR_MAPPING[icon]
+    return utils.colors.rgb_to_hex(color)
+
+
+@callback(
     Output(output_deck, 'children'),
     Output(output, 'style'),
     Output(output, 'class_name'),
     Input(deck_select, 'value'),
     State(deck_store, 'data'),
-    Input(type_input, 'value')
+    Input(type_input, 'value'),
+    Input(color_input, 'value')
 )
-def update_deck_options(deck, decks, t):
+def update_deck_options(deck, decks, t, color):
     if deck is None:
         raise dash.exceptions.PreventUpdate
     deck_options = deck_label.format_label(decks[deck])
-    icon = decks[deck]['icons'][0]
-    color = ICON_COLOR_MAPPING[icon]
     style = {
         'backgroundColor': color,
         'color': utils.colors.text_color_for_background(color)
