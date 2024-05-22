@@ -87,6 +87,14 @@
 }
 
 /* Badges */
+.dcc-dropdown-inputgroup {
+  display: flex;
+  flex-grow: 1;
+}
+.dcc-dropdown-inputgroup .dash-dropdown {
+  flex-grow: 1;
+}
+
 .gym-badge {
   position: relative;
   overflow: hidden;

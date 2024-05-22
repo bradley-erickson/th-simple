@@ -3,7 +3,7 @@ from dash import html, dcc, callback, clientside_callback, ClientsideFunction, O
 import dash_bootstrap_components as dbc
 import datetime
 
-from components import download_button, deck_label, feedback_link
+from components import download_button, deck_label, feedback_link, archetype_builder
 import utils.cache
 import utils.colors
 import utils.data
@@ -24,9 +24,12 @@ prefix = 'badge-maker'
 player_input = f'{prefix}-player-input'
 deck_store = f'{prefix}-deck-store'
 deck_select = f'{prefix}-deck-select'
+additional_archetypes = f'{prefix}-additional-archetypes'
+custom_archetypes = f'{prefix}-custom-archetypes'
+custom_arch_collapse = f'{prefix}-custom-archetypes-collapse'
 store_input = f'{prefix}-store-input'
 color_input = f'{prefix}-color-input'
-type_input = f'{prefix}-type-input'
+background_input = f'{prefix}-background-input'
 pronouns = f'{prefix}-pronouns'
 output = f'{prefix}-output'
 output_trainer = f'{output}-trainer'
@@ -44,14 +47,23 @@ def layout():
         dbc.Label('Pronouns'),
         dcc.Dropdown(options=['their', 'her', 'his'], value='their', id=pronouns, clearable=False),
         dbc.Label('Deck Select'),
-        dcc.Dropdown(id=deck_select, placeholder='Deck played...', value='other'),
+        dbc.InputGroup([
+            html.Div(dcc.Dropdown(id=deck_select, placeholder='Deck played...', value='other'), className='dcc-dropdown-inputgroup'),
+            dbc.Button(html.I(className='fas fa-cog'), id=additional_archetypes, color='secondary'),
+        ]),
         dcc.Store(id=deck_store, data=decks),
+        dbc.Collapse(
+            dbc.CardBody([
+                archetype_builder.builder_plus_built(custom_archetypes, other=[d for d in decks.keys()], persistance='session')
+            ]),
+            id=custom_arch_collapse
+        ),
         dbc.Label('Location'),
         dbc.Input(id=store_input, value='Locals', placeholder=''),
         dbc.Label('Background Color'),
         dbc.Input(id=color_input, value=None, type='color'),
-        dbc.Label('Type'),
-        dcc.Dropdown(id=type_input,
+        dbc.Label('Background'),
+        dcc.Dropdown(id=background_input,
                      options=['Grass', 'Fire', 'Water', 'Lightning',
                               'Psychic', 'Fighting', 'Dark', 'Metal',
                               'Dragon', 'Fairy', 'Colorless'])
@@ -95,10 +107,29 @@ for input_id, output_id in zip(
         Input(input_id, 'value')
     )
 
+clientside_callback(
+    ClientsideFunction(namespace='clientside', function_name='toggle_with_button'),
+    Output(custom_arch_collapse, 'is_open'),
+    Input(additional_archetypes, 'n_clicks'),
+    State(custom_arch_collapse, 'is_open')
+)
+
+archetype_builder.register_callbacks(custom_archetypes)
+
+@callback(
+    Output(deck_store, 'data'),
+    Input(archetype_builder.ArchetypeBuilderAIO.ids.store(custom_archetypes), 'data'),
+    State(deck_store, 'data'),
+    Input(deck_store, 'className'),
+)
+def update_deck_store_with_extra(extra, current, _):
+    for e in extra:
+        current[e['id']] = e
+    return current
 
 @callback(
     Output(deck_select, 'options'),
-    Input(deck_store, 'data')
+    Input(deck_store, 'data'),
 )
 def update_deck_options(decks):
     deck_options = [{'label': deck_label.format_label(d), 'value': d['id'], 'search': d['name']} for d in decks.values()]
@@ -111,6 +142,8 @@ def update_deck_options(decks):
     State(deck_store, 'data'),
 )
 def update_color_on_new_deck(deck, decks):
+    if deck is None:
+        raise dash.exceptions.PreventUpdate
     icon = decks[deck]['icons'][0]
     color = ICON_COLOR_MAPPING[icon]
     return utils.colors.rgb_to_hex(color)
@@ -122,16 +155,17 @@ def update_color_on_new_deck(deck, decks):
     Output(output, 'class_name'),
     Input(deck_select, 'value'),
     State(deck_store, 'data'),
-    Input(type_input, 'value'),
+    Input(background_input, 'value'),
     Input(color_input, 'value')
 )
 def update_deck_options(deck, decks, t, color):
     if deck is None:
-        raise dash.exceptions.PreventUpdate
-    deck_options = deck_label.format_label(decks[deck])
+        deck_option = ''
+    else:
+        deck_option = deck_label.format_label(decks[deck])
     style = {
         'backgroundColor': color,
         'color': utils.colors.text_color_for_background(color)
     }
     classes = f'text-center gym-badge {t.lower() if t is not None else ""}'
-    return deck_options, style, classes
+    return deck_option, style, classes
