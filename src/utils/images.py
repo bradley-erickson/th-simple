@@ -10,6 +10,11 @@ logo_white_tunel = base64.b64encode(open(logo_white_path, 'rb').read())
 logo_black_path = './assets/logo_black.png'
 logo_black_tunel = base64.b64encode(open(logo_black_path, 'rb').read())
 
+pokemon_mapping = {
+    'ogerpon': 'ogerpon-teal-mask',
+    'squawkabilly': 'squawkabilly-green'
+}
+
 
 def get_pokemon_icon(pokemon):
     if not pokemon:
@@ -17,7 +22,8 @@ def get_pokemon_icon(pokemon):
     if pokemon == 'substitute':
         source = '/assets/substitute.png'
     else:
-        source = f'{pokemon_url}/{pokemon}.png'
+        mon = pokemon_mapping[pokemon] if pokemon in pokemon_mapping else pokemon
+        source = f'{pokemon_url}/{mon}.png'
     return source
 
 

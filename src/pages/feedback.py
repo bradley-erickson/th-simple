@@ -50,7 +50,8 @@ layout = html.Div([
             dbc.Textarea(
                 id=comments,
                 value='',
-                required=True
+                required=True,
+                placeholder='Provide us some details...'
             ),
             dbc.FormText('Responses must be a minimum of 10 characters.', color='muted', id=comments_message)
         ]),
