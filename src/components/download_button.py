@@ -27,7 +27,8 @@ class DownloadImageAIO(html.Div):
         self,
         dom_id=None,
         aio_id=None,
-        className=''
+        className='',
+        button_class_name=''
     ):
         if aio_id is None:
             aio_id = str(uuid.uuid4())
@@ -36,7 +37,8 @@ class DownloadImageAIO(html.Div):
             dbc.Button(
                 html.I(className='fas fa-download', title='Download image (png)'),
                 id=self.ids.button(aio_id),
-                n_clicks=0
+                n_clicks=0,
+                class_name=button_class_name
             ),
             dbc.Input(id=self.ids.dom_id(aio_id), value=dom_id, class_name='d-none'),
             html.Div(id=self.ids.dummy(aio_id))

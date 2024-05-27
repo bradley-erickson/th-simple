@@ -94,6 +94,10 @@
 .dcc-dropdown-inputgroup .dash-dropdown {
   flex-grow: 1;
 }
+.dcc-dropdown-inputgroup>div>div>.Select-control {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
 
 .gym-badge {
   position: relative;
@@ -104,8 +108,8 @@
   position: absolute;
   width: 150%;
   height: 250%;
-  left: -50%;
-  top: -20%;
+  left: -40%;
+  top: -25%;
   background-repeat: space;
   background-size: 108px 72px;
   background-position: center;

@@ -49,7 +49,7 @@ def layout():
         dbc.Label('Deck Select'),
         dbc.InputGroup([
             html.Div(dcc.Dropdown(id=deck_select, placeholder='Deck played...', value='other'), className='dcc-dropdown-inputgroup'),
-            dbc.Button(html.I(className='fas fa-cog'), id=additional_archetypes, color='secondary'),
+            dbc.Button(html.I(className='fas fa-cog'), id=additional_archetypes),
         ]),
         dcc.Store(id=deck_store, data=decks),
         dbc.Collapse(

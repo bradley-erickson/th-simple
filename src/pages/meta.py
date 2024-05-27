@@ -27,7 +27,9 @@ tour_store = f'{prefix}-tour-store'
 breakdown = f'{prefix}-breakdown'
 breakdown_place = f'{prefix}-breakdown-placement'
 breakdown_overall = f'{prefix}-breakdown-overall'
+breakdown_overall_wrap = f'{prefix}-breakdown-overall-wrap'
 breakdown_specific = f'{prefix}-breakdown-specific'
+breakdown_specific_wrap = f'{prefix}-breakdown-specific-wrap'
 archetype_select = f'{prefix}-archetype-select'
 archetype_store = f'{prefix}-archetype-store'
 download_matchups_btn = f'{prefix}-download-matchup-btn'
@@ -84,13 +86,19 @@ def layout(players=None, start_date=None, end_date=None, platform=None):
         dbc.Tooltip('The trends are based on usage during the last third of the selected time period.', target='breakdown-info'),
         dbc.Row([
             dbc.Col([
-                html.H4('Overall', className='text-center'),
+                html.Div([
+                    html.H4('Overall', className='d-flex mb-0'),
+                    download_button.DownloadImageAIO(dom_id=breakdown_overall_wrap, className='d-flex ms-1')
+                ], className='d-flex justify-content-center align-items-center'),
                 dbc.Spinner(id=breakdown_overall)
-            ], lg=6),
+            ], id=breakdown_overall_wrap, lg=6),
             dbc.Col([
-                placement.create_placement_dropdown(breakdown_place, 8, 'text-center'),
+                dbc.InputGroup([
+                    html.Div(placement.create_placement_dropdown(breakdown_place, 8, 'text-center'), className=' dcc-dropdown-inputgroup'),
+                    download_button.DownloadImageAIO(dom_id=breakdown_specific_wrap, button_class_name='rounded-0 rounded-end')
+                ]),
                 dbc.Spinner(id=breakdown_specific)
-            ], lg=6)
+            ], id=breakdown_specific_wrap, lg=6)
         ]),
         html.Div([
             html.H3('Matchups', id='matchups', className='d-inline-block'),
