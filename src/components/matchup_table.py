@@ -136,7 +136,7 @@ def create_matchup_spread(data, decks, player='deck1', against='deck2'):
     ]
     headers = html.Thead(html.Tr([
         html.Th(deck) for deck in [win_rate_calc_comp] + header_labels
-    ]))
+    ]), className='sticky-top')
     table = dbc.Table([
         headers,
         html.Tbody(rows)
