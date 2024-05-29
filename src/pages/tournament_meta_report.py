@@ -381,11 +381,9 @@ def update_report_matchups(roster_ts, roster, tdf_ts, tdf, decks):
     for pod in pods:
         rounds = pod['rounds']['round']
         for round_info in rounds:
-            print('-------', round_info, matchups)
             round_matches = round_info['matches']['match']
             round_matches = round_matches if isinstance(round_matches, list) else [round_matches]
             for match in round_matches:
-                print('--')
                 if 'player1' in match and 'player2' in match:
                     p1_deck = roster[match['player1']['@userid']]['deck']
                     p2_deck = roster[match['player2']['@userid']]['deck']
@@ -409,7 +407,6 @@ def update_report_matchups(roster_ts, roster, tdf_ts, tdf, decks):
                         matchups[p2_deck][p1_deck]['ties'] += 1
                         matchups[p1_deck][p2_deck]['ties'] += 1
                     else:
-                        print('passing', round_info)
                         pass
     matchup_list = []
     for m in matchups:
