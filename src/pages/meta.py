@@ -86,10 +86,10 @@ def layout(players=None, start_date=None, end_date=None, platform=None):
         dbc.Tooltip('The trends are based on usage during the last third of the selected time period.', target='breakdown-info'),
         dbc.Row([
             dbc.Col([
-                html.Div([
-                    html.H4('Overall', className='d-flex mb-0'),
-                    download_button.DownloadImageAIO(dom_id=breakdown_overall_wrap, className='d-flex ms-1')
-                ], className='d-flex justify-content-center align-items-center'),
+                dbc.InputGroup([
+                    dbc.Input(value='Overall', disabled=True, class_name='text-center'),
+                    download_button.DownloadImageAIO(dom_id=breakdown_overall_wrap, button_class_name='rounded-0 rounded-end')
+                ]),
                 dbc.Spinner(id=breakdown_overall)
             ], id=breakdown_overall_wrap, lg=6),
             dbc.Col([

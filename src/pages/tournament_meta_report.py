@@ -19,6 +19,9 @@ dash.register_page(
     icon='fa-chart-bar'
 )
 
+
+DIVISIONS = ['juniors', 'seniors', 'masters']
+
 prefix = 'tour-meta-report'
 store = f'{prefix}-store'
 clear_id = f'{prefix}-clear'
@@ -55,13 +58,24 @@ roster_deck_select = f'{roster_prefix}-deck-select'
 roster_player = f'{roster_prefix}-player-row'
 roster_store = f'{roster_prefix}-store'
 roster_archetype_store = f'{roster_prefix}-archetype-store'
+roster_player_sort = f'{roster_prefix}-player-sort-btn'
+roster_player_sort_icon = f'{roster_prefix}-player-sort-icon'
 roster_tab = html.Div([
     dbc.Table([
         html.Thead([html.Tr([
-            html.Th('Player'),
+            html.Th(''),
+            html.Th([
+                'Player', dbc.Button(
+                    html.I(className='fas fa-sort', id=roster_player_sort_icon),
+                    id=roster_player_sort, size='sm',
+                    class_name='bg-transparent border-0 text-body'
+                )
+            ]),
+            html.Th('Record', className='text-center'),
+            html.Th('Div', className='text-center'),
             html.Th('Deck')
         ])]),
-        html.Tbody(id=roster_table)
+        html.Tbody(id=roster_table, className='')
     ], striped=True),
     dcc.Store(id=roster_store, data={}, storage_type='local')
 ])
@@ -69,11 +83,13 @@ roster_tab = html.Div([
 # report tab
 report_prefix = f'{prefix}-report-tab'
 report_information = f'{prefix}-information'
+report_podiums = f'{report_prefix}-podiums'
 report_breakdown = f'{report_prefix}-breakdown'
 report_matchup = f'{report_prefix}-matchup'
 report_wrapper = f'{report_prefix}-wrapper'
 report_tab = html.Div([
     html.Div('No data is currently available.', id=report_information),
+    dbc.Row(id=report_podiums, justify='around', class_name='g-1'),
     html.H4('Breakdown'),
     html.Div(id=report_breakdown),
     html.H4('Matchups'),
@@ -170,21 +186,30 @@ def upload_data(contents, filename, last_mod, curr_roster):
     except Exception:
         raise dash.exceptions.PreventUpdate
     
+    # TODO iterate over matches to create record object then set record
     players_list = tdf_contents['tournament']['players']['player']
+    standings = tdf_contents['tournament']['standings']['pod']
     for p in players_list:
         p_id = p['@userid']
-        if p_id in curr_roster:
-            continue
         curr_roster[p_id] = p
         curr_roster[p_id]['deck'] = 'other'
+        curr_roster[p_id]['standing'] = next(standing['@place'] for pod in standings if pod.get('@type') == 'finished' for standing in pod.get('player', []) if standing['@id'] == p_id)
+        curr_roster[p_id]['record'] = 3
+        curr_roster[p_id]['division'] = DIVISIONS[next(int(pod['@category']) for pod in standings for standing in pod.get('player', []) if standing['@id'] == p_id)]
     return tdf_contents, curr_roster, roster_prefix
 
 
 def create_roster_row(player, decks):
     name = player['firstname'] + ' ' + player['lastname']
+    standing = player['standing']
+    division = player['division'][0].upper()
+    record = player['record']
     id = player['@userid']
     return html.Tr([
+        html.Td(standing, className='text-center'),
         html.Td(name),
+        html.Td(record, className='text-center'),
+        html.Td(division, className='text-center'),
         html.Td(dcc.Dropdown(
             id={'index': id, 'type': roster_deck_select},
             options=decks,
@@ -198,16 +223,32 @@ def create_roster_row(player, decks):
     Output(roster_table, 'children'),
     Input(roster_store, 'modified_timestamp'),
     State(roster_store, 'data'),
-    State(roster_archetype_store, 'data')
+    State(roster_archetype_store, 'data'),
+    Input(roster_player_sort, 'n_clicks'),
 )
-def update_roster_table(ts, data, decks):
+def update_roster_table(ts, data, decks, sort_dir):
     if ts is None:
         raise dash.exceptions.PreventUpdate
     deck_options = [{'label': deck_label.format_label(d), 'value': d['id'], 'search': d['name']} for d in decks.values()]
     rows = []
-    for player in data.values():
+    players = data.values()
+    players = players if sort_dir is None else sorted(players, key=lambda x: x['firstname'], reverse=sort_dir % 2 == 0)
+    for player in players:
         rows.append(create_roster_row(player, deck_options))
     return rows
+
+
+clientside_callback(
+    '''function(value) {
+        if (value > 0) {
+            return (value % 2 === 1) ? 'fas fa-sort-up' : 'fas fa-sort-down';
+        }
+        return window.dash_clientside.no_update;
+    }
+    ''',
+    Output(roster_player_sort_icon, 'className'),
+    Input(roster_player_sort, 'n_clicks')
+)
 
 
 @callback(
@@ -244,6 +285,44 @@ def update_report_information(tdf_ts, tdf):
             utils.date.convert_datestring(ti['startdate'])
         ])
     ]
+
+
+@callback(
+    Output(report_podiums, 'children'),
+    Input(roster_store, 'modified_timestamp'),
+    State(roster_store, 'data'),
+    Input(store, 'modified_timestamp'),
+    State(store, 'data'),
+    State(roster_archetype_store, 'data'),
+)
+def update_report_podiums(roster_ts, roster, tdf_ts, tdf, archetypes):
+    if roster_ts is None or tdf_ts is None:
+        raise dash.exceptions.PreventUpdate
+    output = []
+    if 'tournament' not in tdf: return output
+    standings = tdf['tournament']['standings']['pod']
+    for pod in standings:
+        if pod['@type'] != 'finished':
+            continue
+        players = pod.get('player', [])
+        if len(players) == 0:
+            continue
+        pod_output = []
+        for i, player in enumerate(players[:4]):
+            p = roster[player['@id']]
+            pod_output.append(
+                html.Tr([
+                    html.Td(f'{i+1}.'),
+                    html.Td(p['firstname'] + ' ' + p['lastname'][0] + '.'),
+                    html.Td(deck_label.format_label(archetypes[p['deck']]))
+                ], className='tour-meta-report-row')
+            )
+        card = dbc.Col(dbc.Card([
+            html.H4([html.Span(className='fas fa-crown me-1'), DIVISIONS[int(pod['@category'])].title(), ' - ', len(players)]),
+            dbc.Table(html.Tbody(pod_output))
+        ], body=True), md=6, xl=4)
+        output.append(card)
+    return output
 
 
 @callback(
@@ -298,34 +377,40 @@ def update_report_matchups(roster_ts, roster, tdf_ts, tdf, decks):
     if 'tournament' not in tdf:
         return ''
     matchups = {}
-    rounds = tdf['tournament']['pods']['pod']['rounds']['round']
-    for round_info in rounds:
-        round_matches = round_info['matches']['match']
-        for match in round_matches:
-            if 'player1' in match and 'player2' in match:
-                p1_deck = roster[match['player1']['@userid']]['deck']
-                p2_deck = roster[match['player2']['@userid']]['deck']
-                winner = match['@outcome']
-                if p1_deck not in matchups:
-                    matchups[p1_deck] = {}
-                if p2_deck not in matchups:
-                    matchups[p2_deck] = {}
+    pods = tdf['tournament']['pods']['pod']
+    for pod in pods:
+        rounds = pod['rounds']['round']
+        for round_info in rounds:
+            print('-------', round_info, matchups)
+            round_matches = round_info['matches']['match']
+            round_matches = round_matches if isinstance(round_matches, list) else [round_matches]
+            for match in round_matches:
+                print('--')
+                if 'player1' in match and 'player2' in match:
+                    p1_deck = roster[match['player1']['@userid']]['deck']
+                    p2_deck = roster[match['player2']['@userid']]['deck']
+                    winner = match['@outcome']
+                    if p1_deck not in matchups:
+                        matchups[p1_deck] = {}
+                    if p2_deck not in matchups:
+                        matchups[p2_deck] = {}
 
-                if p1_deck not in matchups[p2_deck]:
-                    matchups[p2_deck][p1_deck] = {'wins': 0, 'losses': 0, 'ties': 0}
-                if p2_deck not in matchups[p1_deck]:
-                    matchups[p1_deck][p2_deck] = {'wins': 0, 'losses': 0, 'ties': 0}
-                if winner == '1':
-                    matchups[p2_deck][p1_deck]['losses'] += 1
-                    matchups[p1_deck][p2_deck]['wins'] += 1
-                elif winner == '2':
-                    matchups[p2_deck][p1_deck]['wins'] += 1
-                    matchups[p1_deck][p2_deck]['losses'] += 1
-                elif winner == '3':
-                    matchups[p2_deck][p1_deck]['ties'] += 1
-                    matchups[p1_deck][p2_deck]['ties'] += 1
-                else:
-                    pass
+                    if p1_deck not in matchups[p2_deck]:
+                        matchups[p2_deck][p1_deck] = {'wins': 0, 'losses': 0, 'ties': 0}
+                    if p2_deck not in matchups[p1_deck]:
+                        matchups[p1_deck][p2_deck] = {'wins': 0, 'losses': 0, 'ties': 0}
+                    if winner == '1':
+                        matchups[p2_deck][p1_deck]['losses'] += 1
+                        matchups[p1_deck][p2_deck]['wins'] += 1
+                    elif winner == '2':
+                        matchups[p2_deck][p1_deck]['wins'] += 1
+                        matchups[p1_deck][p2_deck]['losses'] += 1
+                    elif winner == '3':
+                        matchups[p2_deck][p1_deck]['ties'] += 1
+                        matchups[p1_deck][p2_deck]['ties'] += 1
+                    else:
+                        print('passing', round_info)
+                        pass
     matchup_list = []
     for m in matchups:
         for a in matchups[m]:

@@ -743,6 +743,7 @@ ICON_COLOR_MAPPING = {
 	"omanyte": "rgb(235, 223, 165)",
 	"omastar": "rgb(73, 84, 82)",
 	"onix": "rgb(138, 139, 138)",
+	"ogerpon": "rgb(123, 133, 129)",
 	"oranguru": "rgb(124, 133, 129)",
 	"orbeetle-gmax": "rgb(90, 76, 81)",
 	"orbeetle": "rgb(77, 68, 77)",

@@ -12,7 +12,9 @@ logo_black_tunel = base64.b64encode(open(logo_black_path, 'rb').read())
 
 pokemon_mapping = {
     'ogerpon': 'ogerpon-teal-mask',
-    'squawkabilly': 'squawkabilly-green'
+    'squawkabilly': 'squawkabilly-green',
+    'regieleki-a': 'regieleki',
+    'ogerpon-cornerstone': 'ogerpon-cornerstone-mask',
 }
 
 
