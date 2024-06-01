@@ -147,7 +147,7 @@ def layout(players=None, start_date=None, end_date=None, platform=None):
                 id=archetype_dropdown, multi=True,
                 options=decks, value=[d['value'] for d in decks if d['value'] != 'other'][:15], maxHeight=400
             ),
-            dbc.Switch(label='Show/Hide meta share input', value=False, id=meta_percentage_toggle),
+            dbc.Switch(label='Show/Hide meta share input (beta)', value=False, id=meta_percentage_toggle),
             html.Small('* Removing selected decks already placed in a tier may cause the page to crash.')
         ], className='mb-1'),
         tier_list_tab

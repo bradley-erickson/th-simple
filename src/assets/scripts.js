@@ -77,7 +77,7 @@ window.dash_clientside.clientside = {
                 var anchorTag = document.createElement('a');
                 document.body.appendChild(anchorTag);
                 anchorTag.download = fileName;
-                anchorTag.href = canvas.toDataURL();
+                anchorTag.href = canvas.toDataURL('image/png');
                 anchorTag.target = '_blank';
                 anchorTag.click();
             })
