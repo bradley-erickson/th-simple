@@ -147,8 +147,8 @@ def layout(players=None, start_date=None, end_date=None, platform=None):
                 id=archetype_dropdown, multi=True,
                 options=decks, value=[d['value'] for d in decks if d['value'] != 'other'][:15], maxHeight=400
             ),
+            html.Small('* Removing selected decks already placed in a tier may cause the page to crash.'),
             dbc.Switch(label='Show/Hide meta share input (beta)', value=False, id=meta_percentage_toggle),
-            html.Small('* Removing selected decks already placed in a tier may cause the page to crash.')
         ], className='mb-1'),
         tier_list_tab
     ])
@@ -186,11 +186,14 @@ archetype_builder.register_callbacks(custom_archetypes)
 @callback(
     Output(archetype_dropdown, 'value'),
     Output(archetype_dropdown, 'options'),
-    Input(archetype_builder.ArchetypeBuilderAIO.ids.store(custom_archetypes), 'data'),
+    Input(archetype_builder.ArchetypeBuilderAIO.ids.store(custom_archetypes), 'modified_timestamp'),
+    State(archetype_builder.ArchetypeBuilderAIO.ids.store(custom_archetypes), 'data'),
     State(archetype_dropdown, 'value'),
     State(archetype_dropdown, 'options'),
 )
-def add_new_archetypes_to_dropdown(data, curr_val, curr_opt):
+def add_new_archetypes_to_dropdown(ts, data, curr_val, curr_opt):
+    if ts is None:
+        raise dash.exceptions.PreventUpdate
     p_val = Patch()
     p_opt = Patch()
     all_ids = [d['value'] for d in curr_opt]
@@ -209,8 +212,9 @@ def add_new_archetypes_to_dropdown(data, curr_val, curr_opt):
     } for deck in data if deck['id'] not in all_ids]
     new_values = [d['value'] for d in new_decks]
     if len(new_decks) > 0 and len(new_values) > 0:
-        p_val.prepend(new_values[0])
-        p_opt.prepend(new_decks[0])
+        for val, deck in zip(new_values, new_decks):
+            p_val.append(val)
+            p_opt.append(deck)
     return p_val, p_opt
 
 
