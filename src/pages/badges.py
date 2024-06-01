@@ -2,6 +2,7 @@ import dash
 from dash import html, dcc, callback, clientside_callback, ClientsideFunction, Output, Input, State
 import dash_bootstrap_components as dbc
 import datetime
+import random
 
 from components import download_button, deck_label, feedback_link, archetype_builder
 import utils.cache
@@ -12,7 +13,8 @@ from utils._icon_color_mapping import ICON_COLOR_MAPPING
 
 dash.register_page(
     __name__,
-    path='/prototypes/badges',
+    path='/tools/badges',
+    redirect_from=['/prototypes/badges'],
     title='Badge Maker',
     image='tools.png',
     icon='fa-id-badge',
@@ -37,18 +39,25 @@ output_pronouns = f'{output}-pronouns'
 output_deck = f'{output}-deck'
 output_store = f'{output}-store'
 
+fake_trainers = ['Ash Ketchum', 'Professor Oak', 'Iono', 'Sabrina',
+                 'Blaine', 'Champion Cynthia', 'Champion Leon',
+                 'Youngster Joey', 'Mallow', 'Wally']
+
 def layout():
     today = datetime.date.today()
     archetypes = utils.data.get_decks({'start_date': str(today - datetime.timedelta(21))})
     decks = {d['id']: d for d in archetypes}
     options = [
         dbc.Label('Trainer'),
-        dbc.Input(id=player_input, value='Ash Ketchum', placeholder='Trainer name...'),
+        dbc.Input(id=player_input, value=random.choice(fake_trainers), placeholder='Trainer name...'),
         dbc.Label('Pronouns'),
         dcc.Dropdown(options=['their', 'her', 'his'], value='their', id=pronouns, clearable=False),
         dbc.Label('Deck Select'),
         dbc.InputGroup([
-            html.Div(dcc.Dropdown(id=deck_select, placeholder='Deck played...', value='other'), className='dcc-dropdown-inputgroup'),
+            html.Div(dcc.Dropdown(
+                id=deck_select, placeholder='Deck played...',
+                value=random.choice(list(decks.keys()))
+            ), className='dcc-dropdown-inputgroup'),
             dbc.Button(html.I(className='fas fa-cog'), id=additional_archetypes),
         ]),
         dcc.Store(id=deck_store, data=decks),
@@ -58,10 +67,10 @@ def layout():
             ]),
             id=custom_arch_collapse
         ),
-        dbc.Label('Location'),
-        dbc.Input(id=store_input, value='Locals', placeholder=''),
         dbc.Label('Background Color'),
         dbc.Input(id=color_input, value=None, type='color'),
+        dbc.Label('Location'),
+        dbc.Input(id=store_input, value='Locals', placeholder=''),
         dbc.Label('Background'),
         dcc.Dropdown(id=background_input,
                      options=['Grass', 'Fire', 'Water', 'Lightning',
@@ -74,10 +83,10 @@ def layout():
             download_button.DownloadImageAIO(dom_id=output)
         ], className='d-flex justify-content-between'),
         dbc.Alert(html.Ul([
-            html.Li([html.Strong('Prototype dashboard:'), ' This dashboard is a work in progress. Some things are not yet finalized.']),
-            html.Li([html.Strong('Purpose:'), ' This dashboard allows users to create badges for winning a tournament with a specific deck.']),
-            feedback_link.list_item,
-        ], className='mb-0'), id='tour-meta-report-info-alert', color='info'),
+            html.Li([html.Strong('Create:'), ' Customize your badge']),
+            html.Li([html.Strong('Share:'), ' Download an image to share']),
+            feedback_link.list_item
+        ], className='mb-0'), id='badges-info-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
         dbc.Row([
             dbc.Col(
                 dbc.Form(options),

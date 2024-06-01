@@ -36,6 +36,7 @@ PTCGOCODES = {
     'PAR': 'sv4',
     'PAF': 'sv4pt5'
 }
+card_cache = {}
 
 @cache.cache.memoize(timeout=0)
 def _query_card(q):
@@ -62,11 +63,30 @@ def get_card(card):
         card['supertype'] = 'Energy' if basic_energy else None
         card['subtype'] = 'Basic' if basic_energy else None
         card['dex'] = None
-        return card
-    card['supertype'] = obj.supertype
-    card['subtype'] = obj.subtypes[0] if 'Pokémon Tool' not in obj.subtypes else 'Pokémon Tool'
-    card['dex'] = obj.nationalPokedexNumbers[0] if obj.nationalPokedexNumbers else None
-    return card
+    else:
+        card['supertype'] = obj.supertype
+        card['subtype'] = obj.subtypes[0] if 'Pokémon Tool' not in obj.subtypes else 'Pokémon Tool'
+        card['dex'] = obj.nationalPokedexNumbers[0] if obj.nationalPokedexNumbers else None
+
+    if card['supertype'] == 'Pokémon':
+        card_id = f"{card['name']}-{card['set']}-{card['number']}"
+        if card_id not in card_cache:
+            card['attacks'] = obj.attacks
+            # TODO check similar cards in cache
+            possible_matches = {k: v for k, v in card_cache.items() if k.startswith(card['name'])}
+            matched = False
+            for k, v in possible_matches.items():
+                if v.get('attacks', []) == card['attacks']:
+                    matched = True
+                    card_cache[card_id] = v
+                    break
+            if not matched:
+                card_cache[card_id] = card
+        return card_cache[card_id]
+    else:
+        if card['name'] not in card_cache:
+            card_cache[card['name']] = card
+        return card_cache[card['name']]
 
 
 def sort_pokemon(cards):

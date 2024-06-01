@@ -96,8 +96,7 @@ class TourFiltersAIO(html.Div):
                                 id=self.ids.players(aio_id),
                                 type='number',
                                 value=initial_data['players'],
-                                min=20,
-                                step=10,
+                                min=0
                             ),
                         ], lg=4),
                         dbc.Col([

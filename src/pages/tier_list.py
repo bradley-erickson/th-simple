@@ -4,7 +4,10 @@ import dash_bootstrap_components as dbc
 from datetime import date
 import platform
 
-from components import tour_filter, page_too_small, deck_label, download_button, archetype_builder, feedback_link
+from components import (tour_filter, page_too_small, deck_label,
+                        download_button, archetype_builder, feedback_link,
+                        breakdown
+)
 import utils.data
 
 dash.register_page(
@@ -31,13 +34,24 @@ date_created = f'{prefix}-list-date-created'
 drag_container = f'{prefix}-list-archetype-drag-container'
 drag_wrapper = f'{prefix}-list-archetype-drag-wrapper'
 
+tiers_container = f'{prefix}-tier-container'
 archetype_tray = f'{prefix}-list-archetype-tray'
+
+meta_percentage_toggle = f'{prefix}-meta-percentage-toggle'
+meta_percentage_input = f'{prefix}-meta-percentage-input'
+meta_percentage_breakdown = f'{prefix}-meta-percentage-breakdown'
 
 
 def create_deck_card(deck):
     card = dbc.Col(
-        dbc.Card(
-            deck['label'],
+        dbc.Card(html.Span([
+                deck['label'],
+                dbc.Input(
+                    type='number', style={'width': '60px', 'margin-left': '0.25rem'},
+                    size='sm', min=0,
+                    id={'type': meta_percentage_input, 'index': deck['value']}
+                )
+            ]),
             outline=True,
             color='dark',
             class_name='deck-card',
@@ -70,11 +84,10 @@ def create_tier_row(tier, color, bottom_border=False, top=False):
 def layout(players=None, start_date=None, end_date=None, platform=None):
     tours = tour_filter.TourFiltersAIO(players, start_date, end_date, platform, prefix)
     archetype_raw = utils.data.get_decks(tour_filter.create_tour_filter(players, start_date, end_date, platform))
-
     decks = [{
         'label': deck_label.format_label(deck),
         'value': deck['id'],
-        'search': deck['name']
+        'search': deck['name'],
     } for deck in archetype_raw]
 
 
@@ -95,14 +108,19 @@ def layout(players=None, start_date=None, end_date=None, platform=None):
     ])
 
     tier_list_tab = html.Div([
-        dbc.Card(html.Div([
-            create_tier_row('s', 'red', top=True),
-            create_tier_row('a', 'orange'),
-            create_tier_row('b', 'yellow'),
-            create_tier_row('c', 'teal'),
-            create_tier_row('d', 'green', bottom_border=True),
-        dbc.Row(html.Small(f'Created on {date.today().strftime(date_format)}', className='ms-1')),
-        ]), id=report_card),
+        dbc.Card([
+            dbc.Row([
+                dbc.Col([
+                    create_tier_row('s', 'red', top=True),
+                    create_tier_row('a', 'orange'),
+                    create_tier_row('b', 'yellow'),
+                    create_tier_row('c', 'teal'),
+                    create_tier_row('d', 'green', bottom_border=True),
+                ], id=tiers_container, lg=6, xl=8),
+                dbc.Col(id=meta_percentage_breakdown, lg=6, xl=4)
+            ]),
+            dbc.Row(html.Small(f'Created on {date.today().strftime(date_format)}', className='ms-1')),
+        ], id=report_card),
         dbc.Spinner(dbc.Row(
             id={
                 'index': archetype_tray,
@@ -129,6 +147,7 @@ def layout(players=None, start_date=None, end_date=None, platform=None):
                 id=archetype_dropdown, multi=True,
                 options=decks, value=[d['value'] for d in decks if d['value'] != 'other'][:15], maxHeight=400
             ),
+            dbc.Switch(label='Show/Hide meta share input', value=False, id=meta_percentage_toggle),
             html.Small('* Removing selected decks already placed in a tier may cause the page to crash.')
         ], className='mb-1'),
         tier_list_tab
@@ -147,6 +166,19 @@ clientside_callback(
     Output(archetype_collapse, 'is_open'),
     Input(additional_archetypes, 'n_clicks'),
     State(archetype_collapse, 'is_open')
+)
+
+clientside_callback(
+    ClientsideFunction(namespace='clientside', function_name='show_hide_all_items'),
+    Output({'type': meta_percentage_input, 'index': ALL}, 'class_name'),
+    Input(meta_percentage_toggle, 'value'),
+    State({'type': meta_percentage_input, 'index': ALL}, 'class_name')
+)
+clientside_callback(
+    ClientsideFunction(namespace='clientside', function_name='toggle_tier_list_meta_share'),
+    Output(tiers_container, 'class_name'),
+    Output(meta_percentage_breakdown, 'class_name'),
+    Input(meta_percentage_toggle, 'value'),
 )
 
 archetype_builder.register_callbacks(custom_archetypes)
@@ -190,3 +222,27 @@ def add_new_archetypes_to_dropdown(data, curr_val, curr_opt):
 def update_selected_decks(selected, options):
     archetype_cards = [create_deck_card(d) for d in options if d['value'] in selected]
     return archetype_cards
+
+
+@callback(
+    Output(meta_percentage_breakdown, 'children'),
+    Input({'type': meta_percentage_input, 'index': ALL}, 'value'),
+    State(archetype_dropdown, 'options'),
+    State({'type': meta_percentage_input, 'index': ALL}, 'id'),
+)
+def update_meta_breakdown(meta_shares, decks, ids):
+    data = []
+    for id, val in zip(ids, meta_shares):
+        if val is None:
+            continue
+        data.append({
+            'label': next(d['label'] for d in decks if d['value'] == id['index']),
+            'percent': val/100
+        })
+
+    data = sorted(data, key=lambda x: x['percent'], reverse=True)
+    output = [
+        html.H4('Meta % Predictions'),
+        breakdown.create_ordered_list(data)
+    ]
+    return output

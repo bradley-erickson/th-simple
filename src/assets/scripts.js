@@ -114,5 +114,19 @@ window.dash_clientside.clientside = {
     clear_tour_report_data: function(clicks) {
         if (typeof clicks === 'undefined') { return window.dash_clientside.no_update; }
         return [{}, {}, 'tour-meta-report-upload-tab'];
+    },
+
+    show_hide_all_items: function(toggle, currentItems) {
+        if (toggle) {
+            return Array(currentItems.length).fill('');
+        }
+        return Array(currentItems.length).fill('d-none');
+    },
+
+    toggle_tier_list_meta_share: function(toggle) {
+        if (toggle) {
+            return ['', ''];
+        }
+        return ['w-100', 'd-none'];
     }
 }
