@@ -74,15 +74,15 @@ window.dash_clientside.clientside = {
         fileName = `trainerhill-${id}-${dateString}.png`;
         if (clicks > 0) {
             html2canvas(document.getElementById(id), { useCORS: true, backgroundColor: null }).then(function (canvas) {
-                var newWindow = window.open('', windowFeatures='popup');
-                newWindow.document.title = 'TH - Generated Image'
-                newWindow.document.write('<img src="' + canvas.toDataURL('image/png') + '"/>');
-                // var anchorTag = document.createElement('a');
-                // document.body.appendChild(anchorTag);
-                // anchorTag.download = fileName;
-                // anchorTag.href = canvas.toDataURL('image/png');
-                // anchorTag.target = '_blank';
-                // anchorTag.click();
+                // var newWindow = window.open('', windowFeatures='popup');
+                // newWindow.document.title = 'TH - Generated Image'
+                // newWindow.document.write('<img src="' + canvas.toDataURL('image/png') + '"/>');
+                var anchorTag = document.createElement('a');
+                document.body.appendChild(anchorTag);
+                anchorTag.download = fileName;
+                anchorTag.href = canvas.toDataURL('image/png');
+                anchorTag.target = '_blank';
+                anchorTag.click();
             })
         }
     },
