@@ -47,7 +47,7 @@ def create_deck_card(deck):
         dbc.Card(html.Span([
                 deck['label'],
                 dbc.Input(
-                    type='number', style={'width': '60px', 'margin-left': '0.25rem'},
+                    type='number', style={'width': '60px', 'margin-left': '0.25rem', 'height': '100%'},
                     size='sm', min=0,
                     id={'type': meta_percentage_input, 'index': deck['value']}
                 )

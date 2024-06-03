@@ -59,5 +59,6 @@
     padding: 0.6rem;
 }
 .deck-card span {
-    display: flex
+    display: flex;
+    align-items: center;
 }
