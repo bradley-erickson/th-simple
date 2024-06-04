@@ -1,6 +1,7 @@
 import dash
 from dash import html, dcc, clientside_callback, ClientsideFunction, callback, Output, Input, State, ALL, Patch
 import dash_bootstrap_components as dbc
+import dash_extensions as de
 from datetime import date
 import platform
 
@@ -47,7 +48,7 @@ def create_deck_card(deck):
         dbc.Card(html.Span([
                 deck['label'],
                 dbc.Input(
-                    type='number', style={'width': '60px', 'margin-left': '0.25rem', 'height': '100%'},
+                    type='number', style={'width': '60px', 'marginLeft': '0.25rem', 'height': '100%'},
                     size='sm', min=0,
                     id={'type': meta_percentage_input, 'index': deck['value']}
                 )
@@ -81,6 +82,9 @@ def create_tier_row(tier, color, bottom_border=False, top=False):
     )
 
 
+drop_complete_event = {"event": "dropcomplete", "props": ["detail.id", "detail.target"]}
+
+
 def layout(players=None, start_date=None, end_date=None, platform=None):
     tours = tour_filter.TourFiltersAIO(players, start_date, end_date, platform, prefix)
     archetype_raw = utils.data.get_decks(tour_filter.create_tour_filter(players, start_date, end_date, platform))
@@ -107,7 +111,7 @@ def layout(players=None, start_date=None, end_date=None, platform=None):
         )
     ])
 
-    tier_list_tab = html.Div([
+    tier_list_tab = de.EventListener(html.Div([
         dbc.Card([
             dbc.Row([
                 dbc.Col([
@@ -128,7 +132,7 @@ def layout(players=None, start_date=None, end_date=None, platform=None):
             },
             class_name='g-1 pb-1'
         ))
-    ], id=drag_wrapper)
+    ], id=drag_wrapper), id='el', events=[drop_complete_event])
     cont = html.Div([
         page_too_small.alert,
         html.Div([
@@ -144,10 +148,10 @@ def layout(players=None, start_date=None, end_date=None, platform=None):
         html.Div([
             dbc.Label('Archetype select'),
             dcc.Dropdown(
-                id=archetype_dropdown, multi=True,
+                id=archetype_dropdown, multi=True, className='tier-list-archetype-select',
                 options=decks, value=[d['value'] for d in decks if d['value'] != 'other'][:15], maxHeight=400
             ),
-            html.Small('* Removing selected decks already placed in a tier may cause the page to crash.'),
+            html.Small('* Decks must be removed from tiers before removing as a selection.'),
             dbc.Switch(label='Show/Hide meta share input (beta)', value=False, id=meta_percentage_toggle),
         ], className='mb-1'),
         tier_list_tab
@@ -216,6 +220,19 @@ def add_new_archetypes_to_dropdown(ts, data, curr_val, curr_opt):
             p_val.append(val)
             p_opt.append(deck)
     return p_val, p_opt
+
+
+@callback(
+    Output(archetype_dropdown, 'options', allow_duplicate=True),
+    Input('el', 'n_events'),
+    State('el', 'event'),
+    State(archetype_dropdown, 'options'),
+    prevent_initial_call=True
+)
+def disable_option_in_tier(n_events, event, options):
+    option_index = next(i for i, o in enumerate(options) if o['value'] == event['detail.id'])
+    options[option_index]['disabled'] = f'"{archetype_tray}"' not in event['detail.target']
+    return options
 
 
 @callback(

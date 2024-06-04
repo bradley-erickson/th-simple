@@ -62,3 +62,7 @@
     display: flex;
     align-items: center;
 }
+
+.tier-list-archetype-select .Select-value-disabled > .Select-value-icon {
+    display: none;
+}

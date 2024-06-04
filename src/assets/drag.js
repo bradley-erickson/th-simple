@@ -12,6 +12,17 @@ window.dash_clientside.drag = {
                 els[i] = document.getElementById(JSON.stringify(args[i]));
             }
             window.drake = dragula(els);
+            window.drake.on("drop", function(_el, target, source, sibling) {
+                const dropComplete = new CustomEvent('dropcomplete', {
+                    bubbles: true,
+                    detail: {
+                      id: _el.id,
+                      target: target.id
+                    },
+                    target_id: target.id
+                  });
+                target.dispatchEvent(dropComplete)
+            })
         }, 1)
         return window.dash_clientside.no_update
     },
