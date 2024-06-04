@@ -82,11 +82,13 @@ def get_card(card):
                     break
             if not matched:
                 card_cache[card_id] = card
-        return card_cache[card_id]
     else:
         if card['name'] not in card_cache:
             card_cache[card['name']] = card
-        return card_cache[card['name']]
+        card_id = card['name']
+    return_card = card_cache[card_id].copy()
+    return_card['count'] = card.get('count', 0)
+    return return_card
 
 
 def sort_pokemon(cards):

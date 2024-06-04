@@ -78,11 +78,12 @@ window.dash_clientside.clientside = {
                 // newWindow.document.title = 'TH - Generated Image'
                 // newWindow.document.write('<img src="' + canvas.toDataURL('image/png') + '"/>');
                 var anchorTag = document.createElement('a');
-                document.body.appendChild(anchorTag);
                 anchorTag.download = fileName;
                 anchorTag.href = canvas.toDataURL('image/png');
                 anchorTag.target = '_blank';
+                document.body.appendChild(anchorTag);
                 anchorTag.click();
+                document.body.removeChild(anchorTag);
             })
         }
     },
