@@ -38,7 +38,8 @@ FEEDS = {
     'Dead Draw Gaming': 'https://feeds.buzzsprout.com/1187012.rss',
     'PCS Pokemon': 'https://anchor.fm/s/beaa6040/podcast/rss',
     'PokeBeach': 'https://feeds.buzzsprout.com/2248143.rss',
-    'SpilltheTeaCG': 'https://anchor.fm/s/f5124288/podcast/rss'
+    'SpilltheTeaCG': 'https://anchor.fm/s/f5124288/podcast/rss',
+    'Memory Capsule': 'https://anchor.fm/s/d94e8ac0/podcast/rss'
 }
 
 BACKUP = {
