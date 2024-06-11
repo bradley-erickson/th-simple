@@ -175,3 +175,12 @@
 .tour-meta-report-row td {
   vertical-align: middle;
 }
+
+/* Fixing z index and download buttons/sticky top */
+.DateRangePicker_picker {
+  z-index: 5;
+}
+
+.Select-menu-outer {
+  z-index: 1024 !important;
+}
