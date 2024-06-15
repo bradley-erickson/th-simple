@@ -190,7 +190,7 @@ def upload_data(contents, filename, last_mod, curr_roster):
     players_list = tdf_contents['tournament']['players']['player']
     standings = tdf_contents['tournament'].get('standings', {}).get('pod', [])
     for p in players_list:
-        if len(p) == 0:
+        if len(standings) == 0:
             continue
         p_id = p['@userid']
         curr_roster[p_id] = p
