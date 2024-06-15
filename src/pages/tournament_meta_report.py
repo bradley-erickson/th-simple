@@ -188,7 +188,7 @@ def upload_data(contents, filename, last_mod, curr_roster):
     
     # TODO iterate over matches to create record object then set record
     players_list = tdf_contents['tournament']['players']['player']
-    standings = tdf_contents['tournament']['standings']['pod']
+    standings = tdf_contents['tournament'].get('standings', {}).get('pod', [])
     for p in players_list:
         p_id = p['@userid']
         curr_roster[p_id] = p
@@ -300,7 +300,7 @@ def update_report_podiums(roster_ts, roster, tdf_ts, tdf, archetypes):
         raise dash.exceptions.PreventUpdate
     output = []
     if 'tournament' not in tdf: return output
-    standings = tdf['tournament']['standings']['pod']
+    standings = tdf['tournament'].get('standings', {}).get('pod', [])
     for pod in standings:
         if pod['@type'] != 'finished':
             continue
