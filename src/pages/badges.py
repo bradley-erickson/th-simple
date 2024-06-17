@@ -11,13 +11,16 @@ import utils.data
 import utils.images
 from utils._icon_color_mapping import ICON_COLOR_MAPPING
 
+page_title = 'Badge Maker'
+page_icon = 'fa-id-badge'
+
 dash.register_page(
     __name__,
     path='/tools/badges',
     redirect_from=['/prototypes/badges'],
-    title='Badge Maker',
+    title=page_title,
     image='tools.png',
-    icon='fa-id-badge',
+    icon=page_icon,
     description='Create deck badges for trainers.'
 )
 
@@ -79,7 +82,7 @@ def layout():
     ]
     cont = html.Div([
         html.Div([
-            html.H2('Badge Maker', className='d-inline-block'),
+            html.H2([html.I(className=f'fas {page_icon} me-1'), page_title], className='d-inline-block'),
             download_button.DownloadImageAIO(dom_id=output)
         ], className='d-flex justify-content-between'),
         dbc.Alert(html.Ul([

@@ -11,11 +11,14 @@ import utils.images
 
 description = 'Hone your Pokémon TCG skills with our tool. Practice figuring out your prizes to refine your gameplay strategy.'
 
+page_title = 'Prize Checker (beta)'
+page_icon = 'fa-magnifying-glass'
+
 dash.register_page(
     __name__,
     path='/tools/prize-checker',
-    title='Prize Checker (beta)',
-    icon='fa-magnifying-glass',
+    title=page_title,
+    icon=page_icon,
     image='tools.png',
     description=description
 )
@@ -160,7 +163,7 @@ settings_tab = html.Div([
 ])
 
 layout = html.Div([
-    html.H2('Prize Checking Practicer (beta)'),
+    html.H2([html.I(className=f'fas {page_icon} me-1'), page_title]),
     dbc.Alert(html.Ul([
         html.Li([html.Strong('Set Card Priorities:'), ' Input your decklists and set card priorities.']),
         html.Li([html.Strong('Determine Prize Cards:'), ' Scroll through your deck to figure out which cards are prized.']),

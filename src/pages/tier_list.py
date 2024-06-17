@@ -11,12 +11,15 @@ from components import (tour_filter, page_too_small, deck_label,
 )
 import utils.data
 
+page_title = 'Tier List Creator'
+page_icon = 'fa-ranking-star'
+
 dash.register_page(
     __name__,
     path='/tools/tier-list',
-    title='Tier List Creator',
+    title=page_title,
     image='tools.png',
-    icon='fa-ranking-star',
+    icon=page_icon,
     description='Strategically categorize Pokémon TCG deck archetypes with our Tier List tool. Easily create and customize tier lists based on tournament data and personal insights. Ideal for visualizing the competitive landscape and identifying top-performing decks.'
 )
 date_format = '%B %#d, %G' if platform.system() == 'Windows' else '%B %-d, %G'
@@ -136,7 +139,7 @@ def layout(players=None, start_date=None, end_date=None, platform=None):
     cont = html.Div([
         page_too_small.alert,
         html.Div([
-            html.H2('Tier List Creator', className='d-inline-block'),
+            html.H2([html.I(className=f'fas {page_icon} me-1'), page_title], className='d-inline-block'),
             download_button.DownloadImageAIO(report_card, className='float-end'),
         ]),
         dbc.Alert(html.Ul([

@@ -6,12 +6,15 @@ from components import download_button, feedback_link
 from utils import images, cards as _cards
 import utils.decklists
 
+page_title = 'Deck Diff Analyzer'
+page_icon = 'fa-code-compare'
+
 dash.register_page(
     __name__,
     path='/tools/deck-diff',
-    title='Deck Diff Analyzer',
+    title=page_title,
     image='tools.png',
-    icon='fa-code-compare',
+    icon=page_icon,
     description='Compare and contrast two Pokémon TCG decklists with our Deck Diff tool. Generate intuitive Venn diagrams to visualize card overlaps and differences, helping you refine your deck choices and understand key strategic variations.'
 )
 
@@ -35,7 +38,7 @@ b_only_total = f'{b_only}-total'
 
 layout = html.Div([
     html.Div([
-        html.H2('Deck Diff', className='d-inline-block'),
+        html.H2([html.I(className=f'fas {page_icon} me-1'), page_title], className='d-inline-block'),
         download_button.DownloadImageAIO(dom_id=prefix, className='float-end')
     ]),
     dbc.Alert(html.Ul([

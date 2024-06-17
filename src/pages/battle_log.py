@@ -14,13 +14,16 @@ from components import (deck_label, matchup_table, ternary_switch,
                         download_button as _download, feedback_link)
 import utils.data
 
+page_title = 'Battle Journal'
+page_icon = 'fa-book'
+
 dash.register_page(
     __name__,
     path='/tools/battle-journal',
-    title='Battle Journal',
+    title=page_title,
     redirect_from=['/tools/battle-log'],
     image='tools.png',
-    icon='fa-book',
+    icon=page_icon,
     description='Track your Pokémon TCG matches with our tool: Record opponents, game outcomes, notes, and more. Download your data for in-depth analysis.'
 )
 
@@ -86,7 +89,7 @@ def create_options():
                 dbc.Label('Tags'),
                 dbc.Checklist(id={'type': tags, 'index': g}, inline=True, options=TAG_OPTIONS, value=[]),
                 dbc.Label('Notes'),
-                dbc.Textarea(id={'type': notes, 'index': g}, maxlength=300),
+                dbc.Textarea(id={'type': notes, 'index': g}, maxlength=1_000),
             ])
         ])
     ], id={'type': game, 'index': g}, lg=4) for g in range(0, 3)]
@@ -171,7 +174,7 @@ def layout():
         {'playing': 'other', 'against': 'other', 'time': str(datetime.datetime.now()), 'result': 'Win', 'game1': {'result': 'Win', 'turn': 1, 'tags': ['Lucky', 'Slow start'], 'notes': 'Got off to a rocky start from judge, but we top decked the out.'}},
     ]
     cont = html.Div([
-        html.H2('Battle Journal'),
+        html.H2([html.I(className=f'fas {page_icon} me-1'), page_title]),
         dbc.Alert(html.Ul([
             html.Li([html.Strong('Track Your Games:'), ' Log your games, view your history, and dive into detailed analysis.']),
             html.Li([html.Strong('Filter & Analyze:'), ' Easily filter your game history for better insights.']),

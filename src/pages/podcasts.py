@@ -10,11 +10,14 @@ from utils import cache
 
 description = 'Stay tuned with our Pokémon TCG Podcast Hub: Latest episodes from top shows. Dive into insightful discussions for TCG enthusiasts.'
 
+page_title = 'Podcast Hub'
+page_icon = 'fa-podcast'
+
 dash.register_page(
     __name__,
     path='/tools/podcast-hub',
-    title='Podcast Hub',
-    icon='fa-podcast',
+    title=page_title,
+    icon=page_icon,
     image='tools.png',
     description=description
 )
@@ -48,16 +51,22 @@ BACKUP = {
     'PokeBeach': 'https://feeds.buzzsprout.com/2248143'
 }
 
+browserlike_headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36',
+    'Accept': 'application/rss+xml, application/rdf+xml, application/atom+xml, application/xml, text/xml',
+    'Accept-Language': 'en-US,en;q=0.9'
+}
+
 # cache for half an hour
 @cache.cache.memoize(timeout=1800)
 def download_rss_feed(url):
-    response = requests.get(url)
+    response = requests.get(url, headers=browserlike_headers)
     
     # Check if the request was successful (status code 200)
     if response.status_code == 200:
         return response.text
     else:
-        print(f"Error downloading RSS feed. Status Code: {response.status_code}")
+        print(f"Error downloading RSS feed. Status Code: {response.status_code} {url}")
         return None
     
 
@@ -152,7 +161,7 @@ def create_podcast_card(pod):
 
 def layout():
     cont = html.Div([
-        html.H2('Podcast Hub'),
+        html.H2([html.I(className=f'fas {page_icon} me-1'), page_title]),
         dbc.Spinner(id=container),
         html.Div(html.Small([
             'If we are ',
