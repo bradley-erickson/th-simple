@@ -380,6 +380,7 @@ def update_report_matchups(roster_ts, roster, tdf_ts, tdf, decks):
         return ''
     matchups = {}
     pods = tdf['tournament']['pods']['pod']
+    pods = pods if isinstance(pods, list) else [pods]
     for pod in pods:
         rounds = pod['rounds']['round']
         for round_info in rounds:
