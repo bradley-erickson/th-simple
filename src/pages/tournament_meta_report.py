@@ -30,7 +30,9 @@ tabs = f'{prefix}-tabs'
 # upload tab
 upload_prefix = f'{prefix}-upload-tab'
 upload_comp = f'{upload_prefix}-comp'
+upload_info = f'{upload_prefix}-info'
 upload_tab = html.Div([
+    html.Div(id=upload_info),
     dcc.Upload(
         id=upload_comp,
         children=html.Div([
@@ -131,6 +133,7 @@ clientside_callback(
     Output(store, 'data', allow_duplicate=True),
     Output(roster_store, 'data', allow_duplicate=True),
     Output(tabs, 'active_tab', allow_duplicate=True),
+    Output(upload_info, 'children', allow_duplicate=True),
     Input(clear_id, 'submit_n_clicks'),
     prevent_initial_call=True
 )
@@ -169,6 +172,63 @@ def parse_file_content(contents, filename):
     except Exception as e:
         raise e
 
+
+def create_record_dict(pods):
+    matches = []
+    pods = pods if isinstance(pods, list) else [pods]
+    for pod in pods:
+        rounds = pod['rounds']['round']
+        for round_info in rounds:
+            round_matches = round_info['matches']['match']
+            round_matches = round_matches if isinstance(round_matches, list) else [round_matches]
+            matches.extend(round_matches)
+    records = {}
+    for match in matches:
+        outcome = int(match['@outcome'])
+        if 'player1' in match and 'player2' in match:
+            p1 = match['player1']['@userid']
+            if p1 not in records:
+                records[p1] = {'wins': 0, 'losses': 0, 'ties': 0, 'played': set()}
+            p2 = match['player2']['@userid']
+            if p2 not in records:
+                records[p2] = {'wins': 0, 'losses': 0, 'ties': 0, 'played': set()}
+            if outcome == 1:
+                records[p1]['wins'] += 1
+                records[p2]['losses'] += 1
+            elif outcome == 2:
+                records[p1]['losses'] += 1
+                records[p2]['wins'] += 1
+            elif outcome == 3:
+                records[p1]['ties'] += 1
+                records[p2]['ties'] += 1
+            else:
+                print(match)
+                break
+            records[p1]['played'].add(p2)
+            records[p2]['played'].add(p1)
+        # handle bye
+        elif outcome == 5 and 'player' in match:
+            p = match['player']['@userid']
+            if p not in records:
+                records[p] = {'wins': 0, 'losses': 0, 'ties': 0, 'played': set()}
+            records[p]['wins'] += 1
+        # handle late to round 1
+        elif outcome == 8 and 'player' in match:
+            p = match['player']['@userid']
+            if p not in records:
+                records[p] = {'wins': 0, 'losses': 0, 'ties': 0, 'played': set()}
+            records[p]['losses'] += 1
+        else:
+            print(match)
+            break
+        # check for ties or dgl or bye
+        # grab player
+        player = ''
+        if player not in records:
+            records[player] = {'wins': 0, 'losses': 0, 'ties': 0}
+    return records
+
+
 @callback(
     Output(store, 'data'),
     Output(roster_store, 'data'),
@@ -186,19 +246,34 @@ def upload_data(contents, filename, last_mod, curr_roster):
     except Exception:
         raise dash.exceptions.PreventUpdate
     
+    tour_info = tdf_contents['tournament']
     # TODO iterate over matches to create record object then set record
-    players_list = tdf_contents['tournament']['players']['player']
-    standings = tdf_contents['tournament'].get('standings', {}).get('pod', [])
+    records = create_record_dict(tour_info['pods']['pod'])
+    players_list = tour_info['players']['player']
+    standings = tour_info.get('standings', {}).get('pod', [])
     for p in players_list:
         if len(standings) == 0:
             continue
         p_id = p['@userid']
+        record = records[p_id]
         curr_roster[p_id] = p
         curr_roster[p_id]['deck'] = 'other'
         curr_roster[p_id]['standing'] = next(standing['@place'] for pod in standings if pod.get('@type') == 'finished' for standing in pod.get('player', []) if standing['@id'] == p_id)
-        curr_roster[p_id]['record'] = 3
+        curr_roster[p_id]['record'] = f"{record['wins']}-{record['losses']}-{record['ties']}"
         curr_roster[p_id]['division'] = DIVISIONS[next(int(pod['@category']) for pod in standings for standing in pod.get('player', []) if standing['@id'] == p_id)]
     return tdf_contents, curr_roster, roster_prefix
+
+
+@callback(
+    Output(upload_info, 'children'),
+    Input(roster_store, 'modified_timestamp'),
+)
+def update_upload_message(ts):
+    if ts is None:
+        raise dash.exceptions.PreventUpdate
+    warning_message = 'A tournament has already been uploaded. We suggest you clear the current data before uploading a new tournament.'
+    warning = dbc.Alert(warning_message, color='warning')
+    return warning
 
 
 def create_roster_row(player, decks):
