@@ -256,6 +256,7 @@ def update_selected_decks(selected, options):
 )
 def update_meta_breakdown(meta_shares, decks, ids):
     data = []
+    total = 0
     for id, val in zip(ids, meta_shares):
         if val is None:
             continue
@@ -263,10 +264,11 @@ def update_meta_breakdown(meta_shares, decks, ids):
             'label': next(d['label'] for d in decks if d['value'] == id['index']),
             'percent': val/100
         })
+        total += val
 
     data = sorted(data, key=lambda x: x['percent'], reverse=True)
     output = [
-        html.H4('Meta % Predictions'),
+        html.H4(f'Meta Predictions - Total {total}%'),
         breakdown.create_ordered_list(data)
     ]
     return output

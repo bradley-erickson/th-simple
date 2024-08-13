@@ -28,14 +28,17 @@ class DownloadImageAIO(html.Div):
         dom_id=None,
         aio_id=None,
         className='',
-        button_class_name=''
+        button_class_name='',
+        text='Download'
     ):
         if aio_id is None:
             aio_id = str(uuid.uuid4())
         
         button = [
-            dbc.Button(
-                html.I(className='fas fa-download', title='Download image (png)'),
+            dbc.Button([
+                    html.I(className='fas fa-download', title='Download image (png)'),
+                    html.Span(text, className='ms-1 d-sm-inline-block d-none') if text else ''
+                ],
                 id=self.ids.button(aio_id),
                 n_clicks=0,
                 class_name=button_class_name

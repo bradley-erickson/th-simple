@@ -28,7 +28,7 @@ def create_list_label(d, max_num, i, placing, key):
             ),
             html.Td(f'{d[key]:.1%}' if key == 'percent' else d[key], className='text-end'),
             html.Td(dbc.Progress(value=d[key], max=max_num, class_name='bg-transparent'), className='w-100 d-none d-lg-table-cell')
-        ], className=f'deck-row {"" if i < 8 else "d-none d-md-table-row"}')
+        ], className='deck-row')
 
 def create_ordered_list(l, placing=None, key='percent'):
     max_num = max((d[key] for d in l), default=0)

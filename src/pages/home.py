@@ -21,7 +21,7 @@ def create_card(c):
     card = dbc.Card([
         dbc.CardImg(src=f'/assets/{c["image"]}'),
         dbc.CardImgOverlay(dcc.Link(dbc.CardBody([
-            html.H3(c['title']),
+            html.H2(c['title']),
             c['children'],
         ]), href=c['link']))
     ], color='light', className='home-card')
@@ -31,7 +31,7 @@ def create_card(c):
 cards = [
     {'title': 'Meta Overview', 'link': '/meta', 'image': 'meta-analysis.png',
      'children': html.P('Unlock the secrets of the Pokémon TCG meta - Top 8 insights, matchup analysis, and more.')},
-    {'title': 'Decklists Deep Dive', 'link': '/decklist', 'image': 'decklist-analysis.png',
+    {'title': 'Decklists Analysis', 'link': '/decklist', 'image': 'decklist-analysis.png',
      'children': html.P('Explore card breakdowns, usage trends, and matchup data for your favorite Pokémon TCG archetypes.')},
 ]
 

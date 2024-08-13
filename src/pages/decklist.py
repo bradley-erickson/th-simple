@@ -43,6 +43,7 @@ table_clip_btn = f'{prefix}-table-clipboard-btn'
 download_image = f'{prefix}-download-image'
 card_table_id = f'{prefix}-card-table'
 
+deck_matchups = f'{prefix}-deck-matchups'
 card_matchups = f'{prefix}-card-matchups'
 card_trend = f'{prefix}-card-trend'
 
@@ -130,6 +131,10 @@ def layout(deck=None, players=None, start_date=None, end_date=None, platform=Non
             ], className='d-flex')
         ], className='d-flex justify-content-between align-items-center mt-1'),
         html.Span(loading.random_message(), id=loading_text),
+        html.Div([
+            html.H4('Overall Matchups'),
+            html.Div(id=deck_matchups),
+        ]),
         html.Div([
             html.A(html.H4([
                 'List Overview',
@@ -334,6 +339,51 @@ def update_card_matchups(tf, options):
 
     decks = {d['name']: d for d in options}
     return matchup_table.create_matchup_spread(matchups, decks, player='count', against='deck_other')
+
+
+@callback(
+    Output(deck_matchups, 'children'),
+    Input(store, 'data'),
+    Input(option_store, 'data'),
+    State({'type': card_select, 'index': ALL}, 'options'),
+    running=[
+        (Output(matchup_disable, 'disabled'), True, False)
+    ],
+    background=True
+)
+def update_card_matchups(tf, options, card_options):
+    if tf['include'] is None:
+        if card_options[0] is None:
+            raise dash.exceptions.PreventUpdate
+        tf['include'] = card_options[0][0]['value']
+
+    if len(options) == 0:
+        raise exceptions.PreventUpdate
+    url = f'{data.analysis_url}/decklists/{tf["deck"]}/card-matchups/{tf["include"]}'
+    params = tf.copy()
+    params['against_archetypes'] = [o['id'] for o in options[:15]]
+    if 'other' in params['against_archetypes']: params['against_archetypes'].remove('other')
+    if tf['deck'] in params['against_archetypes']:
+        params['against_archetypes'].remove(tf['deck'])
+    r = data.session.post(url, params=params)
+    matchups = []
+    if r.status_code == 200:
+        matchups = r.json()['data']
+
+    decks = {d['name']: d for d in options}
+    deck_name = next(d['name'] for d in options if d['id'] == tf['deck'])
+    grouped_matchups = {}
+    for matchup in matchups:
+        other_deck = matchup['deck_other']
+        if other_deck not in grouped_matchups:
+            grouped_matchups[other_deck] = {'name': deck_name, 'deck_other': other_deck, 'total': 0, 'wins': 0, 'losses': 0, 'ties': 0}
+        for i in ['total', 'wins', 'losses', 'ties']:
+            grouped_matchups[other_deck][i] += matchup[i]
+
+    for k in grouped_matchups:
+        gmk = grouped_matchups[k]
+        grouped_matchups[k]['win_rate'] = round((gmk['wins'] + gmk['ties']/3) / (gmk['total']) * 100, 1)
+    return matchup_table.create_matchup_spread(grouped_matchups.values(), decks, player='name', against='deck_other')
 
 
 @callback(

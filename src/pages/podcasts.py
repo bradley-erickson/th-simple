@@ -42,7 +42,8 @@ FEEDS = {
     'PCS Pokemon': 'https://anchor.fm/s/beaa6040/podcast/rss',
     'PokeBeach': 'https://feeds.buzzsprout.com/2248143.rss',
     'SpilltheTeaCG': 'https://anchor.fm/s/f5124288/podcast/rss',
-    'Memory Capsule': 'https://anchor.fm/s/d94e8ac0/podcast/rss'
+    'Memory Capsule': 'https://anchor.fm/s/d94e8ac0/podcast/rss',
+    'Let Loose': 'https://anchor.fm/s/f47193c4/podcast/rss'
 }
 
 BACKUP = {

@@ -101,7 +101,8 @@ def sort_pokemon(cards):
         if card_name not in name_dex:
             name_counter[card_name] = 0
             name_dex[card_name] = 0
-        name_counter[card_name] += card.get('count', 0)
+        card_count = card.get('count', 0)
+        name_counter[card_name] += 0 if card_count == 0 else max(1, int(card_count))
         if card['dex']:
             name_dex[card_name] = card['dex']
 

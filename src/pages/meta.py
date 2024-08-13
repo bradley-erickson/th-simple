@@ -30,6 +30,8 @@ breakdown_overall = f'{prefix}-breakdown-overall'
 breakdown_overall_wrap = f'{prefix}-breakdown-overall-wrap'
 breakdown_specific = f'{prefix}-breakdown-specific'
 breakdown_specific_wrap = f'{prefix}-breakdown-specific-wrap'
+breakdown_show_more = f'{prefix}-breakdown-show-more'
+
 archetype_select = f'{prefix}-archetype-select'
 archetype_store = f'{prefix}-archetype-store'
 download_matchups_btn = f'{prefix}-download-matchup-btn'
@@ -49,7 +51,7 @@ def fetch_breakdown_data(tour_data, placing=None):
     url = f'{data.analysis_url}/meta/breakdown'
     r = data.session.post(url, params=params)
     if r.status_code == 200:
-        overall = r.json()['overall'][0:15]
+        overall = r.json()['overall']
     return overall
 
 
@@ -88,24 +90,29 @@ def layout(players=None, start_date=None, end_date=None, platform=None):
             dbc.Col([
                 dbc.InputGroup([
                     dbc.Input(value='Overall', disabled=True, class_name='text-center'),
-                    download_button.DownloadImageAIO(dom_id=breakdown_overall_wrap, button_class_name='rounded-0 rounded-end')
+                    download_button.DownloadImageAIO(dom_id=breakdown_overall_wrap, button_class_name='rounded-0 rounded-end', text=False)
                 ]),
                 dbc.Spinner(id=breakdown_overall)
             ], id=breakdown_overall_wrap, lg=6),
             dbc.Col([
                 dbc.InputGroup([
                     html.Div(placement.create_placement_dropdown(breakdown_place, 8, 'text-center'), className=' dcc-dropdown-inputgroup'),
-                    download_button.DownloadImageAIO(dom_id=breakdown_specific_wrap, button_class_name='rounded-0 rounded-end')
+                    download_button.DownloadImageAIO(dom_id=breakdown_specific_wrap, button_class_name='rounded-0 rounded-end', text=False)
                 ]),
                 dbc.Spinner(id=breakdown_specific)
-            ], id=breakdown_specific_wrap, lg=6)
+            ], id=breakdown_specific_wrap, lg=6),
+            dbc.Col(
+                dbc.Switch(id=breakdown_show_more, label='Show more', value=False)
+            )
         ]),
         html.Div([
             html.H3('Matchups', id='matchups', className='d-inline-block'),
             html.Span([
-                download_button.DownloadImageAIO(dom_id=matchups, className='me-1 d-inline-block'),
-                dbc.Button(
-                    html.I(className='fas fa-file-export'),
+                download_button.DownloadImageAIO(dom_id=matchups, className='me-1 d-inline-block', text='Download (png)'),
+                dbc.Button([
+                        html.I(className='fas fa-file-export'),
+                        html.Span('Export data (csv)', className='d-sm-inline-block d-none ms-1')
+                    ],
                     id=download_matchups_btn,
                     title='Export matchup data (csv)'),
                 dcc.Download(id=download_matchups)
@@ -147,37 +154,41 @@ def update_options(tour_filters):
     Output(breakdown_overall, 'children'),
     Input(tour_store, 'data'),
     Input(archetype_select, 'options'),
+    Input(breakdown_show_more, 'value')
 )
 @cache.cache.memoize(21600)
-def update_breakdown_overall(tour_filters, archetypes):
+def update_breakdown_overall(tour_filters, archetypes, show_more):
     decks = {d['value']: d['label'] for d in archetypes}
 
     overall = fetch_breakdown_data(tour_filters)
+    breakpoint = 15 if show_more else 8
     for d in overall:
         d['label'] = decks[d['deck']]
         d['href'] = f'/decklist/{d["deck"]}{tour_filter.create_param_string(tour_filters)}'
 
-    return _breakdown.create_ordered_list(overall)
+    return _breakdown.create_ordered_list(overall[0:breakpoint])
 
 @callback(
     Output(breakdown_specific, 'children'),
     Input(tour_store, 'data'),
     Input(archetype_select, 'options'),
     Input(breakdown_place, 'value'),
+    Input(breakdown_show_more, 'value'),
     background=True,
     running=[
         (Output(breakdown_place, 'disabled'), True, False)
     ]
 )
-def update_breakdown(tour_filters, archetypes, place):
+def update_breakdown(tour_filters, archetypes, place, show_more):
     decks = {d['value']: d['label'] for d in archetypes}
 
     top_x = fetch_breakdown_data(tour_filters, place)
+    breakpoint = 15 if show_more else 8
     for d in top_x:
         d['label'] = decks[d['deck']]
         d['href'] = f'/decklist/{d["deck"]}{tour_filter.create_param_string(tour_filters)}&placement={place}'
 
-    return _breakdown.create_ordered_list(top_x)
+    return _breakdown.create_ordered_list(top_x[0:breakpoint])
 
 @callback(
     Output(matchup_data_store, 'data'),
