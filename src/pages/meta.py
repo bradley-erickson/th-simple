@@ -55,18 +55,6 @@ def fetch_breakdown_data(tour_data, placing=None):
     return overall
 
 
-def fetch_matchup_data(tour_data, decks):
-    params = tour_data.copy()
-    params['games_played'] = 5
-    params['archetypes'] = decks
-    params['ids_only'] = True
-    url = f'{data.analysis_url}/meta/matchups'
-    r = data.session.post(url, params=params)
-    if r.status_code == 200:
-        return r.json()['data']
-    return []
-
-
 def layout(players=None, start_date=None, end_date=None, platform=None):
     tours = tour_filter.TourFiltersAIO(players, start_date, end_date, platform, prefix)
     tour_filters = tour_filter.create_tour_filter(players, start_date, end_date, platform)
@@ -203,7 +191,7 @@ def update_breakdown(tour_filters, archetypes, place, show_more):
 )
 def update_matchups(tour_filters, selected, place):
     tour_filters['placement'] = place
-    matchup_data = fetch_matchup_data(tour_filters, selected)
+    matchup_data = data.fetch_matchup_data(tour_filters, selected)
     return matchup_data
 
 @callback(

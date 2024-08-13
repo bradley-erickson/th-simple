@@ -29,3 +29,15 @@ def get_decks(tour_filter):
         decks.append(c)
         ids.add(id)
     return decks
+
+
+def fetch_matchup_data(tour_data, decks):
+    params = tour_data.copy()
+    params['games_played'] = 5
+    params['archetypes'] = decks
+    params['ids_only'] = True
+    url = f'{analysis_url}/meta/matchups'
+    r = session.post(url, params=params)
+    if r.status_code == 200:
+        return r.json()['data']
+    return []
