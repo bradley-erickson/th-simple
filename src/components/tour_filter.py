@@ -79,11 +79,15 @@ class TourFiltersAIO(html.Div):
             'platform': default_platform(platform)
         }
 
+        platform_text = {'all': 'on all platforms', 'inperson': 'at majors', 'online': 'online'}
+        end_date_text = f" - {initial_data['end_date']}" if initial_data['end_date'] else ''
+        header_text = f' - {initial_data["players"]} players, from {initial_data["start_date"]}{end_date_text} {platform_text[initial_data["platform"]]}'
         filters = dbc.Card([
             html.A(
                 dbc.CardHeader([
                     html.I(className='fas fa-filter me-1'),
-                    'Tournament Filters'
+                    html.Strong('Tournament Filters'),
+                    html.Span(header_text)
                 ]),
                 id=self.ids.header(aio_id)
             ),

@@ -102,7 +102,7 @@ def layout(players=None, start_date=None, end_date=None, platform=None):
         html.A(
             dbc.CardHeader([
                 html.I(className='fas fa-filter me-1'),
-                'Custom Deck Archetypes'
+                html.Strong('Custom Deck Archetypes')
             ]),
             id=additional_archetypes
         ),

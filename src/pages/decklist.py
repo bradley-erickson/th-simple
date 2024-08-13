@@ -26,6 +26,7 @@ deck_count = f'{prefix}-deck-count'
 option_store = f'{prefix}-option-store'
 
 decklist_filters = f'{prefix}-filters'
+decklist_filter_text = f'{decklist_filters}-header-text'
 filters_collapse = f'{decklist_filters}-collapse'
 card_select = f'{decklist_filters}-card-select'
 exclude_select = f'{decklist_filters}-exclude-card-select'
@@ -63,7 +64,8 @@ def create_filter(include, exclude, granularity, placement):
         html.A(
             dbc.CardHeader([
                 html.I(className='fas fa-filter me-1'),
-                'Decklist Filters'
+                html.Strong('Decklist Filters'),
+                html.Span(id=decklist_filter_text)
             ]),
             id=decklist_filters
         ),
@@ -247,6 +249,23 @@ def update_card_select_options(tour_filters):
         } for c in cards]
         return [formatted_cards, formatted_cards], formatted_cards
     return [[], []], []
+
+
+@callback(
+    Output(decklist_filter_text, 'children'),
+    Input({'type': card_select, 'index': ALL}, 'value'),
+    Input(exclude_select, 'value'),
+    Input(granularity_slider, 'value'),
+    Input(placement_select, 'value'),
+    State(placement_select, 'options')
+)
+def update_decklist_filter_text(include, exclude, granularity, placement, placement_options):
+    include_id = next((i for i in include if i), None)
+    include_text = f' includes {include_id},' if include_id else ''
+    exclude_text = f' excludes {exclude},' if exclude else ''
+    placement_text = next(p['label'] for p in placement_options if str(p['value']) == placement)
+    header_text = f' -{include_text}{exclude_text} {granularity:.0%} granularity, placed in {placement_text}'
+    return header_text
 
 
 @callback(
