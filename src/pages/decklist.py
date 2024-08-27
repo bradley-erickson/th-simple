@@ -58,14 +58,24 @@ headers = {
     k: {'header': k, 'collapse': f'{k}-collapse'} for k in [overview_header, individual_card_header]
 }
 
-def create_filter(include, exclude, granularity, placement):
+def create_decklist_filter_text(include, exclude, granularity, placement):
+    include_text = ''
+    if include is not None:
+        include_id = next((i for i in include if i), None)
+        include_text = f' includes {include_id},' if include_id else ''
+    exclude_text = f' excludes {exclude},' if exclude else ''
+    placement_text = next(p['label'] for p in _placement.OPTIONS if str(p['value']) == str(placement))
+    header_text = f' -{include_text}{exclude_text} {float(granularity):.0%} granularity, placed in {placement_text}'
+    return header_text
 
+
+def create_filter(include, exclude, granularity, placement):
     filter_row = dbc.Card([
         html.A(
             dbc.CardHeader([
                 html.I(className='fas fa-filter me-1'),
                 html.Strong('Decklist Filters'),
-                html.Span(id=decklist_filter_text)
+                html.Span(create_decklist_filter_text(include, exclude, granularity, placement), id=decklist_filter_text)
             ]),
             id=decklist_filters
         ),
@@ -136,6 +146,7 @@ def layout(deck=None, players=None, start_date=None, end_date=None, platform=Non
         html.Div([
             html.H4('Overall Matchups'),
             html.Div(id=deck_matchups),
+            html.Small('* Included and excluded cards are not factored into the overall matchup data.')
         ]),
         html.Div([
             html.A(html.H4([
@@ -257,15 +268,9 @@ def update_card_select_options(tour_filters):
     Input(exclude_select, 'value'),
     Input(granularity_slider, 'value'),
     Input(placement_select, 'value'),
-    State(placement_select, 'options')
 )
-def update_decklist_filter_text(include, exclude, granularity, placement, placement_options):
-    include_id = next((i for i in include if i), None)
-    include_text = f' includes {include_id},' if include_id else ''
-    exclude_text = f' excludes {exclude},' if exclude else ''
-    placement_text = next(p['label'] for p in placement_options if str(p['value']) == placement)
-    header_text = f' -{include_text}{exclude_text} {granularity:.0%} granularity, placed in {placement_text}'
-    return header_text
+def update_decklist_filter_text(include, exclude, granularity, placement):
+    return create_decklist_filter_text(include, exclude, granularity, placement)
 
 
 @callback(
@@ -285,6 +290,8 @@ def update_search(include, exclude, granularity, placement, tf):
             params_str += f'&include={include[0]}'
         else:
             params_str += f'&include={include[1]}'
+    else:
+        params_str += f'&include={include[0]}' if include[0] is not None else ''
     if exclude is not None:
         params_str += f'&exclude={exclude}'
     if granularity is not None:
