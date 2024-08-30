@@ -34,6 +34,7 @@ custom_archetypes = f'{prefix}-custom-archetypes'
 custom_arch_collapse = f'{prefix}-custom-archetypes-collapse'
 store_input = f'{prefix}-store-input'
 color_input = f'{prefix}-color-input'
+date_input = f'{prefix}-date-input'
 background_input = f'{prefix}-background-input'
 pronouns = f'{prefix}-pronouns'
 output = f'{prefix}-output'
@@ -41,6 +42,7 @@ output_trainer = f'{output}-trainer'
 output_pronouns = f'{output}-pronouns'
 output_deck = f'{output}-deck'
 output_store = f'{output}-store'
+output_date = f'{output}-date'
 
 fake_trainers = ['Ash Ketchum', 'Professor Oak', 'Iono', 'Sabrina',
                  'Blaine', 'Champion Cynthia', 'Champion Leon',
@@ -78,7 +80,9 @@ def layout():
         dcc.Dropdown(id=background_input,
                      options=['Grass', 'Fire', 'Water', 'Lightning',
                               'Psychic', 'Fighting', 'Dark', 'Metal',
-                              'Dragon', 'Fairy', 'Colorless'])
+                              'Dragon', 'Fairy', 'Colorless']),
+        dbc.Label('Date'),
+        html.Div(dcc.DatePickerSingle(date=datetime.date.today(), id=date_input))
     ]
     cont = html.Div([
         html.Div([
@@ -100,7 +104,7 @@ def layout():
                     html.H4(id=output_trainer),
                     html.Div(['earned ', html.Span(id=output_pronouns)], className='mb-2'),
                     html.H4(id=output_deck, className='d-flex justify-content-around'),
-                    html.Div(['badge at ', html.Strong(id=output_store), ' on ', datetime.datetime.now().strftime("%B %d, %Y")]),
+                    html.Div(['badge at ', html.Strong(id=output_store), ' on ', html.Span(id=output_date)]),
                 ],id=output, class_name='text-center gym-badge', body=True),
                 md=7, lg=6, xl=5, xxl=4
             )
@@ -159,6 +163,14 @@ def update_color_on_new_deck(deck, decks):
     icon = decks[deck]['icons'][0]
     color = ICON_COLOR_MAPPING[icon]
     return utils.colors.rgb_to_hex(color)
+
+@callback(
+    Output(output_date, 'children'),
+    Input(date_input, 'date')
+)
+def update_date_info(date):
+    date_str = datetime.datetime.strptime(date, '%Y-%m-%d').strftime('%B %d, %Y')
+    return date_str
 
 
 @callback(
