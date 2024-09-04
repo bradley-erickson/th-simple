@@ -132,6 +132,37 @@
   height: 250px;
 }
 
+th .rotate {
+  display: flex;
+  justify-content: center;
+}
+
+th .rotate > div {
+  -ms-writing-mode: tb-lr;
+  -webkit-writing-mode: vertical-lr;
+  writing-mode: vertical-lr;
+}
+
+.deck-diff-card-img-wrapper {
+  position: relative;
+  width: 75px;
+  height: 3rem; /* Adjust this to control how much of the image is visible */
+  overflow: hidden;
+}
+
+.deck-diff-card-img-wrapper img {
+  width: 75px;
+  height: auto;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.deck-diff-limitless-dropdowns>div {
+  width: 50%;
+  display: inline-block;
+}
+
 /* BATTLE JOURNAL */
 .notes-template textarea {
   border-bottom-left-radius: 0;
