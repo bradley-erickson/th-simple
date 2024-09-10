@@ -733,6 +733,7 @@ pokemon = [
     'obstagoon',
     'octillery',
     'oddish',
+    'ogerpon',
     'oinkologne',
     'okidogi',
     'omanyte',

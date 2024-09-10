@@ -15,6 +15,7 @@ pokemon_mapping = {
     'squawkabilly': 'squawkabilly-green',
     'regieleki-a': 'regieleki',
     'ogerpon-cornerstone': 'ogerpon-cornerstone-mask',
+    'ursaluna-bloodmoon': 'ursaluna'
 }
 
 
