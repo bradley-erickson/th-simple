@@ -95,12 +95,12 @@ clientside_callback(
     Output(reason, 'value'),
     Output(comments, 'value'),
     Output(contact_method, 'value'),
-    Output(contact_user, 'vallue'),
+    Output(contact_user, 'value'),
     Input(submit, 'n_clicks'),
     State(reason, 'value'),
     State(comments, 'value'),
     State(contact_method, 'value'),
-    State(contact_user, 'vallue'),
+    State(contact_user, 'value'),
 )
 def submit_form(clicks, r, c, cm, cu):
     if clicks is None:
