@@ -34,7 +34,11 @@ PTCGOCODES = {
     'MEW': 'sv3pt5',
     'OBF': 'sv3',
     'PAR': 'sv4',
-    'PAF': 'sv4pt5'
+    'PAF': 'sv4pt5',
+    'TEF': 'sv5',
+    'TWM': 'sv6',
+    'SFA': 'sv6pt5',
+    'SCR': 'sv7',
 }
 card_cache = {}
 
