@@ -1,19 +1,22 @@
+.home-card .card-header.meta {
+    position: relative;
+    background: linear-gradient(to right, var(--bs-card-bg) 15%, rgba(255, 255, 255, 0)), url('meta-analysis.png');
+    background-size: cover;
+    background-position: right;
+}
+.home-card .card-header.decklist {
+    position: relative;
+    background: linear-gradient(to right, var(--bs-card-bg) 15%, rgba(255, 255, 255, 0)), url('decklist-analysis.png');
+    background-size: cover;
+    background-position: right;
+}
 .home-card:hover {
     border: 2px solid var(--bs-dark) !important;
 }
 .home-card {
     border: 2px solid var(--bs-light) !important;
 }
-.home-card>.card-img-overlay>a>.card-body {
-    background-color: rgba(255, 255, 255, 0.8);
-    height: 100%;
-    padding: 0.5rem;
-    border-radius: var(--bs-border-radius);
-    color: var(--bs-gray-dark);
-}
-.home-card>.card-img-overlay>a>.card-body:hover {
-    background-color: rgba(255, 255, 255, 0.9);
-}
-.home-card>.card-img-overlay>a {
+.home-card a {
     text-decoration: none;
+    color: var(--bs-body);
 }

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta, date
 
 def convert_datestring(date_string):
     date_object = datetime.strptime(date_string, '%m/%d/%Y')
@@ -11,3 +11,9 @@ def convert_datestring(date_string):
 
     readable_date = readable_date.replace(f' {day} ', f'{day}{suffix}')
     return readable_date
+
+
+def weeks_ago_3():
+    today = date.today()
+    weeks_ago_3 = str(today - timedelta(21))
+    return weeks_ago_3
