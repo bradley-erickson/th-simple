@@ -151,7 +151,7 @@ def layout(players=None, start_date=None, end_date=None, platform=None):
         html.Div([
             dbc.Label('Archetype select'),
             dcc.Dropdown(
-                id=archetype_dropdown, multi=True, className='tier-list-archetype-select',
+                id=archetype_dropdown, multi=True, className='tier-list-archetype-select', clearable=False,
                 options=decks, value=[d['value'] for d in decks if d['value'] != 'other'][:15], maxHeight=400
             ),
             html.Small('* Decks must be removed from tiers before removing as a selection.'),
