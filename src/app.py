@@ -2,6 +2,7 @@ import dash
 from dash import html, DiskcacheManager, CeleryManager
 import dash_bootstrap_components as dbc
 from dotenv import load_dotenv
+from flask import send_from_directory
 import os
 import uuid
 
@@ -92,8 +93,15 @@ def serve_layout():
         className='dbc app'
     )
 
+
 app.layout = serve_layout
 server = app.server
+
+
+@server.route('/ads.txt')
+def serve_text_file():
+    return send_from_directory(directory='assets', path='ads.txt')
+
 
 if __name__ == "__main__":
     app.run_server(debug=True)
