@@ -132,17 +132,6 @@
   height: 250px;
 }
 
-th .rotate {
-  display: flex;
-  justify-content: center;
-}
-
-th .rotate > div {
-  -ms-writing-mode: tb-lr;
-  -webkit-writing-mode: vertical-lr;
-  writing-mode: vertical-lr;
-}
-
 .deck-diff-card-img-wrapper {
   position: relative;
   width: 75px;

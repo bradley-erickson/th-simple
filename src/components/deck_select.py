@@ -14,7 +14,7 @@ MANUAL_ENTRY = 'Manual'
 def create_deck_option(deck, icons, name):
     opt = html.Div([
         html.Span(components.deck_label.format_label({'name': deck, 'icons': icons})),
-        f' - {name}'
+        html.Span(f'- {name}', className='ms-1')
     ], className='d-flex align-items-center')
     return opt
 

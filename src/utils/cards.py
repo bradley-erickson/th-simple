@@ -162,12 +162,14 @@ def sort_deck(cards):
     types = collections.OrderedDict({
         pokemon: [],
         trainer: [],
-        energy: []
+        energy: [],
+        None: []
     })
     sort_functions = {
         pokemon: sort_pokemon,
         trainer: sort_trainers,
-        energy: sort_energy
+        energy: sort_energy,
+        None: sort_energy
     }
     for c in cards:
         supertype = c['supertype']

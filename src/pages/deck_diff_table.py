@@ -8,12 +8,12 @@ from utils import images, cards as _cards
 # TODO download button, prototype banner, more deck entry methods
 # caching limitless stuff
 
-page_title = 'Deck Diff Analyzer'
-page_icon = 'fa-code-compare'
+page_title = 'Deck Diff Table Compare'
+page_icon = 'fa-table'
 
 dash.register_page(
     __name__,
-    path='/prototypes/deck-diff-new',
+    path='/tools/deck-diff-table',
     title=page_title,
     image='tools.png',
     icon=page_icon,
@@ -33,11 +33,10 @@ def layout():
             download_button.DownloadImageAIO(dom_id=card_table, className='float-end')
         ]),
         dbc.Alert(html.Ul([
-            html.Li([html.Strong('Prototype dashboard:'), ' This dashboard is a work in progress. Some things are not yet finalized.']),
-            html.Li([html.Strong('Purpose:'), ' Analyze and compare multiple decklists.']),
-            html.Li([html.Strong('Usage:'), ' Select decks from LimitlessTCG or input decks manually to compare.']),
+            html.Li([html.Strong('Quickly compare:'), ' Analyze and compare multiple decklists.']),
+            html.Li([html.Strong('Decklist input:'), ' Select decks from LimitlessTCG or input decks manually to compare.']),
             feedback_link.list_item,
-        ], className='mb-0'), id='tour-meta-report-info-alert', color='info'),
+        ], className='mb-0'), id='tour-meta-report-info-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
         html.Div([deck_select.DeckSelectAIO(aio_id=0)], id=deck_selection_table),
         dbc.Button([html.I(className='fas fa-plus me-1'), 'Add'], id=add_row),
         dbc.Checkbox(id=hide_common, value=False, label='Hide common cards'),
@@ -89,7 +88,7 @@ def update_card_table(decks, labels, hide):
 
     headers = [html.Th('')]
     for label in labels:
-        headers.append(html.Th(html.Div(html.Div(label), className='rotate')))
+        headers.append(html.Th(html.Div(html.Div(label))))
     rows = []
     for card in sorted_cards:
         card_id = f"{card['set']}-{card['number'].zfill(3)}"

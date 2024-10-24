@@ -6,7 +6,7 @@ from components import download_button, feedback_link
 from utils import images, cards as _cards
 import utils.decklists
 
-page_title = 'Deck Diff Analyzer'
+page_title = 'Deck Diff Venn Diagram'
 page_icon = 'fa-code-compare'
 
 dash.register_page(

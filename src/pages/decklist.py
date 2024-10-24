@@ -7,7 +7,7 @@ import urllib
 from components import (tour_filter, deck_label,
     card_table, matchup_table, trend_graph, download_button,
     placement as _placement, loading)
-from utils import data, url, cards as _cards, cache, images
+from utils import data, cache, images
 
 dash.register_page(
     __name__,
