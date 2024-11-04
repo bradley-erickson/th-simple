@@ -29,6 +29,7 @@
 
 .radio-group .form-check {
   padding-left: 0;
+  margin-bottom: 0;
 }
 
 .radio-group .btn-group>.form-check:not(:last-child)>.btn {
@@ -63,6 +64,10 @@
   .tooltip-inner {
     color: var(--bs-light)
   }
+}
+
+.DateRangePicker_picker {
+  z-index: 3000 !important;
 }
 
 .dbc input {
