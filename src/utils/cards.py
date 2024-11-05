@@ -42,7 +42,7 @@ PTCGOCODES = {
 }
 card_cache = {}
 
-@cache.cache.memoize(timeout=0)
+@cache.cache.memoize(timeout=604800)
 def _query_card(q):
     card = Card.where(q=q)
     if len(card) > 0:

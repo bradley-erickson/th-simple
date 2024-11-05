@@ -283,14 +283,14 @@ def update_cards_in_deck(store, clicks, outputs):
 
     random.shuffle(decomposed)
     hand = [dbc.Col(
-        html.Img(src=utils.images.get_card_image(c['card_code'], 'XS'), className='w-100'),
+        html.Img(src=utils.images.get_card_image(c.get('card_code', None), 'XS'), className='w-100'),
         xs=3, sm=2, md=2, lg=1
         ) for c in decomposed[:8]
     ]
     prizes = decomposed[8:14]
     deck = [
             html.Div([
-                html.Img(src=utils.images.get_card_image(c['card_code'], 'XS'))
+                html.Img(src=utils.images.get_card_image(c.get('card_code', None), 'XS'))
             ], className='card-in-stack') for c in decomposed[14:]
     ]
     return deck, hand, prizes, [None for i in range(len(outputs))]

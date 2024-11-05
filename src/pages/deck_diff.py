@@ -93,7 +93,7 @@ clientside_callback(
 def clean_list(raw, mid=False):
     cards_sorted = _cards.sort_deck(raw)
     cards_comp = [dbc.Col([
-        html.Img(src=images.get_card_image(c['card_code'], 'SM'), className='w-100'),
+        html.Img(src=images.get_card_image(c.get('card_code', None), 'SM'), className='w-100'),
         dbc.Badge(
             int(c['count']),
             class_name='position-absolute bottom-0 end-0 m-2 rounded-circle font-monospace border border-light',

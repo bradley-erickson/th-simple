@@ -11,6 +11,8 @@ def parse_decklist(l):
             continue
         if not c[0].isdigit():
             continue
+        c = c.replace('\t', '')
+        c = c.removesuffix(' PH')
         c_split = c.split(' ')
         try:
             c_set = c_split[-2]
