@@ -4,6 +4,7 @@ import dash_bootstrap_components as dbc
 
 import components.patreon
 import components.deck_label
+import components.navbar
 import utils.data
 import utils.date
 
@@ -34,7 +35,7 @@ def create_card(c):
             c['children'],
             html.Div(dbc.Spinner(id=c['computed_children']), className='text-center')
         ]),
-    ], href=c['link']), className='home-card')
+    ], href=c['link'], id={'type': components.navbar.link_with_game, 'index': f'{c["id"]}-home'}), className='home-card')
     return dbc.Col(card, md=6, lg=5, xl=4)
 
 
@@ -46,10 +47,14 @@ cards = [
 ]
 
 def create_tool(title, t):
-    tool = dcc.Link(dbc.Card([
-        html.H3(className=f'fas {t["icon"]}'),
-        html.Div(title)
-    ], body=True, class_name='home-card text-center'), href=t['href'], className='text-decoration-none')
+    tool = dcc.Link(
+        dbc.Card([
+            html.H3(className=f'fas {t["icon"]}'),
+            html.Div(title)
+        ], body=True, class_name='home-card text-center'),
+        href=t['href'], className='text-decoration-none',
+        id={'type': components.navbar.link_with_game, 'index': f'{title}-home'}
+    )
     return dbc.Col(tool, sm=6, md=4, xl=3)
 
 def layout():
@@ -71,11 +76,12 @@ def layout():
 
 @callback(
     Output(_archetype_store, 'data'),
-    Input(_prefix, 'id')
+    Input(_prefix, 'id'),
+    Input(components.navbar.game_preference, 'value')
 )
-def update_decks(_):
-    deck_data = utils.data.get_decks({'start_date': utils.date.weeks_ago_3()})
-    data = {d['id']: d for d in deck_data[:5]}
+def update_decks(_, game):
+    deck_data = utils.data.get_decks({'start_date': utils.date.weeks_ago_3(), 'game': game})
+    data = {d['id']: d for d in deck_data[:6] if d['id'] != 'other'}
     return data
 
 
@@ -98,11 +104,12 @@ def create_matchup_progress_bar(matchup, decks):
 
 @callback(
     Output(_meta_children, 'children'),
-    Input(_archetype_store, 'data')
+    Input(_archetype_store, 'data'),
+    Input(components.navbar.game_preference, 'value')
 )
-def update_meta_children(archetypes):
+def update_meta_children(archetypes, game):
     decks = archetypes.keys()
-    matchup_data = utils.data.fetch_matchup_data({'start_date': utils.date.weeks_ago_3()}, decks)
+    matchup_data = utils.data.fetch_matchup_data({'start_date': utils.date.weeks_ago_3(), 'game': game}, decks)
     filtered_data = (d for d in matchup_data if d['deck1'] != d['deck2'])
     sorted_data = sorted(filtered_data, key=lambda d: d['total'], reverse=True)
     children = [html.H5('Common Matchups')]
@@ -118,7 +125,7 @@ def update_meta_children(archetypes):
 
 @callback(
     Output(_decklist_children, 'children'),
-    Input(_archetype_store, 'data')
+    Input(_archetype_store, 'data'),
 )
 def update_decklist_children(archetypes):
     decks = list(archetypes.keys())
@@ -126,6 +133,6 @@ def update_decklist_children(archetypes):
         html.Div([
             f'{i+1}.',
             html.Span(components.deck_label.format_label(archetypes[d]), className='ms-1 d-inline-block')
-        ], className='text-start d-flex align-items-center mb-1') for i, d in enumerate(decks[:4])
+        ], className='text-start d-flex align-items-center mb-1') for i, d in enumerate(decks[:5])
     ])
     return component

@@ -1,6 +1,7 @@
 import base64
 
 ptcg_card_url = 'https://limitlesstcg.nyc3.digitaloceanspaces.com/tpci'
+pocket_card_url = 'https://limitlesstcg.nyc3.digitaloceanspaces.com/pocket'
 pokemon_url = 'https://limitlesstcg.s3.us-east-2.amazonaws.com/pokemon/gen9'
 pokemon_url = 'https://raw.githubusercontent.com/bradley-erickson/pokesprite/master/pokemon/regular'
 
@@ -30,11 +31,27 @@ def get_pokemon_icon(pokemon):
     return source
 
 
-def get_card_image(card_code, size):
-    if not card_code:
-        return ''
+def get_ptcg_image(card_code, size):
     card_code = card_code.replace('PR-SW', 'SSP')
     card_code = card_code.replace('PR-SV', 'SVP')
     set_code, number = card_code.split('-', 1)
     source = f'{ptcg_card_url}/{set_code}/{set_code}_{number}_R_EN_{size}.png'
     return source
+
+
+def get_pocket_image(card_code, size):
+    set_code, number = card_code.rsplit('-', 1)
+    source = f'{pocket_card_url}/{set_code}/{set_code}_{number}_EN.webp'
+    return source
+
+
+IMAGE_SOURCES = {
+    'PTCG': get_ptcg_image,
+    'POCKET': get_pocket_image
+}
+
+
+def get_card_image(card_code, size, game='PTCG'):
+    if not card_code:
+        return ''
+    return IMAGE_SOURCES[game](card_code, size)

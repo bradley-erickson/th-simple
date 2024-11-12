@@ -39,6 +39,7 @@ PTCGOCODES = {
     'TWM': 'sv6',
     'SFA': 'sv6pt5',
     'SCR': 'sv7',
+    'SSP': 'sv8'
 }
 card_cache = {}
 

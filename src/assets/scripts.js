@@ -24,7 +24,7 @@ window.dash_clientside.clientside = {
         return is_open;
     },
 
-    disable_tour_filter_apply: function (players, start, end, platform, initial) {
+    disable_tour_filter_apply: function (players, start, end, platform, game, initial) {
         if (players !== initial.players) {
             return false;
         }
@@ -37,13 +37,16 @@ window.dash_clientside.clientside = {
         if (platform !== initial.platform) {
             return false;
         }
+        if (game !== initial.game) {
+            return false;
+        }
         return true;
     },
 
-    update_tour_filter_apply_href: function (players, start, end, platform, hash) {
+    update_tour_filter_apply_href: function (players, start, end, platform, game, hash) {
         const end_string = end !== null ? `&end_date=${end}` : '';
         const platform_string = platform !== null ? `&platform=${platform}` : '';
-        return `?players=${players}&start_date=${start}${end_string}${platform_string}#${hash}`;
+        return `?game=${game}&players=${players}&start_date=${start}${end_string}${platform_string}#${hash}`;
     },
 
     return_self: function (self) {

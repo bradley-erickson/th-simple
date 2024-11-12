@@ -10,7 +10,7 @@ color_breakdown = colors.blue
 color_inclusion = colors.red
 color_winrate = colors.green
 
-def create_grid_item(card, total):
+def create_grid_item(card, total, game):
     id = card['card_code']
     play_rate = sum(x['decks'] for x in card.get('counts')) / total
 
@@ -47,7 +47,7 @@ def create_grid_item(card, total):
     )
 
     item = dbc.Col([
-        html.Img(src=images.get_card_image(id, 'SM'), className='w-100'),
+        html.Img(src=images.get_card_image(id, 'SM', game), className='w-100'),
         html.Div(
             dcc.Graph(
                 figure=figure,
@@ -71,17 +71,17 @@ def create_grid_item(card, total):
     ], className='position-relative', id=id, xs=4, sm=3, md=2, lg=2, xxl=1)
     return item
 
-def create_grid_layout(cards, total):
+def create_grid_layout(cards, total, game):
     skeleton_count = sum(c['count'] for c in cards if c['skeleton'])
     row = dbc.Row([
         html.H5(['Skeleton', dbc.Badge(skeleton_count, className='ms-1')]),
-        dbc.Row([create_grid_item(card, total) for card in cards if card['skeleton']], className='g-1 mb-1'),
+        dbc.Row([create_grid_item(card, total, game) for card in cards if card['skeleton']], className='g-1 mb-1'),
         html.H5('Other cards'),
-        dbc.Row([create_grid_item(card, total) for card in cards if not card['skeleton']], className='g-1')
+        dbc.Row([create_grid_item(card, total, game) for card in cards if not card['skeleton']], className='g-1')
     ])
     return row
 
-def create_list_item(card, max_count, total):
+def create_list_item(card, max_count, total, game):
     id = card['card_code']
     color = colors.red_gradient[math.floor(card['play_rate']*100)]
 
@@ -114,7 +114,7 @@ def create_list_item(card, max_count, total):
         dbc.Popover(
             dbc.PopoverBody(dbc.Row([
                 dbc.Col([
-                    html.Img(src=images.get_card_image(id, 'SM'), className='w-100'),
+                    html.Img(src=images.get_card_image(id, 'SM', game), className='w-100'),
                     dbc.Badge('Overall play-rate %', color=color_inclusion),
                     dbc.Badge('Play-rate %', color=color_breakdown),
                     dbc.Badge('Win-rate %', color=color_winrate),
@@ -136,16 +136,16 @@ def create_list_item(card, max_count, total):
     row = html.Tr(cells, id=id)
     return row
 
-def create_list_layout(cards, total):
+def create_list_layout(cards, total, game):
     max_count = max(count['count'] for card in cards for count in card['counts'])
     skeleton_count = sum(c['count'] for c in cards if c['skeleton'])
     skeleton = []
     other = []
     for card in cards:
         if card['skeleton']:
-            skeleton.append(create_list_item(card, max_count, total))
+            skeleton.append(create_list_item(card, max_count, total, game))
         else:
-            other.append(create_list_item(card, max_count, total))
+            other.append(create_list_item(card, max_count, total, game))
 
     headers = [html.Th('Card'),
         html.Th('Play-rate %', colSpan=5, className='text-center small'),

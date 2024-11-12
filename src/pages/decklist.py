@@ -113,10 +113,10 @@ def create_filter(include, exclude, granularity, placement):
     ])
     return filter_row
 
-def layout(deck=None, players=None, start_date=None, end_date=None, platform=None, include=None, exclude=None, granularity=0.6, placement=0.5):
+def layout(deck=None, players=None, start_date=None, end_date=None, platform=None, game=None, include=None, exclude=None, granularity=0.6, placement=0.5):
     include = None if include == 'None' else include
-    tours = tour_filter.TourFiltersAIO(players, start_date, end_date, platform, prefix)
-    filters = tour_filter.create_tour_filter(players, start_date, end_date, platform)
+    tours = tour_filter.TourFiltersAIO(players, start_date, end_date, platform, game, prefix)
+    filters = tour_filter.create_tour_filter(players, start_date, end_date, platform, game)
     filters['deck'] = deck
     filters['placement'] = placement
     filters['include'] = include
@@ -186,7 +186,7 @@ def layout(deck=None, players=None, start_date=None, end_date=None, platform=Non
                             lg={'order': 'first', 'size': 12}
                         ),
                         dbc.Col(
-                            html.Img(src=images.get_card_image(include, 'SM'), className='w-100') if include else [],
+                            html.Img(src=images.get_card_image(include, 'SM', filters['game']), className='w-100') if include else [],
                             xs=3, lg=12
                         )
                     ]),
@@ -329,12 +329,13 @@ def update_table_store(tf):
     Output(card_table_id, 'children'),
     Output(table_clipboard, 'content'),
     Input(table_view, 'value'),
-    Input(table_store, 'data')
+    Input(table_store, 'data'),
+    Input(store, 'data')
 )
-def update_card_table(view, data):
+def update_card_table(view, data, tf):
     skeleton = [c for c in data['cards'] if c['skeleton']]
     skeleton_list = '\n'.join((' '.join(str(c[k]) for k in ['count', 'name', 'set', 'number']) for c in skeleton))
-    return card_table.container_layout[view](data['cards'], data['total']), skeleton_list
+    return card_table.container_layout[view](data['cards'], data['total'], tf['game']), skeleton_list
 
 
 @callback(

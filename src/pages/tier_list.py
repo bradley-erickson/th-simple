@@ -88,9 +88,9 @@ def create_tier_row(tier, color, bottom_border=False, top=False):
 drop_complete_event = {"event": "dropcomplete", "props": ["detail.id", "detail.target"]}
 
 
-def layout(players=None, start_date=None, end_date=None, platform=None):
-    tours = tour_filter.TourFiltersAIO(players, start_date, end_date, platform, prefix)
-    archetype_raw = utils.data.get_decks(tour_filter.create_tour_filter(players, start_date, end_date, platform))
+def layout(players=None, start_date=None, end_date=None, platform=None, game=None):
+    tours = tour_filter.TourFiltersAIO(players, start_date, end_date, platform, game, prefix)
+    archetype_raw = utils.data.get_decks(tour_filter.create_tour_filter(players, start_date, end_date, platform, game))
     decks = [{
         'label': deck_label.format_label(deck),
         'value': deck['id'],
@@ -113,6 +113,7 @@ def layout(players=None, start_date=None, end_date=None, platform=None):
             id=archetype_collapse
         )
     ])
+    selected_decks = [d['value'] for d in decks if d['value'] != 'other'][:15]
 
     tier_list_tab = de.EventListener(html.Div([
         dbc.Card([
@@ -129,6 +130,7 @@ def layout(players=None, start_date=None, end_date=None, platform=None):
             dbc.Row(html.Small(f'Created on {date.today().strftime(date_format)}', className='ms-1')),
         ], id=report_card),
         dbc.Spinner(dbc.Row(
+            [create_deck_card(d) for d in decks if d['value'] in selected_decks],
             id={
                 'index': archetype_tray,
                 'type': drag_container
@@ -152,7 +154,7 @@ def layout(players=None, start_date=None, end_date=None, platform=None):
             dbc.Label('Archetype select'),
             dcc.Dropdown(
                 id=archetype_dropdown, multi=True, className='tier-list-archetype-select', clearable=False,
-                options=decks, value=[d['value'] for d in decks if d['value'] != 'other'][:15], maxHeight=400
+                options=decks, value=selected_decks, maxHeight=400
             ),
             html.Small('* Decks must be removed from tiers before removing as a selection.'),
             dbc.Switch(label='Show/Hide meta share input (beta)', value=False, id=meta_percentage_toggle),
