@@ -113,9 +113,16 @@ clientside_callback(
     State({'type': link_with_game, 'index': ALL}, 'href'),
 )
 def update_hrefs_with_game(game, hrefs):
-    href_with_game = [
-        f'{href}?game={game}' if href in ['/meta', '/decklist', '/tools/tier-list'] else href for href in hrefs
-    ]
+    href_with_game = []
+    for href in hrefs:
+        if href.startswith('/meta'):
+            href_with_game.append(f'/meta?game={game}')
+        elif href.startswith('/decklist'):
+            href_with_game.append(f'/decklist?game={game}')
+        elif href.startswith('/tools/tier-list'):
+            href_with_game.append(f'/tools/tier-list?game={game}')
+        else:
+            href_with_game.append(href)
     return href_with_game
 
 
