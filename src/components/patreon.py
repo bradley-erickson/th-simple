@@ -48,7 +48,7 @@ banner_id = 'patreon-banner-id'
 
 patreon_banner = dbc.Alert([
     html.I(className='fab fa-patreon me-1'),
-    'Help keep the site ad-free by supporting us on ',
+    'Help support the site on ',
     html.A('Patreon', href=patreon_link, target='_blank', className='alert-link'),
     '!'
 ], id=banner_id)
