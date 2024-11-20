@@ -377,6 +377,22 @@ def update_card_matchups(tf, options):
     if len(options) == 0:
         raise exceptions.PreventUpdate
 
+    url = f'{data.analysis_url}/decklists/{tf["deck"]}/card-matchups/overall'
+    params = tf.copy()
+    params['against_archetypes'] = [o['id'] for o in options[:15]]
+    if 'other' in params['against_archetypes']: params['against_archetypes'].remove('other')
+    if tf['deck'] in params['against_archetypes']:
+        params['against_archetypes'].remove(tf['deck'])
+    r = data.session.post(url, params=params)
+    matchups = []
+    if r.status_code == 200:
+        matchups = r.json()['data']
+    decks = {d['name']: d for d in options}
+    current_deck = next(d['name'] for d in options if d['id'] == tf['deck'])
+    for m in matchups:
+        m['count'] = current_deck
+    return matchup_table.create_matchup_spread(matchups, decks, player='count', against='deck_other')
+
     matchup_decks = [o['id'] for o in options[:15] if o['id'] not in [tf['deck'], 'other']] + [tf['deck']]
     matchups = data.fetch_matchup_data(tf, matchup_decks)
     filtered_matchups = [m for m in matchups if m['deck1'] == tf['deck']]
