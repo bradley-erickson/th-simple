@@ -12,6 +12,7 @@ import pandas as pd
 from components import (deck_label, matchup_table, ternary_switch,
                         archetype_builder, tags as tag_settings,
                         download_button as _download, feedback_link)
+import components.navbar
 import utils.data
 
 page_title = 'Battle Journal'
@@ -276,16 +277,17 @@ def upload_files(list_of_contents, list_of_filenames):
     Input(game_store, 'modified_timestamp'),
     Input(archetype_builder.ArchetypeBuilderAIO.ids.store(settings_archetype_builder), 'data'),
     State(game_store, 'data'),
-    State(archetype_store, 'data')
+    State(archetype_store, 'data'),
+    State(components.navbar.game_preference, 'value')
 )
-def update_archetype_store(ts, extra_archetypes, data, current):
+def update_archetype_store(ts, extra_archetypes, data, current, game_preference):
     if ts is None or (len(current) > 0 and ctx.triggered_id == game_store):
         raise exceptions.PreventUpdate
     today = datetime.date.today()
     weeks_ago_3 = str(today - datetime.timedelta(21))
     min_game = min(d['time'] for d in data).split(' ')[0] if len(data) > 0 else str(today)
     start_date = min(min_game, weeks_ago_3)
-    api_archetypes = utils.data.get_decks({'start_date': start_date})
+    api_archetypes = utils.data.get_decks({'start_date': start_date, 'game': game_preference})
     archetypes = extra_archetypes + api_archetypes
     decks = {d['id']: d for d in archetypes}
     return current | decks
