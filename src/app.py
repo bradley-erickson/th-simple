@@ -60,6 +60,7 @@ app.index_string = '''
         {%metas%}
         <title>{%title%}</title>
         <link rel="manifest" href="./assets/manifest.json" />
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1461880207794875" crossorigin="anonymous"></script>
         {%favicon%}
         {%css%}
     </head>

@@ -393,12 +393,6 @@ def update_card_matchups(tf, options):
         m['count'] = current_deck
     return matchup_table.create_matchup_spread(matchups, decks, player='count', against='deck_other')
 
-    matchup_decks = [o['id'] for o in options[:15] if o['id'] not in [tf['deck'], 'other']] + [tf['deck']]
-    matchups = data.fetch_matchup_data(tf, matchup_decks)
-    filtered_matchups = [m for m in matchups if m['deck1'] == tf['deck']]
-    decks = {d['id']: d for d in options}
-    return matchup_table.create_matchup_spread(filtered_matchups, decks)
-
 
 @callback(
     Output(card_trend, 'children'),
