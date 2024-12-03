@@ -477,6 +477,8 @@ def create_deck_breakdown(data, decks):
     overall = {'Win': 0, 'Loss': 0, 'Tie': 0, 'total': 0}
     for m in data:
         m_play = m['playing']
+        if not m['result']:
+            continue
         if m_play not in breakdown:
             breakdown[m_play] = {'Win': 0, 'Loss': 0, 'Tie': 0, 'total': 0}
         breakdown[m_play][m['result']] += 1

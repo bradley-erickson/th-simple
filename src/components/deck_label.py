@@ -19,4 +19,5 @@ def format_label(deck, hide_text=False, hide_text_small=False):
     )
 
 def create_default_deck(id):
-    return {'id': id, 'name': id.title(), 'icons': ['substitute']}
+    id_fix = 'other' if id is None else id
+    return {'id': id_fix, 'name': id_fix.title(), 'icons': ['substitute']}
