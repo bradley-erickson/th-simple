@@ -453,7 +453,7 @@ def create_match(g, decks):
 def update_history(history_ts, data, archetype_ts, decks):
     if history_ts is None or archetype_ts is None or len(decks) == 0:
         raise exceptions.PreventUpdate
-    games = [create_match(g, decks) for g in data]
+    games = [create_match(g, decks) for g in data if g['result'] is not None]
     return games
 
 
@@ -509,6 +509,8 @@ def create_deck_breakdown(data, decks):
 def prep_matchup_spread(data):
     matchup_dict = {}
     for m in data:
+        if not m['result']:
+            continue
         m_play = m['playing']
         m_agai = m['against']
         if m_play not in matchup_dict:
