@@ -4,7 +4,7 @@ import dash_bootstrap_components as dbc
 import math
 
 from components import tour_filter, deck_label
-from utils import colors, data
+from utils import colors, data, cache
 
 dash.register_page(
     __name__,
@@ -16,6 +16,7 @@ dash.register_page(
 
 prefix = 'deck-select'
 tour_store = f'{prefix}-tour-store'
+_search = f'{prefix}-search'
 table = f'{prefix}-table'
 
 def layout(players=None, start_date=None, end_date=None, platform=None, game=None):
@@ -26,16 +27,24 @@ def layout(players=None, start_date=None, end_date=None, platform=None, game=Non
         tours,
         dcc.Store(id=tour_store, data=tour_filters),
         html.H3('Deck Select'),
+        dbc.Input(placeholder='Search for a deck', id=_search, class_name='mb-1'),
         dbc.Spinner(dbc.Table(id=table))
     ])
     return cont
 
+
+@cache.cache.memoize(86400)
+def _fetch_decks(tf):
+    return data.get_decks(tf)
+
+
 @callback(
     Output(table, 'children'),
-    Input(tour_store, 'data')
+    Input(tour_store, 'data'),
+    Input(_search, 'value')
 )
-def update_table(tf):
-    decks_raw = data.get_decks(tf)
+def update_table(tf, search):
+    decks_raw = _fetch_decks(tf)
     params = tour_filter.create_param_string(tf)
     body = html.Tbody([
         html.Tr([
@@ -46,6 +55,7 @@ def update_table(tf):
                     href=f'/decklist/{deck["id"]}{params}'
                 )
             )
-        ], className='deck-row') for i, deck in enumerate(decks_raw[:50])
+        ], className='deck-row' if not search or search.strip().lower() in deck.get('name', '').lower() else 'd-none')
+        for i, deck in enumerate(decks_raw[:50])
     ])
     return body
