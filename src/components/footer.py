@@ -13,6 +13,11 @@ bmc_link = 'https://www.buymeacoffee.com/trainerhill'
 footer = dbc.Navbar(
     dbc.Container([
         dbc.NavLink(
+            html.I(className='fab fa-bluesky fs-5', title='Follow us on Bluesky'),
+            href='https://bsky.app/profile/trainerhill.com',
+            target='_blank'
+        ),
+        dbc.NavLink(
             html.I(className='fab fa-twitter fs-5', title='Follow us on Twitter'),
             href='https://twitter.com/Trainer_Hill',
             target='_blank'

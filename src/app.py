@@ -29,7 +29,7 @@ app = dash.Dash(
     use_pages=True,
     external_stylesheets=[
         dbc_css,
-        dbc.icons.FONT_AWESOME,
+        'https://use.fontawesome.com/releases/v6.7.2/css/all.css',
         'https://epsi95.github.io/dash-draggable-css-scipt/dragula.css'
     ],
     external_scripts=[
