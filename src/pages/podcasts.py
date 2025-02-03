@@ -43,7 +43,7 @@ FEEDS = {
     'PokeBeach': 'https://feeds.buzzsprout.com/2248143.rss',
     'SpilltheTeaCG': 'https://anchor.fm/s/f5124288/podcast/rss',
     'Memory Capsule': 'https://anchor.fm/s/d94e8ac0/podcast/rss',
-    'Let Loose': 'https://anchor.fm/s/f47193c4/podcast/rss',
+    'Unfazed Facts': 'https://anchor.fm/s/f47193c4/podcast/rss',
     'TCG Royals': 'https://media.rss.com/tcg-royals-podcast/feed.xml'
 }
 
@@ -165,13 +165,13 @@ def layout():
     cont = html.Div([
         html.H2([html.I(className=f'fas {page_icon} me-1'), page_title]),
         dbc.Spinner(id=container),
-        html.Div(html.Small([
+        html.Div([
             'If we are ',
             html.Strong('missing'),
             ' a podcast, please submit a ',
             feedback_link.link_item,
             " with the podcast's name and we'll get it added!"
-        ]))
+        ])
     ])
     return cont
 
