@@ -18,6 +18,7 @@ dash.register_page(
 prefix = 'feedback'
 alert = f'{prefix}-alert'
 reason = f'{prefix}-reason'
+relevant_page = f'{prefix}-page'
 comments = f'{prefix}-comments'
 comments_message = f'{prefix}-comments-message'
 contact_method = f'{prefix}-contact-method'
@@ -26,16 +27,13 @@ contact_message = f'{prefix}-contact-message'
 submit = f'{prefix}-submit'
 webhook_url = os.environ['FEEDBACK_URL']
 
+feedback_text = "We'd love to hear your thoughts about our site. Whether it's a suggestion, a bug, or just a quick comment, your feedback is crucial in helping us improve. If you wish to be contacted, leave your contact information so we can follow up. Thanks for helping us make our website better for everyone."
+
 
 layout = html.Div([
     html.H2('Feedback'),
     html.Strong('We value your feedback!'),
-    html.P("We'd love to hear your thoughts about our site. "\
-           "Whether it's a suggestion, a bug, or just a quick "\
-           "comment, your feedback is crucial in helping us improve.\n"\
-           "If you wish to be contacted, leave your Twitter or Discord "\
-           "so we can follow up. Thanks for helping us make our website "\
-           "better for everyone."),
+    html.P(feedback_text),
     dbc.Alert(id=alert, dismissable=True, duration=5_000, is_open=False),
     dbc.Form([
         html.Div([
@@ -46,12 +44,24 @@ layout = html.Div([
             )
         ]),
         html.Div([
+            dbc.Label('Relevant Page'),
+            dcc.Dropdown(
+                ['None', 'Meta Analysis', 'Decklist Analysis', 'Badge Maker',
+                 'Battle Journal', 'Deck Diff Table Compare', 'Deck Diff Venn Diagram',
+                 'Podcast Hub', 'Prize Checker', 'Tier List Creator'
+                ],
+                value='None',
+                id=relevant_page,
+                clearable=False
+            )
+        ]),
+        html.Div([
             dbc.Label('Comments'),
             dbc.Textarea(
                 id=comments,
                 value='',
                 required=True,
-                placeholder='Provide us some details...'
+                placeholder='Please describe your feedback in detail...'
             ),
             dbc.FormText('Responses must be a minimum of 10 characters.', color='muted', id=comments_message)
         ]),
@@ -59,7 +69,7 @@ layout = html.Div([
             dbc.Label('Contact'),
             dbc.Row([
                 dbc.Col(dcc.Dropdown(
-                    ['None', 'Twitter', 'Discord'],
+                    ['None', 'Twitter', 'Bluesky', 'Discord', 'Email'],
                     placeholder='Preference',
                     value='None',
                     id=contact_method,
@@ -93,24 +103,27 @@ clientside_callback(
     Output(alert, 'children'),
     Output(alert, 'color'),
     Output(reason, 'value'),
+    Output(relevant_page, 'value'),
     Output(comments, 'value'),
     Output(contact_method, 'value'),
     Output(contact_user, 'value'),
     Input(submit, 'n_clicks'),
     State(reason, 'value'),
+    State(relevant_page, 'value'),
     State(comments, 'value'),
     State(contact_method, 'value'),
     State(contact_user, 'value'),
 )
-def submit_form(clicks, r, c, cm, cu):
+def submit_form(clicks, r, p, c, cm, cu):
     if clicks is None:
         raise exceptions.PreventUpdate
     hook = discord.SyncWebhook.from_url(webhook_url)
     content = f'**Reason**: {r}\n'\
+              f'**Page**: {p}\n'\
               f'**Comments**: {c}\n'\
               f'**Contact method**: {cm}\n'\
               f'**Contact username**: {cu}\n'
     sent = hook.send(content, wait=True)
     if sent is not None:
-        return True, 'Submitted', 'success', None, '', None, ''
-    return True, 'Error occured, try again later', 'danger', no_update, no_update, no_update, no_update
+        return True, 'Submitted', 'success', None, 'None', '', None, ''
+    return True, 'Error occured, try again later', 'danger', no_update, no_update, no_update, no_update, no_update
