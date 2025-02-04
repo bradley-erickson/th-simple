@@ -15,7 +15,6 @@ win_rate_calc_comp = dcc.Markdown(
     mathjax=True, className='win-rate-calc'
 )
 
-
 def create_record_string(match):
     if 'Win' in match and 'Loss' in match:
         tied = f'-{match["Tie"]}' if 'Tie' in match else ''
@@ -28,13 +27,7 @@ def create_record_string(match):
     return None
 
 
-def create_matchup_tile(match, decks, player, against):
-    if match is None or match['win_rate'] is None or math.isnan(match['win_rate']):
-        return html.Td('-', className='text-center align-middle')
-    id = match[player] + match[against]
-    wr = match['win_rate']
-    record = create_record_string(match)
-    color = colors.win_rate_color_bar[math.floor(wr)][1]
+def create_popover_inside(color='', record='', wr='', decks=None, match=None, player=None, against=None):
     vs_item = html.Div([
         html.Span(deck_label.format_label(
             decks.get(match[player], deck_label.create_default_deck(match[player])),
@@ -43,16 +36,27 @@ def create_matchup_tile(match, decks, player, against):
         html.Span(deck_label.format_label(
             decks.get(match[against], deck_label.create_default_deck(match[against])),
             hide_text=True)),
-    ], className='d-flex align-items-center')
+    ], className='d-flex align-items-center justify-content-around')
+    return html.Div([
+        vs_item,
+        html.Div(f'{wr}%'),
+        html.Div(record)
+    ], className='text-black text-center p-2 rounded', style={'backgroundColor': color})
+
+
+def create_matchup_tile(match, decks, player, against):
+    if match is None or match['win_rate'] is None or math.isnan(match['win_rate']):
+        return html.Td('-', className='text-center align-middle')
+    id = match[player] + match[against]
+    wr = match['win_rate']
+    record = create_record_string(match)
+    color = colors.win_rate_color_bar[math.floor(wr)][1]
     return html.Td([
         html.Div([f'{wr}%', html.Div(record)], id=id, className='text-center'),
         dbc.Popover(
-            dbc.PopoverBody([
-                vs_item,
-                html.Div(f'{wr}%'),
-                html.Div(record)
-            ], class_name='text-black text-center'),
-            style={'backgroundColor': color},
+            create_popover_inside(color=color, record=record, wr=wr,
+                                  decks=decks, match=match, player=player,
+                                  against=against),
             target=id,
             trigger='hover',
             placement='bottom'
@@ -95,7 +99,7 @@ def create_matchup_tile_row(deck, data, decks, player, against):
     ], className='mb-2')
     return row
 
-def create_matchup_spread(data, decks, player='deck1', against='deck2'):
+def create_matchup_spread(data, decks, player='deck1', against='deck2', small_view=False):
     # Extract unique decks from player and sort them alphabetically
     player_unique_decks = list(set(matchup[player] for matchup in data))
     if len(player_unique_decks) == 0:
@@ -140,10 +144,30 @@ def create_matchup_spread(data, decks, player='deck1', against='deck2'):
     table = dbc.Table([
         headers,
         html.Tbody(rows)
-    ], className='d-none d-xl-block')
+    ], className='d-none' if small_view else 'd-none d-xl-block')
 
     small_view = html.Div([
         win_rate_calc_comp,
         html.Div(small_rows)
-    ], className='d-xl-none')
+    ], className='' if small_view else 'd-xl-none')
     return html.Div([table, small_view])
+
+
+example = html.Div([
+    html.Div([
+        'Other vs Other',
+        create_popover_inside('#fff', 'Wins-Losses-Ties', 'rate', decks={}, match={None: None}),
+        'Color based on rate',
+        html.Div(style={
+            'background': f'linear-gradient(to right, {", ".join(colors.red_to_white_to_blue)})',
+            'height': '20px',
+            'width': '100%',
+            'border': '1px solid #ccc'
+        }),
+        html.Div([html.Span(c) for c in [0, 100]], className='d-flex justify-content-between')
+    ], className='text-center'),
+    html.Div([
+        'Weighted success rate',
+        win_rate_calc_comp
+    ]),
+])
