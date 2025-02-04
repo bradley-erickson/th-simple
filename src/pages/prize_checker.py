@@ -4,7 +4,7 @@ import dash_bootstrap_components as dbc
 from dash_extensions import EventListener
 import random
 
-from components import feedback_link
+from components import feedback_link, help_icon
 import utils.cards
 import utils.decklists
 import utils.images
@@ -25,6 +25,13 @@ dash.register_page(
 
 prefix = 'prize-checker'
 parse_alert = f'{prefix}-parse-alert'
+
+_help_icon = f'{prefix}-help'
+_help_children = html.Ul([
+    html.Li([html.Strong('Set Card Priorities:'), ' Input your decklists and set card priorities.']),
+    html.Li([html.Strong('Determine Prize Cards:'), ' Scroll through your deck to figure out which cards are prized.']),
+    feedback_link.list_item
+], className='mb-0')
 
 EXAMPLE = '''Pokémon (18)
 2 Charmander MEW 4
@@ -163,12 +170,11 @@ settings_tab = html.Div([
 ])
 
 layout = html.Div([
-    html.H2([html.I(className=f'fas {page_icon} me-1'), page_title]),
-    dbc.Alert(html.Ul([
-        html.Li([html.Strong('Set Card Priorities:'), ' Input your decklists and set card priorities.']),
-        html.Li([html.Strong('Determine Prize Cards:'), ' Scroll through your deck to figure out which cards are prized.']),
-        feedback_link.list_item
-    ], className='mb-0'), id='prizechecker-info-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
+    html.Div([
+        html.H2([html.I(className=f'fas {page_icon} me-1'), page_title], className='d-inline-block'),
+        help_icon.create_help_icon(_help_icon, _help_children, className='align-top'),
+    ]),
+    dbc.Alert(_help_children, id='prizechecker-info-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
     dbc.Alert(is_open=False, color='warning', id=parse_alert),
     dbc.Tabs([
         dbc.Tab(decklist_tab, label='List'),

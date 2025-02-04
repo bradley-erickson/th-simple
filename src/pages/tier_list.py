@@ -7,7 +7,7 @@ import platform
 
 from components import (tour_filter, page_too_small, deck_label,
                         download_button, archetype_builder, feedback_link,
-                        breakdown
+                        breakdown, help_icon
 )
 import utils.data
 
@@ -44,6 +44,12 @@ archetype_tray = f'{prefix}-list-archetype-tray'
 meta_percentage_toggle = f'{prefix}-meta-percentage-toggle'
 meta_percentage_input = f'{prefix}-meta-percentage-input'
 meta_percentage_breakdown = f'{prefix}-meta-percentage-breakdown'
+
+_help_icon = f'{prefix}-help'
+_help_children = html.Ul([
+    html.Li([html.Strong('Drag n Drop:'), ' Easily create your tier list by dragging and dropping decks into tiers.']),
+    feedback_link.list_item
+], className='mb-0')
 
 
 def create_deck_card(deck):
@@ -142,12 +148,10 @@ def layout(players=None, start_date=None, end_date=None, platform=None, game=Non
         page_too_small.alert,
         html.Div([
             html.H2([html.I(className=f'fas {page_icon} me-1'), page_title], className='d-inline-block'),
+            help_icon.create_help_icon(_help_icon, _help_children, className='align-top'),
             download_button.DownloadImageAIO(report_card, className='float-end'),
         ]),
-        dbc.Alert(html.Ul([
-            html.Li([html.Strong('Drag n Drop:'), ' Easily create your tier list by dragging and dropping decks into tiers.']),
-            feedback_link.list_item
-        ], className='mb-0'), id='tierlist-info-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
+        dbc.Alert(_help_children, id='tierlist-info-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
         tours,
         additional_decks,
         html.Div([

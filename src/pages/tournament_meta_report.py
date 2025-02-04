@@ -7,7 +7,7 @@ import dash_bootstrap_templates as dbt
 import datetime
 import xml.etree.ElementTree as ET
 
-from components import deck_label, matchup_table, breakdown, download_button, navbar, feedback_link
+from components import deck_label, matchup_table, breakdown, download_button, navbar, feedback_link, help_icon
 import utils.data
 import utils.date
 
@@ -26,6 +26,15 @@ prefix = 'tour-meta-report'
 store = f'{prefix}-store'
 clear_id = f'{prefix}-clear'
 tabs = f'{prefix}-tabs'
+
+_help_icon = f'{prefix}-help'
+_help_children = html.Ul([
+    html.Li([html.Strong('Prototype dashboard:'), ' This dashboard is a work in progress. Some things are not yet finalized.']),
+    html.Li([html.Strong('Purpose:'), ' This dashboard allows Tournamet Organizers to see a snapshot of the local meta.']),
+    html.Li([html.Strong('Usage:'), ' Upload a tdf, choose a deck for each player, inpsect breakdown and matchups.']),
+    html.Li([html.Strong('Data Privacy:'), " The uploaded data is processed to display relevant information, but no information is collected. If you clear cookies or click the clear button, your data will be deleted forever."]),
+    feedback_link.list_item,
+], className='mb-0')
 
 # upload tab
 upload_prefix = f'{prefix}-upload-tab'
@@ -104,6 +113,7 @@ def layout():
     return html.Div([
         html.Div([
             html.H2('Tournament Meta Report', className='d-inline-block'),
+            help_icon.create_help_icon(_help_icon, _help_children, className='align-top'),
             html.Div(dcc.ConfirmDialogProvider(
                 dbc.Button([html.I(className='far fa-trash-can me-1'), 'Clear Data']),
                 id=clear_id,
@@ -112,13 +122,7 @@ def layout():
             # TODO make the download button only appear when the report tab is active
             download_button.DownloadImageAIO(dom_id=report_wrapper, className='float-end me-1'),
         ]),
-        dbc.Alert(html.Ul([
-            html.Li([html.Strong('Prototype dashboard:'), ' This dashboard is a work in progress. Some things are not yet finalized.']),
-            html.Li([html.Strong('Purpose:'), ' This dashboard allows Tournamet Organizers to see a snapshot of the local meta.']),
-            html.Li([html.Strong('Usage:'), ' Upload a tdf, choose a deck for each player, inpsect breakdown and matchups.']),
-            html.Li([html.Strong('Data Privacy:'), " The uploaded data is processed to display relevant information, but no information is collected. If you clear cookies or click the clear button, your data will be deleted forever."]),
-            feedback_link.list_item,
-        ], className='mb-0'), id='tour-meta-report-info-alert', color='info'),
+        dbc.Alert(_help_children, id='tour-meta-report-info-alert', color='info'),
         dbc.Tabs([
             dbc.Tab(upload_tab, label='Upload', tab_id=upload_prefix),
             dbc.Tab(roster_tab, label='Roster', tab_id=roster_prefix),

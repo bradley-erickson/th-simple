@@ -2,7 +2,7 @@ import dash
 from dash import html, callback, clientside_callback, ClientsideFunction, Output, Input
 import dash_bootstrap_components as dbc
 
-from components import download_button, feedback_link
+from components import download_button, feedback_link, help_icon
 from utils import images, cards as _cards
 import utils.decklists
 
@@ -36,15 +36,19 @@ overlap_total = f'{overlap}-total'
 b_only = f'{prefix}-b-only'
 b_only_total = f'{b_only}-total'
 
+_help_icon = f'{prefix}-help'
+_help_children = html.Ul([
+    html.Li([html.Strong('Simple to Use:'), ' Input your decklists and see a Venn diagram-like comparison.']),
+    feedback_link.list_item
+], className='mb-0')
+
 layout = html.Div([
     html.Div([
         html.H2([html.I(className=f'fas {page_icon} me-1'), page_title], className='d-inline-block'),
+            help_icon.create_help_icon(_help_icon, _help_children, className='align-top'),
         download_button.DownloadImageAIO(dom_id=prefix, className='float-end')
     ]),
-    dbc.Alert(html.Ul([
-        html.Li([html.Strong('Simple to Use:'), ' Input your decklists and see a Venn diagram-like comparison.']),
-        feedback_link.list_item
-    ], className='mb-0'), id='deckdiff-info-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
+    dbc.Alert(_help_children, id='deckdiff-info-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
     dbc.Alert(is_open=False, color='warning', id=parse_alert),
     dbc.Row([
         dbc.Col([
@@ -126,8 +130,6 @@ def update_diff(a, b):
     in_b = []
     in_both = []
 
-    # TODO first fetch card supertypes
-    # then we can ignore card_id for trainers
     overall = set(list(a_dict.keys()) + list(b_dict.keys()))
     for card in overall:
         if card in a_dict and card in b_dict:

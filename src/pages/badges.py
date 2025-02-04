@@ -4,7 +4,7 @@ import dash_bootstrap_components as dbc
 import datetime
 import random
 
-from components import download_button, deck_label, feedback_link, archetype_builder
+from components import download_button, deck_label, feedback_link, archetype_builder, help_icon
 import utils.cache
 import utils.colors
 import utils.data
@@ -48,6 +48,13 @@ fake_trainers = ['Ash Ketchum', 'Professor Oak', 'Iono', 'Sabrina',
                  'Blaine', 'Champion Cynthia', 'Champion Leon',
                  'Youngster Joey', 'Mallow', 'Wally']
 
+_help_icon = f'{prefix}-help'
+_help_children = html.Ul([
+    html.Li([html.Strong('Create:'), ' Customize your badge']),
+    html.Li([html.Strong('Share:'), ' Download an image to share']),
+    feedback_link.list_item
+], className='mb-0')
+
 def layout():
     today = datetime.date.today()
     archetypes = utils.data.get_decks({'start_date': str(today - datetime.timedelta(21))})
@@ -87,13 +94,10 @@ def layout():
     cont = html.Div([
         html.Div([
             html.H2([html.I(className=f'fas {page_icon} me-1'), page_title], className='d-inline-block'),
-            download_button.DownloadImageAIO(dom_id=output)
-        ], className='d-flex justify-content-between'),
-        dbc.Alert(html.Ul([
-            html.Li([html.Strong('Create:'), ' Customize your badge']),
-            html.Li([html.Strong('Share:'), ' Download an image to share']),
-            feedback_link.list_item
-        ], className='mb-0'), id='badges-info-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
+            help_icon.create_help_icon(_help_icon, _help_children, className='align-top'),
+            download_button.DownloadImageAIO(dom_id=output, className='float-end')
+        ]),
+        dbc.Alert(_help_children, id='badges-info-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
         dbc.Row([
             dbc.Col(
                 dbc.Form(options),

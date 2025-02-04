@@ -27,7 +27,11 @@ hide_common = f'{prefix}-hide-common'
 _remove_item = f'{prefix}-remove-item'
 
 _help_icon = f'{prefix}-help'
-_help_children = []
+_help_children = html.Ul([
+    html.Li([html.Strong('Quickly compare:'), ' Analyze and compare multiple decklists.']),
+    html.Li([html.Strong('Decklist input:'), ' Select decks from LimitlessTCG or input decks manually to compare.']),
+    feedback_link.list_item,
+], className='mb-0')
 
 
 def create_decklist_row(id, event=None):
@@ -46,14 +50,10 @@ def layout():
     cont = html.Div([
         html.Div([
             html.H2([html.I(className=f'fas {page_icon} me-1'), page_title], className='d-inline-block'),
-            # help_icon.create_help_icon(_help_icon, _help_children, className='align-top'),
+            help_icon.create_help_icon(_help_icon, _help_children, className='align-top'),
             download_button.DownloadImageAIO(dom_id=card_table, className='float-end')
         ]),
-        dbc.Alert(html.Ul([
-            html.Li([html.Strong('Quickly compare:'), ' Analyze and compare multiple decklists.']),
-            html.Li([html.Strong('Decklist input:'), ' Select decks from LimitlessTCG or input decks manually to compare.']),
-            feedback_link.list_item,
-        ], className='mb-0'), id='tour-meta-report-info-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
+        dbc.Alert(_help_children, id='tour-meta-report-info-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
         html.Div([create_decklist_row(0)], id=deck_selection_table),
         dbc.Button([html.I(className='fas fa-plus me-1'), 'Add'], id=add_row),
         dbc.Checkbox(id=hide_common, value=False, label='Hide common cards'),
