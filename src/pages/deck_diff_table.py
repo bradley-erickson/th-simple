@@ -32,13 +32,13 @@ _help_children = []
 
 def create_decklist_row(id, event=None):
     return html.Div([
+        deck_select.DeckSelectAIO(aio_id=id, event=event, className='d-flex flex-grow-1'),
         html.Div(dbc.Button(
             html.I(className='fas fa-trash text-primary'),
             id={'type': _remove_item, 'index': id},
             title='Remove deck',
             color='transparent',
-        ), className='me-3'),
-        deck_select.DeckSelectAIO(aio_id=id, event=event, className='d-flex flex-grow-1')
+        ), className='ms-3'),
     ], id=f'decklist-{id}', className='d-flex')
 
 
@@ -104,9 +104,8 @@ def update_card_table(decks, labels, hide):
     cards = {}
     for i, deck in enumerate(decks):
         if deck is None: continue
-        parsed_deck, parsed_errors = utils.decklists.parse_decklist(deck)
-        for card in parsed_deck:
-            id = card['card_code'] if card.get('supertype') == 'Pokémon' else card['name']
+        for card in deck:
+            id = card['unique']
             if id not in cards:
                 cards[id] = card
                 cards[id]['decks'] = []

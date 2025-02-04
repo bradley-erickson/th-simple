@@ -119,8 +119,8 @@ def update_diff(a, b):
     dl_a, dl_a_issues = utils.decklists.parse_decklist(a)
     dl_b, dl_b_issues = utils.decklists.parse_decklist(b)
 
-    a_dict = {(c['card_code'] if c.get('supertype') == 'Pokémon' and 'card_code' in c else c['name']): c for c in dl_a}
-    b_dict = {(c['card_code'] if c.get('supertype') == 'Pokémon' and 'card_code' in c else c['name']): c for c in dl_b}
+    a_dict = {c['unique']: c for c in dl_a}
+    b_dict = {c['unique']: c for c in dl_b}
 
     in_a = []
     in_b = []

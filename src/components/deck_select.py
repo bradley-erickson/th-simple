@@ -25,14 +25,16 @@ def _fetch_limitless_events():
     return th_helpers.scraper.limitless.fetch_events()
 
 
-@utils.cache.cache.memoize()
+@utils.cache.cache.memoize(86400)
 def _fetch_limitless_tour_decklists(tour):
     return th_helpers.scraper.limitless.fetch_decklists(tour)
 
 
-@utils.cache.cache.memoize(86400)
+@utils.cache.cache.memoize(604800)
 def _fetch_limitless_decklist(url):
-    return th_helpers.scraper.limitless.fetch_decklist(url)
+    limitless_decklist = th_helpers.scraper.limitless.fetch_decklist(url)
+    decklist, _ = utils.decklists.parse_decklist(limitless_decklist)
+    return decklist
 
 
 class DeckSelectAIO(html.Div):
@@ -88,7 +90,17 @@ class DeckSelectAIO(html.Div):
             'subcomponent': 'manual_input',
             'aio_id': aio_id
         }
-    
+        manual_error = lambda aio_id: {
+            'component': 'DeckSelectAIO',
+            'subcomponent': 'manual_error',
+            'aio_id': aio_id
+        }
+        manual_parse = lambda aio_id: {
+            'component': 'DeckSelectAIO',
+            'subcomponent': 'manual_parse',
+            'aio_id': aio_id
+        }
+
     ids = ids
 
     def __init__(
@@ -113,8 +125,12 @@ class DeckSelectAIO(html.Div):
                 dbc.Input(value='', placeholder='Label', id=self.ids.manual_label(aio_id)),
                 dbc.Textarea(
                     value='', placeholder='Paste decklist here', id=self.ids.manual_input(aio_id),
-                    size='sm', spellcheck='false'
-                )
+                    size='sm', spellcheck='false', class_name='my-1'
+                ),
+                html.Small(id=self.ids.manual_error(aio_id)),
+                dbc.Button(
+                    'Parse', disabled=True, id=self.ids.manual_parse(aio_id),
+                    class_name='float-end mb-1', size='sm')
             ], xl=10, lg=9, id=self.ids.manual_wrapper(aio_id)),
             dbc.Col([
                 dcc.Dropdown(id=self.ids.limitless_events(aio_id), options=[{
@@ -139,6 +155,16 @@ class DeckSelectAIO(html.Div):
         Input(ids.input_toggle(MATCH), 'value')
     )
 
+    clientside_callback(
+        '''function (val) {
+            if (val.length > 1) { return false; }
+            return true;
+        }
+        ''',
+        Output(ids.manual_parse(MATCH), 'disabled'),
+        Input(ids.manual_input(MATCH), 'value')
+    )
+
     @callback(
         Output(ids.limitless_players(MATCH), 'options'),
         Input(ids.limitless_events(MATCH), 'value')
@@ -156,23 +182,25 @@ class DeckSelectAIO(html.Div):
 
     @callback(
         Output(ids.decklist(MATCH), 'data'),
+        Output(ids.manual_error(MATCH), 'childen'),
         Input(ids.limitless_players(MATCH), 'value'),
-        Input(ids.manual_input(MATCH), 'value')
+        Input(ids.manual_parse(MATCH), 'n_clicks'),
+        State(ids.manual_input(MATCH), 'value')
     )
-    def update_selected_deck(deck, manual_input):
+    def update_selected_deck(deck, manual_clicks, manual_input):
         if ctx.triggered_id is None:
             raise dash.exceptions.PreventUpdate
         
         subcomponent = ctx.triggered_id['subcomponent']
-
         if subcomponent == 'limitless_players':    
             base_url = 'https://limitlesstcg.com'
             path = deck.split(':')[-1]
             decklist = _fetch_limitless_decklist(f'{base_url}{path}')
-            return decklist
-        elif subcomponent == 'manual_input':
-            decklist, _ = utils.decklists.parse_decklist(manual_input)
-            return decklist
+            return decklist, []
+        elif subcomponent == 'manual_parse':
+            decklist, errors = utils.decklists.parse_decklist(manual_input)
+            error_string = f'Error parsing: {", ".join(errors)}' if len(errors) > 0 else ''
+            return decklist, error_string
         raise dash.exceptions.PreventUpdate
     
     @callback(
