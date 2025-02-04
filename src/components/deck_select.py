@@ -6,6 +6,7 @@ import uuid
 
 import components.deck_label
 import utils.decklists
+import utils.cache
 
 LIMITLESSTCG = 'Limitless TCG'
 MANUAL_ENTRY = 'Manual'
@@ -19,9 +20,29 @@ def create_deck_option(deck, icons, name):
     return opt
 
 
+@utils.cache.cache.memoize(43200)
+def _fetch_limitless_events():
+    return th_helpers.scraper.limitless.fetch_events()
+
+
+@utils.cache.cache.memoize()
+def _fetch_limitless_tour_decklists(tour):
+    return th_helpers.scraper.limitless.fetch_decklists(tour)
+
+
+@utils.cache.cache.memoize(86400)
+def _fetch_limitless_decklist(url):
+    return th_helpers.scraper.limitless.fetch_decklist(url)
+
+
 class DeckSelectAIO(html.Div):
 
     class ids:
+        wrapper = lambda aio_id: {
+            'component': 'DeckSelectAIO',
+            'subcomponent': 'wrapper',
+            'aio_id': aio_id
+        }
         input_toggle = lambda aio_id: {
             'component': 'DeckSelectAIO',
             'subcomponent': 'input_toggle',
@@ -73,35 +94,39 @@ class DeckSelectAIO(html.Div):
     def __init__(
         self,
         event=None,
-        aio_id=None
+        aio_id=None,
+        className=None
     ):
-        events = th_helpers.scraper.limitless.fetch_events()
+        events = _fetch_limitless_events()
         if aio_id is None:
             aio_id = str(uuid.uuid4())
         component = dbc.Row([
-            dbc.Col(dbc.RadioItems(
-                options=[LIMITLESSTCG, MANUAL_ENTRY],
-                value=LIMITLESSTCG,
-                id=self.ids.input_toggle(aio_id)
-            ), md=2),
+            dbc.Col([
+                dbc.RadioItems(
+                    options=[LIMITLESSTCG, MANUAL_ENTRY],
+                    value=LIMITLESSTCG,
+                    id=self.ids.input_toggle(aio_id),
+                    class_name='d-inline-block'
+                )
+            ], xl=2, lg=3, class_name='d-flex justify-content-between align-items-start'),
             dbc.Col([
                 dbc.Input(value='', placeholder='Label', id=self.ids.manual_label(aio_id)),
                 dbc.Textarea(
                     value='', placeholder='Paste decklist here', id=self.ids.manual_input(aio_id),
                     size='sm', spellcheck='false'
                 )
-            ], md=10, id=self.ids.manual_wrapper(aio_id)),
+            ], xl=10, lg=9, id=self.ids.manual_wrapper(aio_id)),
             dbc.Col([
                 dcc.Dropdown(id=self.ids.limitless_events(aio_id), options=[{
                     'label': e[0], 'value': e[1]
                 } for e in events], value=event),
                 dcc.Dropdown(id=self.ids.limitless_players(aio_id))
-            ], md=10, id=self.ids.limitless_wrapper(aio_id), class_name='deck-diff-limitless-dropdowns'),
+            ], xl=10, lg=9, id=self.ids.limitless_wrapper(aio_id), class_name='deck-diff-limitless-dropdowns'),
             dcc.Store(id=self.ids.decklist(aio_id)),
             html.Div(id=self.ids.label(aio_id), className='d-none'),
             html.Hr()
-        ])
-        super().__init__(component)
+        ], className='flex-grow-1')
+        super().__init__(component, id=self.ids.wrapper(aio_id), className=className)
 
     clientside_callback(
         f'''function (val) {{
@@ -121,7 +146,7 @@ class DeckSelectAIO(html.Div):
     def update_deck_options(tour):
         if tour is None:
             raise dash.exceptions.PreventUpdate
-        decks = th_helpers.scraper.limitless.fetch_decklists(tour)
+        decks = _fetch_limitless_tour_decklists(tour)
         options = [{
             'label': create_deck_option(d[1], d[2], d[4]),
             'value': f'{d[0]}:{d[3]}',
@@ -143,7 +168,7 @@ class DeckSelectAIO(html.Div):
         if subcomponent == 'limitless_players':    
             base_url = 'https://limitlesstcg.com'
             path = deck.split(':')[-1]
-            decklist = th_helpers.scraper.limitless.fetch_decklist(f'{base_url}{path}')
+            decklist = _fetch_limitless_decklist(f'{base_url}{path}')
             return decklist
         elif subcomponent == 'manual_input':
             decklist, _ = utils.decklists.parse_decklist(manual_input)

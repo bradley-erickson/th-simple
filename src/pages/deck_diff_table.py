@@ -1,12 +1,11 @@
 import dash
-from dash import html, callback, Output, Input, State, Patch, ALL
+from dash import html, callback, Output, Input, State, Patch, ALL, ctx
 import dash_bootstrap_components as dbc
 
-from components import download_button, feedback_link, deck_select
-from utils import images, cards as _cards
-
-# TODO download button, prototype banner, more deck entry methods
-# caching limitless stuff
+from components import download_button, feedback_link, deck_select, help_icon
+import utils.cards
+import utils.decklists
+import utils.images
 
 page_title = 'Deck Diff Table Compare'
 page_icon = 'fa-table'
@@ -25,11 +24,29 @@ deck_selection_table = f'{prefix}-deck-selection'
 add_row = f'{prefix}-add-row-btn'
 card_table = f'{prefix}-card-table'
 hide_common = f'{prefix}-hide-common'
+_remove_item = f'{prefix}-remove-item'
+
+_help_icon = f'{prefix}-help'
+_help_children = []
+
+
+def create_decklist_row(id, event=None):
+    return html.Div([
+        html.Div(dbc.Button(
+            html.I(className='fas fa-trash text-primary'),
+            id={'type': _remove_item, 'index': id},
+            title='Remove deck',
+            color='transparent',
+        ), className='me-3'),
+        deck_select.DeckSelectAIO(aio_id=id, event=event, className='d-flex flex-grow-1')
+    ], id=f'decklist-{id}', className='d-flex')
+
 
 def layout():
     cont = html.Div([
         html.Div([
             html.H2([html.I(className=f'fas {page_icon} me-1'), page_title], className='d-inline-block'),
+            # help_icon.create_help_icon(_help_icon, _help_children, className='align-top'),
             download_button.DownloadImageAIO(dom_id=card_table, className='float-end')
         ]),
         dbc.Alert(html.Ul([
@@ -37,7 +54,7 @@ def layout():
             html.Li([html.Strong('Decklist input:'), ' Select decks from LimitlessTCG or input decks manually to compare.']),
             feedback_link.list_item,
         ], className='mb-0'), id='tour-meta-report-info-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
-        html.Div([deck_select.DeckSelectAIO(aio_id=0)], id=deck_selection_table),
+        html.Div([create_decklist_row(0)], id=deck_selection_table),
         dbc.Button([html.I(className='fas fa-plus me-1'), 'Add'], id=add_row),
         dbc.Checkbox(id=hide_common, value=False, label='Hide common cards'),
         dbc.Spinner(dbc.Table(id=card_table, bordered=True))
@@ -55,7 +72,25 @@ def add_row_to_table(clicks, curr_events):
         raise dash.exceptions.PreventUpdate
     patch = Patch()
     last_event = curr_events[-1] if len(curr_events) > 0 else None
-    patch.append(deck_select.DeckSelectAIO(aio_id=clicks, event=last_event))
+    patch.append(create_decklist_row(id=clicks, event=last_event))
+    return patch
+
+
+@callback(
+    Output(deck_selection_table, 'children', allow_duplicate=True),
+    Input({'type': _remove_item, 'index': ALL}, 'n_clicks'),
+    State(deck_selection_table, 'children'),
+    prevent_initial_call=True
+)
+def remove_row_from_table(clicks, children):
+    triggered_id = ctx.triggered_id.get('index', None)
+    if triggered_id is None:
+        raise dash.exceptions.PreventUpdate
+    matched_idx = next(idx for idx, child in enumerate(children) if f'decklist-{triggered_id}' == child['props']['id'])
+    if triggered_id is None or clicks[matched_idx] is None:
+        raise dash.exceptions.PreventUpdate
+    patch = Patch()
+    del patch[matched_idx]
     return patch
 
 
@@ -69,8 +104,9 @@ def update_card_table(decks, labels, hide):
     cards = {}
     for i, deck in enumerate(decks):
         if deck is None: continue
-        for card in deck:
-            id = f'{card["set"]}-{card["number"]}'
+        parsed_deck, parsed_errors = utils.decklists.parse_decklist(deck)
+        for card in parsed_deck:
+            id = card['card_code'] if card.get('supertype') == 'Pokémon' else card['name']
             if id not in cards:
                 cards[id] = card
                 cards[id]['decks'] = []
@@ -81,10 +117,10 @@ def update_card_table(decks, labels, hide):
     card_info = []
     for card in cards.values():
         deck_counts = card['decks']
-        fetched_card = _cards.get_card(card)
+        fetched_card = utils.cards.get_card(card)
         fetched_card['decks'] = deck_counts
         card_info.append(fetched_card)
-    sorted_cards = _cards.sort_deck(card_info)
+    sorted_cards = utils.cards.sort_deck(card_info)
 
     headers = [html.Th('')]
     for label in labels:
@@ -95,7 +131,7 @@ def update_card_table(decks, labels, hide):
         cells = [html.Td([
             dbc.Popover(
                 dbc.PopoverBody(
-                    html.Img(src=images.get_card_image(card_id, 'SM'), className='w-100')
+                    html.Img(src=utils.images.get_card_image(card_id, 'SM'), className='w-100')
                 ), target=card_id, trigger='hover legacy', placement='bottom'
             ),
             card['name']
