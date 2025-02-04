@@ -11,7 +11,8 @@ import pandas as pd
 
 from components import (deck_label, matchup_table, ternary_switch,
                         archetype_builder, tags as tag_settings,
-                        download_button as _download, feedback_link)
+                        download_button as _download, feedback_link,
+                        help_icon)
 import components.navbar
 import utils.data
 
@@ -40,6 +41,14 @@ game_store = f'{prefix}-games-store'
 history = f'{prefix}-history'
 analysis = f'{prefix}-analysis'
 archetype_store = f'{prefix}-archetype-store'
+
+_help_icon = f'{prefix}-help'
+_help_children = html.Ul([
+    html.Li([html.Strong('Track Your Games:'), ' Log your games, view your history, and dive into detailed analysis.']),
+    html.Li([html.Strong('Filter & Analyze:'), ' Easily filter your game history for better insights.']),
+    html.Li([html.Strong('Data Privacy:'), " Your game data is stored locally in your browser. It's never collected. If you clear cookies or click the clear button, your data will be deleted forever."]),
+    feedback_link.list_item,
+], className='mb-0')
 
 # buttons
 download_btn = f'{prefix}-download-button'
@@ -175,13 +184,11 @@ def layout():
         {'playing': 'other', 'against': 'other', 'time': str(datetime.datetime.now()), 'result': 'Win', 'game1': {'result': 'Win', 'turn': 1, 'tags': ['Lucky', 'Slow start'], 'notes': 'Got off to a rocky start from judge, but we top decked the out.'}},
     ]
     cont = html.Div([
-        html.H2([html.I(className=f'fas {page_icon} me-1'), page_title]),
-        dbc.Alert(html.Ul([
-            html.Li([html.Strong('Track Your Games:'), ' Log your games, view your history, and dive into detailed analysis.']),
-            html.Li([html.Strong('Filter & Analyze:'), ' Easily filter your game history for better insights.']),
-            html.Li([html.Strong('Data Privacy:'), " Your game data is stored locally in your browser. It's never collected. If you clear cookies or click the clear button, your data will be deleted forever."]),
-            feedback_link.list_item,
-        ], className='mb-0'), id='battlelog-info-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
+        html.Div([
+            html.H2([html.I(className=f'fas {page_icon} me-1'), page_title], className='d-inline-block'),
+            help_icon.create_help_icon(_help_icon, _help_children, className='align-top'),
+        ]),
+        dbc.Alert(_help_children, id='battlelog-info-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
         dbc.Alert(dismissable=True, id=upload_alert, is_open=False),
         html.Div([
             html.Span(dcc.Upload(

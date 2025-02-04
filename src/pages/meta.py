@@ -6,7 +6,8 @@ import pandas as pd
 
 from components import (
     tour_filter, deck_label, matchup_table, placement,
-    download_button, breakdown as _breakdown
+    download_button, breakdown as _breakdown, help_icon,
+    feedback_link
 )
 from utils import data, cache
 
@@ -24,6 +25,15 @@ dash.register_page(
 prefix = 'meta'
 loading = f'{prefix}-loading'
 tour_store = f'{prefix}-tour-store'
+
+_help_icon = f'{prefix}-help'
+_help_children = html.Ul([
+    html.Li([html.Strong('Filter:'), ' Select which types of tournaments you wish to see.']),
+    html.Li([html.Strong('Breakdown:'), ' View the overall distribution of deck archetypes and analyze top performers.']),
+    html.Li([html.Strong('Matchups:'), ' Explore detailed head-to-head comparisons between deck archetypes.']),
+    feedback_link.list_item,
+], className='mb-0')
+
 breakdown = f'{prefix}-breakdown'
 breakdown_place = f'{prefix}-breakdown-placement'
 breakdown_overall = f'{prefix}-breakdown-overall'
@@ -31,6 +41,27 @@ breakdown_overall_wrap = f'{prefix}-breakdown-overall-wrap'
 breakdown_specific = f'{prefix}-breakdown-specific'
 breakdown_specific_wrap = f'{prefix}-breakdown-specific-wrap'
 breakdown_show_more = f'{prefix}-breakdown-show-more'
+_breakdown_help = f'{breakdown}-help'
+_breakdown_children = [
+    html.Div('Rankings based on percentage in meta.'),
+    html.Div([
+        'Trends are based on usage during the last third of the selected date range.',
+        dbc.Progress([
+            dbc.Progress(value=66, color='secondary', bar=True, label='A'),
+            dbc.Progress(value=34, color='primary', bar=True, label='B')
+        ], class_name='mb-1'),
+        html.Div([
+            _breakdown.create_deck_delta(-1),
+            ' rank during ', dbc.Badge('A', color='secondary'), ' > ',
+            dbc.Badge('B', color='primary')
+        ], className='mb-1'),
+        html.Div([
+            _breakdown.create_deck_delta(1),
+            ' rank during ', dbc.Badge('B', color='primary'), ' > ',
+            dbc.Badge('A', color='secondary')
+        ]),
+    ])
+]
 
 archetype_select = f'{prefix}-archetype-select'
 archetype_store = f'{prefix}-archetype-store'
@@ -39,6 +70,9 @@ download_matchups = f'{prefix}-download-matchup-data'
 matchup_data_store = f'{prefix}-matchup-data-store'
 matchups = f'{prefix}-matchups'
 placing_id = f'{prefix}-placing'
+_matchups_help = f'{prefix}-matchups-help'
+_matchups_children = matchup_table.example
+
 
 def fetch_breakdown_data(tour_data, placing=None):
     params = tour_data.copy()
@@ -60,7 +94,10 @@ def layout(players=None, start_date=None, end_date=None, platform=None, game=Non
     tour_filters = tour_filter.create_tour_filter(players, start_date, end_date, platform, game)
     
     cont = html.Div([
-        html.H2('Meta Analysis'),
+        html.Div([
+            html.H2('Meta Analysis', className='d-inline-block'),
+            help_icon.create_help_icon(_help_icon, _help_children, className='align-top'),
+        ]),
         dbc.Alert([
             'The Tier List Creator has moved to its own ',
             dcc.Link('Tool', href='/tools/tier-list', className='alert-link')
@@ -70,10 +107,9 @@ def layout(players=None, start_date=None, end_date=None, platform=None, game=Non
         dcc.Store(id=archetype_store, data=[]),
         tours,
         html.Div([
-            html.H3('Breakdown', id='breakdown', className='d-inline-block mb-0'),
-            html.I(className='ms-1 fas fa-circle-info', id='breakdown-info')
-        ], className='d-flex align-items-center'),
-        dbc.Tooltip('The trends are based on usage during the last third of the selected time period.', target='breakdown-info'),
+            html.H3('Breakdown', id='breakdown', className='d-inline-block'),
+            help_icon.create_help_icon(_breakdown_help, _breakdown_children, 'align-top')
+        ]),
         dbc.Row([
             dbc.Col([
                 dbc.InputGroup([
@@ -95,6 +131,7 @@ def layout(players=None, start_date=None, end_date=None, platform=None, game=Non
         ]),
         html.Div([
             html.H3('Matchups', id='matchups', className='d-inline-block'),
+            help_icon.create_help_icon(_matchups_help, _matchups_children, 'align-top'),
             html.Span([
                 download_button.DownloadImageAIO(dom_id=matchups, className='me-1 d-inline-block', text='Download (png)'),
                 dbc.Button([
@@ -104,8 +141,8 @@ def layout(players=None, start_date=None, end_date=None, platform=None, game=Non
                     id=download_matchups_btn,
                     title='Export matchup data (csv)'),
                 dcc.Download(id=download_matchups)
-            ], className='')
-        ], className='d-flex justify-content-between'),
+            ], className='float-end')
+        ]),
         dbc.Row([
             dbc.Col([
                 dbc.Label('Placement'),
