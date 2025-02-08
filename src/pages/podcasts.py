@@ -44,7 +44,8 @@ FEEDS = {
     'SpilltheTeaCG': 'https://anchor.fm/s/f5124288/podcast/rss',
     'Memory Capsule': 'https://anchor.fm/s/d94e8ac0/podcast/rss',
     'Unfazed Facts': 'https://anchor.fm/s/f47193c4/podcast/rss',
-    'TCG Royals': 'https://media.rss.com/tcg-royals-podcast/feed.xml'
+    'TCG Royals': 'https://media.rss.com/tcg-royals-podcast/feed.xml',
+    'Battle Frontier': 'https://anchor.fm/s/fbc18490/podcast/rss',
 }
 
 BACKUP = {
