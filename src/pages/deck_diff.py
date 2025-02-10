@@ -3,8 +3,8 @@ from dash import html, callback, clientside_callback, ClientsideFunction, Output
 import dash_bootstrap_components as dbc
 
 from components import download_button, feedback_link, help_icon
+import components.deck_select
 from utils import images, cards as _cards
-import utils.decklists
 
 page_title = 'Deck Diff Venn Diagram'
 page_icon = 'fa-code-compare'
@@ -19,15 +19,11 @@ dash.register_page(
 )
 
 prefix = 'deck-diff'
-decklist_a_name = f'{prefix}-decklist-a-name'
 decklist_a_list = f'{prefix}-decklist-a-list'
 decklist_a_title = f'{prefix}-decklist-a-title'
 
-decklist_b_name = f'{prefix}-decklist-b-name'
 decklist_b_list = f'{prefix}-decklist-b-list'
 decklist_b_title = f'{prefix}-decklist-b-title'
-
-parse_alert = f'{prefix}-parse-alert'
 
 a_only = f'{prefix}-a-only'
 a_only_total = f'{a_only}-total'
@@ -42,56 +38,49 @@ _help_children = html.Ul([
     feedback_link.list_item
 ], className='mb-0')
 
-layout = html.Div([
-    html.Div([
-        html.H2([html.I(className=f'fas {page_icon} me-1'), page_title], className='d-inline-block'),
-            help_icon.create_help_icon(_help_icon, _help_children, className='align-top'),
-        download_button.DownloadImageAIO(dom_id=prefix, className='float-end')
-    ]),
-    dbc.Alert(_help_children, id='deckdiff-info-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
-    dbc.Alert(is_open=False, color='warning', id=parse_alert),
-    dbc.Row([
-        dbc.Col([
-            dbc.InputGroup([
-                dbc.InputGroupText('Decklist A'),
-                dbc.Input(id=decklist_a_name, placeholder='Name', className='inputgroup-input-fix')
-            ]),
-            dbc.Textarea(id=decklist_a_list, placeholder='Paste decklist here', size='sm', value='', class_name='deck-diff-input', spellcheck='false')
-        ], md=6),
-        dbc.Col([
-            dbc.InputGroup([
-                dbc.InputGroupText('Decklist B'),
-                dbc.Input(id=decklist_b_name, type='text', placeholder='Name', className='inputgroup-input-fix')
-            ]),
-            dbc.Textarea(id=decklist_b_list, placeholder='Paste decklist here', size='sm', value='', class_name='deck-diff-input', spellcheck='false')
-        ], md=6)
-    ], className='gy-1 mb-1'),
-    dbc.Spinner(dbc.Row([
-        dbc.Col([
-            html.H4(['Decklist A', html.Span(id=decklist_a_title), dbc.Badge(id=a_only_total, className='ms-1')]),
-            dbc.Row(id=a_only, className='g-0')
-        ], md=3),
-        dbc.Col([
-            html.H4(['Decklist B', html.Span(id=decklist_b_title), dbc.Badge(id=b_only_total, className='ms-1')], className='text-md-end'),
-            dbc.Row(id=b_only, className='g-0')
-        ], md={'size': 3, 'order': 'last'}),
-        dbc.Col([
-            html.H4(['Overlap', dbc.Badge(id=overlap_total, className='ms-1')], className='text-md-center'),
-            dbc.Row(id=overlap, className='g-0')
-        ], md=6)
-    ], id=prefix, className='gy-1'))
-])
+
+def layout():
+    return html.Div([
+        html.Div([
+            html.H2([html.I(className=f'fas {page_icon} me-1'), page_title], className='d-inline-block'),
+                help_icon.create_help_icon(_help_icon, _help_children, className='align-top'),
+            download_button.DownloadImageAIO(dom_id=prefix, className='float-end')
+        ]),
+        dbc.Alert(_help_children, id='deckdiff-info-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
+        dbc.Row([
+            dbc.Col([
+                components.deck_select.DeckSelectAIO(aio_id=decklist_a_list, className='d-flex flex-grow-1')
+            ], md=6),
+            dbc.Col([
+                components.deck_select.DeckSelectAIO(aio_id=decklist_b_list, className='d-flex flex-grow-1')
+            ], md=6)
+        ], className='gy-1 mb-1'),
+        dbc.Spinner(dbc.Row([
+            dbc.Col([
+                html.H4([html.Span(id=decklist_a_title), dbc.Badge(id=a_only_total, className='ms-1')]),
+                dbc.Row(id=a_only, className='g-0')
+            ], md=3),
+            dbc.Col([
+                html.H4([html.Span(id=decklist_b_title), dbc.Badge(id=b_only_total, className='ms-1')]),
+                dbc.Row(id=b_only, className='g-0')
+            ], md={'size': 3, 'order': 'last'}),
+            dbc.Col([
+                html.H4(['Overlap', dbc.Badge(id=overlap_total, className='ms-1')], className='text-md-center'),
+                dbc.Row(id=overlap, className='g-0')
+            ], md=6)
+        ], id=prefix, className='gy-1'))
+    ])
 
 clientside_callback(
     ClientsideFunction(namespace='clientside', function_name='update_diff_title'),
     Output(decklist_a_title, 'children'),
-    Input(decklist_a_name, 'value')
+    Input(components.deck_select.DeckSelectAIO.ids.label(decklist_a_list), 'children'),
 )
 
 clientside_callback(
     ClientsideFunction(namespace='clientside', function_name='update_diff_title'),
     Output(decklist_b_title, 'children'),
-    Input(decklist_b_name, 'value')
+    Input(components.deck_select.DeckSelectAIO.ids.label(decklist_b_list), 'children'),
 )
 
 def clean_list(raw, mid=False):
@@ -114,17 +103,12 @@ def clean_list(raw, mid=False):
     Output(overlap_total, 'children'),
     Output(b_only, 'children'),
     Output(b_only_total, 'children'),
-    Output(parse_alert, 'is_open'),
-    Output(parse_alert, 'children'),
-    Input(decklist_a_list, 'value'),
-    Input(decklist_b_list, 'value')
+    Input(components.deck_select.DeckSelectAIO.ids.decklist(decklist_a_list), 'data'),
+    Input(components.deck_select.DeckSelectAIO.ids.decklist(decklist_b_list), 'data'),
 )
 def update_diff(a, b):
-    dl_a, dl_a_issues = utils.decklists.parse_decklist(a)
-    dl_b, dl_b_issues = utils.decklists.parse_decklist(b)
-
-    a_dict = {c['unique']: c for c in dl_a}
-    b_dict = {c['unique']: c for c in dl_b}
+    a_dict = {c['unique']: c for c in (a if a else [])}
+    b_dict = {c['unique']: c for c in (b if b else [])}
 
     in_a = []
     in_b = []
@@ -157,11 +141,4 @@ def update_diff(a, b):
     in_b, total_b = clean_list(in_b)
     in_both, total_both = clean_list(in_both, True)
 
-    parse_error = len(dl_a_issues) + len(dl_b_issues) > 0
-    overall_parse_errors = dl_a_issues + dl_b_issues
-    parse_child = [
-        html.Div('Could not parse the following cards:'),
-        html.Ul([html.Li(o) for o in overall_parse_errors])
-    ]
-
-    return in_a, total_a, in_both, total_both, in_b, total_b, parse_error, parse_child
+    return in_a, total_a, in_both, total_both, in_b, total_b

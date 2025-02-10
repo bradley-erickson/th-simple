@@ -55,10 +55,7 @@ window.dash_clientside.clientside = {
 
     update_diff_title: function (text) {
         if (typeof text === 'undefined') { return ''; }
-        if (text.length > 0) {
-            return ` - ${text}`;
-        }
-        return '';
+        return text
     },
 
     update_feedback_submit_disabled: function (arg, contactType, contactUser) {
