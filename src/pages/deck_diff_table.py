@@ -35,7 +35,7 @@ _help_children = html.Ul([
 
 
 def create_decklist_row(id, event=None):
-    return html.Div([
+    return dbc.Spinner(html.Div([
         deck_select.DeckSelectAIO(aio_id=id, event=event, className='d-flex flex-grow-1'),
         html.Div(dbc.Button(
             html.I(className='fas fa-trash text-primary'),
@@ -43,7 +43,7 @@ def create_decklist_row(id, event=None):
             title='Remove deck',
             color='transparent',
         ), className='ms-3'),
-    ], id=f'decklist-{id}', className='d-flex')
+    ], id=f'decklist-{id}', className='d-flex'))
 
 
 def layout():

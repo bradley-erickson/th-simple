@@ -48,12 +48,12 @@ def layout():
         ]),
         dbc.Alert(_help_children, id='deckdiff-info-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
         dbc.Row([
-            dbc.Col([
+            dbc.Col(dbc.Spinner(
                 components.deck_select.DeckSelectAIO(aio_id=decklist_a_list, className='d-flex flex-grow-1')
-            ], md=6),
-            dbc.Col([
+            ), md=6),
+            dbc.Col(dbc.Spinner(
                 components.deck_select.DeckSelectAIO(aio_id=decklist_b_list, className='d-flex flex-grow-1')
-            ], md=6)
+            ), md=6)
         ], className='gy-1 mb-1'),
         dbc.Spinner(dbc.Row([
             dbc.Col([

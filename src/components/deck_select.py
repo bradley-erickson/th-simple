@@ -138,7 +138,7 @@ class DeckSelectAIO(html.Div):
                 } for e in events], value=event),
                 dcc.Dropdown(id=self.ids.limitless_players(aio_id))
             ], xl=10, lg=9, id=self.ids.limitless_wrapper(aio_id), class_name='deck-diff-limitless-dropdowns'),
-            dcc.Store(id=self.ids.decklist(aio_id)),
+            dcc.Store(id=self.ids.decklist(aio_id), data=[]),
             html.Div(id=self.ids.label(aio_id), className='d-none'),
             html.Hr()
         ], className='flex-grow-1')

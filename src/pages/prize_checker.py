@@ -5,13 +5,14 @@ from dash_extensions import EventListener
 import random
 
 from components import feedback_link, help_icon
+import components.deck_select
 import utils.cards
 import utils.decklists
 import utils.images
 
 description = 'Hone your Pokémon TCG skills with our tool. Practice figuring out your prizes to refine your gameplay strategy.'
 
-page_title = 'Prize Checker (beta)'
+page_title = 'Prize Checker'
 page_icon = 'fa-magnifying-glass'
 
 dash.register_page(
@@ -24,7 +25,6 @@ dash.register_page(
 )
 
 prefix = 'prize-checker'
-parse_alert = f'{prefix}-parse-alert'
 
 _help_icon = f'{prefix}-help'
 _help_children = html.Ul([
@@ -69,47 +69,43 @@ Trainer (36)
 
 Energy (6)
 6 Fire Energy 2'''
+
 # decklist tab
 d_prefix = f'{prefix}-decklist'
-d_collapse = f'{d_prefix}-collapse'
-d_header = f'{d_prefix}-header'
-d_import = f'{d_prefix}-import'
-d_input = f'{d_prefix}-input'
 d_store = f'{d_prefix}-store'
 d_output = f'{d_prefix}-output'
 d_card = f'{d_output}-card'
-decklist_tab = html.Div([
-    dbc.Card([
-        html.A(
+
+
+def create_decklist_tab():
+    return html.Div([
+        dbc.Card([
             dbc.CardHeader([
                 html.I(className='fas fa-pen-to-square me-1'),
                 'Edit Decklist'
             ]),
-            id=d_header
-        ),
-        dbc.Collapse(dbc.CardBody([
-            dbc.Textarea(
-                id=d_input, placeholder='Paste decklist here', size='sm',
-                value='', class_name='deck-diff-input', spellcheck='false'),
-            dbc.Button('Import', class_name='float-end my-1', disabled=True, id=d_import)
-        ]), id=d_collapse, is_open=True)
-    ]),
-    html.H4('Set Priority'),
-    dbc.Spinner([
-        dbc.Table([
-            html.Thead(html.Tr([
-                html.Th('#', title='Card count'),
-                html.Th('Card', title='Card name'),
-                html.Th('Priority', title='Priority')
-            ])),
-            html.Tbody([], id=d_output)
+            dbc.CardBody(dbc.Spinner(
+                components.deck_select.DeckSelectAIO(aio_id=d_store, className='d-flex flex-grow-1')
+            ))
         ]),
-        dcc.Store(data=[], id=d_store)
+        html.H4('Set Priority'),
+        dbc.Spinner([
+            dbc.Table([
+                html.Thead(html.Tr([
+                    html.Th('#', title='Card count'),
+                    html.Th('Card', title='Card name'),
+                    html.Th('Priority', title='Priority')
+                ])),
+                html.Tbody([], id=d_output)
+            ])
+        ])
     ])
-])
+
 
 # practice tab
 p_prefix = f'{prefix}-practice'
+p_header = f'{p_prefix}-header'
+p_collapse = f'{p_prefix}-collapse'
 p_reset = f'{prefix}-reset'
 p_index = f'{p_prefix}-index'
 p_wheel = f'{p_prefix}-wheel'
@@ -117,6 +113,7 @@ p_deck = f'{p_prefix}-deck'
 p_card = f'{p_deck}-card'
 p_hand = f'{p_prefix}-hand'
 p_prize = f'{p_prefix}-prize'
+p_prize_hidden = f'{p_prefix}-prize-hidden'
 p_index = f'{p_prefix}-index'
 p_out = f'{p_prefix}-output'
 p_prized = f'{p_out}-prized-count'
@@ -139,7 +136,12 @@ practice_tab = html.Div([
     html.I(className='ms-1 fas fa-circle-info', id='known'),
     dbc.Tooltip('Draw 7 plus 1 for turn start', target='known'),
     dbc.Row([], id=p_hand, class_name='g-1'),
+    html.H4(html.A('Show Prizes', id=p_header)),
+    dbc.Collapse(dbc.CardBody([
+        dbc.Row([], id=p_prize_hidden, class_name='g-1')
+    ]), id=p_collapse, is_open=False),
     dcc.Store(data=[], id=p_prize),
+    html.H4('Guess Prizes'),
     dbc.Table([
         html.Thead(html.Tr([
             html.Th('Card', title='Card name', className='w-100'),
@@ -169,59 +171,36 @@ settings_tab = html.Div([
     dbc.RadioItems({'ltr': 'Left to Right', 'rtl': 'Right to Left'}, value='ltr', id=settings_order, inline=True)
 ])
 
-layout = html.Div([
-    html.Div([
-        html.H2([html.I(className=f'fas {page_icon} me-1'), page_title], className='d-inline-block'),
-        help_icon.create_help_icon(_help_icon, _help_children, className='align-top'),
-    ]),
-    dbc.Alert(_help_children, id='prizechecker-info-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
-    dbc.Alert(is_open=False, color='warning', id=parse_alert),
-    dbc.Tabs([
-        dbc.Tab(decklist_tab, label='List'),
-        dbc.Tab(practice_tab, label='Practice'),
-        # dbc.Tab(tips_tab, label='Tips'),
-        # dbc.Tab(settings_tab, label='Settings')
-    ], class_name='mb-1')
-])
+
+def layout():
+    return html.Div([
+        html.Div([
+            html.H2([html.I(className=f'fas {page_icon} me-1'), page_title], className='d-inline-block'),
+            help_icon.create_help_icon(_help_icon, _help_children, className='align-top'),
+        ]),
+        dbc.Alert(_help_children, id='prizechecker-info-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
+        dbc.Tabs([
+            dbc.Tab(create_decklist_tab(), label='List'),
+            dbc.Tab(practice_tab, label='Practice'),
+            # dbc.Tab(tips_tab, label='Tips'),
+            # dbc.Tab(settings_tab, label='Settings')
+        ], class_name='mb-1')
+    ])
+
 
 # decklist tab callbacks
 clientside_callback(
     ClientsideFunction(namespace='clientside', function_name='toggle_with_button'),
-    Output(d_collapse, 'is_open', allow_duplicate=True),
-    Input(d_header, 'n_clicks'),
-    State(d_collapse, 'is_open'),
+    Output(p_collapse, 'is_open', allow_duplicate=True),
+    Input(p_header, 'n_clicks'),
+    State(p_collapse, 'is_open'),
     prevent_initial_call=True
 )
-
-clientside_callback(
-    ClientsideFunction(namespace='prize_checker', function_name='disable_import'),
-    Output(d_import, 'disabled'),
-    Input(d_input, 'value')
-)
-
-@callback(
-    Output(d_store, 'data'),
-    Output(d_collapse, 'is_open'),
-    Output(parse_alert, 'is_open'),
-    Output(parse_alert, 'children'),
-    Input(d_import, 'n_clicks'),
-    State(d_input, 'value')
-)
-def update_decklist_store(clicks, value):
-    if clicks is None:
-        raise dash.exceptions.PreventUpdate
-    deck, parse_error = utils.decklists.parse_decklist(value)
-    deck = utils.cards.sort_deck(deck)
-    parse_child = [
-        html.Div('Could not parse the following cards:'),
-        html.Ul([html.Li(o) for o in parse_error])
-    ]
-    return deck, False or len(parse_error) > 0, len(parse_error) > 0, parse_child
 
 
 @callback(
     Output(d_output, 'children'),
-    Input(d_store, 'data')
+    Input(components.deck_select.DeckSelectAIO.ids.decklist(d_store), 'data'),
 )
 def update_decklist_deck(data):
     out = []
@@ -275,9 +254,10 @@ clientside_callback(
 @callback(
     Output(p_deck, 'children'),
     Output(p_hand, 'children'), 
+    Output(p_prize_hidden, 'children'),
     Output(p_prize, 'data'),
     Output({'type': p_prized, 'index': ALL}, 'value'),
-    Input(d_store, 'data'),
+    Input(components.deck_select.DeckSelectAIO.ids.decklist(d_store), 'data'),
     Input(p_reset, 'n_clicks'),
     State({'type': p_prized, 'index': ALL}, 'value')
 )
@@ -299,18 +279,23 @@ def update_cards_in_deck(store, clicks, outputs):
                 html.Img(src=utils.images.get_card_image(c.get('card_code', None), 'XS'))
             ], className='card-in-stack') for c in decomposed[14:]
     ]
-    return deck, hand, prizes, [None for i in range(len(outputs))]
+    prize_cards = [dbc.Col(
+        html.Img(src=utils.images.get_card_image(c.get('card_code', None), 'XS'), className='w-100'),
+        xs=3, sm=2, md=2, lg=1
+        ) for c in prizes
+    ]
+    return deck, hand, prize_cards, prizes, [None for i in range(len(outputs))]
 
 
 @callback(
     Output(p_out, 'children'),
     Input({'type': d_card, 'index': ALL}, 'value'),
-    Input(d_store, 'data')
+    Input(components.deck_select.DeckSelectAIO.ids.decklist(d_store), 'data'),
 )
 def ask_about_prizes(prios, data):
     top_cards = []
     for p, d in zip(prios, data):
-        if p == 0 or p is None:
+        if p is None:
             continue
         d['priority'] = p
         top_cards.append(d)
