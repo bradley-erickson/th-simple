@@ -9,15 +9,15 @@ from components import (tour_filter, deck_label,
     placement as _placement, loading)
 from utils import data, cache, images
 
-dash.register_page(
-    __name__,
-    path_template='/decklist/<deck>',
-    title='Decklist Analysis',
-    image='decklist-analysis.png',
-    description='Explore Pokémon TCG Decklists: In-depth analysis of deck '\
-        'archetypes, card trends, and matchup impacts for strategic '\
-        'deck building.'
-)
+# dash.register_page(
+#     __name__,
+#     path_template='/decklist/<deck>',
+#     title='Decklist Analysis',
+#     image='decklist-analysis.png',
+#     description='Explore Pokémon TCG Decklists: In-depth analysis of deck '\
+#         'archetypes, card trends, and matchup impacts for strategic '\
+#         'deck building.'
+# )
 
 prefix = 'decklist'
 store = f'{prefix}-store'

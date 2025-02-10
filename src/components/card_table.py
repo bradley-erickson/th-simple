@@ -29,6 +29,10 @@ def create_grid_item(card, total, game):
         color_discrete_sequence=[color_breakdown],
         labels=dict(count='', play_rate=''),
     )
+    figure.update_traces(
+        marker_line_color='black',
+        marker_line_width=1
+    )
     figure.update_layout(
         plot_bgcolor='rgba(0, 0, 0, 0)',
         paper_bgcolor='rgba(0, 0, 0, 0)',
@@ -38,11 +42,12 @@ def create_grid_item(card, total, game):
         showgrid=False,
         title=None,
         type='category',
+        linecolor='black'
     )
     figure.update_yaxes(
         showticklabels=False,
         title=None,
-        range=[0, 1.2],
+        range=[0, 1.4],
         showgrid=False
     )
 
@@ -68,7 +73,7 @@ def create_grid_item(card, total, game):
             int(max_num),
             class_name='position-absolute top-0 end-0 m-2 mt-3 rounded-circle font-monospace border border-light',
         )
-    ], className='position-relative', id=id, xs=4, sm=3, md=2, lg=2, xxl=1)
+    ], className='position-relative', id=id, xs=4, sm=3, md=2, lg=2)
     return item
 
 def create_grid_layout(cards, total, game):

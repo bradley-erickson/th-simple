@@ -91,6 +91,10 @@
   margin: 0.25em 0 !important;
 }
 
+.spinner-in-strong div {
+  display: inline-block;
+}
+
 /* Badges */
 .dcc-dropdown-inputgroup {
   display: flex;

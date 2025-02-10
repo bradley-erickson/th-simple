@@ -14,6 +14,12 @@ win_rate_calc_comp = dcc.Markdown(
     ''',
     mathjax=True, className='win-rate-calc'
 )
+SIGNIFICANT_MAPPING = {
+    'some': '*',
+    'all': '**',
+    'favored': '*',
+    'unfavored': '*'
+}
 
 def create_record_string(match):
     if 'Win' in match and 'Loss' in match:
@@ -81,10 +87,11 @@ def create_matchup_tile_full(match, decks, player, against):
             decks.get(match[against], deck_label.create_default_deck(match[against])),
             hide_text=True)),
     ], className='d-flex align-items-center')
+    significant = SIGNIFICANT_MAPPING[match['significant']] if match.get('significant', None) else ''
     return dbc.Card(
         dbc.CardBody([
             vs_item,
-            html.Div(f'{match["win_rate"]}%'),
+            html.Div(f'{match["win_rate"]}%{significant}'),
             html.Div(record)
         ], class_name='text-black text-center p-1'),
         style={'backgroundColor': color},
@@ -147,7 +154,7 @@ def create_matchup_spread(data, decks, player='deck1', against='deck2', small_vi
     ], className='d-none' if small_view else 'd-none d-xl-block')
 
     small_view = html.Div([
-        win_rate_calc_comp,
+        # win_rate_calc_comp,
         html.Div(small_rows)
     ], className='' if small_view else 'd-xl-none')
     return html.Div([table, small_view])

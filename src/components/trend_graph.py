@@ -19,10 +19,10 @@ def create_trend_graph(df):
     )
     fig.update_layout(
         legend=dict(
-            yanchor="bottom",
-            y=1,
+            yanchor="top",
+            y=0.99,
             xanchor="left",
-            x=1
+            x=0.02
         )
     )
     return dcc.Graph(figure=fig)
