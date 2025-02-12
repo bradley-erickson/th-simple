@@ -28,6 +28,8 @@ faq = [
            'the deck archetype based on cards played.']},
     {'q': 'I encountered a bug or I have an idea. What do I do?',
      'a': ['Submit a ', html.A('Feedback form', href='/feedback'), '.']},
+    {'q': 'How can I stay up to date?',
+     'a': ['We post updates in our ', html.A('Discord', href='https://discord.gg/tDwNSt6Z7w'), ' when changes are made or major tournaments have been uploaded.']},
     {'q': 'Who runs Trainer Hill?', 'a': "It's just me! My name is Brad and I'm a lifelong Pokémon fan."},
     {'q': 'How long has this website been online?',
      'a': 'Trainer Hill first went online in December 2020.'},

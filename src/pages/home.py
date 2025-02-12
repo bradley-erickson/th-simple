@@ -1,12 +1,15 @@
 import dash
 from dash import html, dcc, callback, Output, Input
 import dash_bootstrap_components as dbc
+import requests
 
-import components.patreon
 import components.deck_label
 import components.navbar
+import components.patreon
+import components.podcast_card
 import utils.data
 import utils.date
+import utils.podcasts
 
 description = 'Discover Trainer Hill: The ultimate Pokémon '\
     'TCG analytics platform. Dive into meta analysis, deck '\
@@ -16,6 +19,7 @@ _prefix = 'home'
 _archetype_store = f'{_prefix}-deck-store'
 _meta_children = f'{_prefix}-meta-children'
 _decklist_children = f'{_prefix}-decklist-children'
+_podcast_children = f'{_prefix}-podcast-children'
 
 dash.register_page(
     __name__,
@@ -24,6 +28,10 @@ dash.register_page(
     title='Trainer Hill',
     description=description
 )
+
+external_tools = {
+    'City League Analysis': {'href': 'https://city.trainerhill.com/', 'icon': 'fa-city'}
+}
 
 
 def create_card(c):
@@ -35,8 +43,8 @@ def create_card(c):
             c['children'],
             html.Div(dbc.Spinner(id=c['computed_children']), className='text-center')
         ]),
-    ], href=c['link'], id={'type': components.navbar.link_with_game, 'index': f'{c["id"]}-home'}), className='home-card')
-    return dbc.Col(card, md=6, lg=5, xl=4)
+    ], href=c['link'], id={'type': components.navbar.link_with_game, 'index': f'{c["id"]}-home'}), className='home-card h-100')
+    return dbc.Col(card, md=6)
 
 
 cards = [
@@ -46,29 +54,49 @@ cards = [
      'children': html.P('Explore card breakdowns, usage trends, and matchup data for your favorite Pokémon TCG archetypes.')},
 ]
 
-def create_tool(title, t):
+
+def create_tool(title, t, external=False):
+    if external:
+        availability_request = requests.get(t['href'])
+        if availability_request.status_code != 200:
+            return ''
     tool = dcc.Link(
         dbc.Card([
             html.H3(className=f'fas {t["icon"]}'),
-            html.Div(title)
+            html.Div([title, html.I(className='ms-1 fas fa-arrow-up-right-from-square') if external else ''])
         ], body=True, class_name='home-card text-center'),
-        href=t['href'], className='text-decoration-none',
+        href=t['href'], className='text-decoration-none', target='_blank' if external else '',
         id={'type': components.navbar.link_with_game, 'index': f'{title}-home'}
     )
-    return dbc.Col(tool, sm=6, md=4, xl=3)
+    return dbc.Col(tool, sm=6, md=4)
+
+
+def create_podcast_card():
+    return dbc.Card([
+        dbc.CardHeader(html.A('Latest Podcast Episodes', href='/tools/podcast-hub')),
+        dbc.CardBody(dbc.Spinner([], id=_podcast_children))
+    ])
+
 
 def layout():
     main_pages = dbc.Row([
         create_card(c) for c in cards
-    ], justify='around', class_name='g-1')
+    ], justify='around', align='stretch', class_name='g-1')
     tool_pages = {page['title']: {'href': page['path'], 'icon': page['icon']} for page in dash.page_registry.values() if page['path'].startswith('/tools/')}
     sorted_tools = sorted(tool_pages.keys())
     tools = dbc.Row([
-        create_tool(k, tool_pages[k]) for k in sorted_tools
+        create_tool(k, tool_pages[k]) for k in sorted_tools if k != 'Podcast Hub'
+    ] + [
+        # create_tool(k, external_tools[k], external=True) for k in external_tools
     ], justify='around', class_name='gy-2 mt-1 mb-2')
     return dbc.Container([
-        main_pages,
-        tools,
+        dbc.Row([
+            dbc.Col([
+                main_pages,
+                tools
+            ],lg=7, xl=8),
+            dbc.Col(create_podcast_card(),lg=5, xl=4)
+        ], class_name='mb-1'),
         components.patreon.patreon_banner,
         dcc.Store(id=_archetype_store, data=[])
     ], id=_prefix)
@@ -136,3 +164,13 @@ def update_decklist_children(archetypes):
         ], className='text-start d-flex align-items-center mb-1') for i, d in enumerate(decks[:5])
     ])
     return component
+
+
+@callback(
+    Output(_podcast_children, 'children'),
+    Input(_prefix, 'id'),
+)
+def update_decklist_children(id):
+    episodes = utils.podcasts.fetch_latest_episodes()[:3]
+    podcasts = [components.podcast_card.create_podcast_card(pod) for pod in episodes]
+    return podcasts
