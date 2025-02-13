@@ -25,6 +25,7 @@ FEEDS = {
     'Unfazed Facts': 'https://anchor.fm/s/f47193c4/podcast/rss',
     'TCG Royals': 'https://media.rss.com/tcg-royals-podcast/feed.xml',
     'Battle Frontier': 'https://anchor.fm/s/fbc18490/podcast/rss',
+    'Gust of Wind': 'https://anchor.fm/s/8df66c8c/podcast/rss',
 }
 
 BACKUP = {
