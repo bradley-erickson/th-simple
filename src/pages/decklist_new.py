@@ -165,7 +165,7 @@ def create_filter(include, exclude, granularity, placement):
     return filter_row
 
 
-def create_deck_analysis_layout(deck, selected_card):
+def create_deck_analysis_layout(deck, selected_card, game):
     decklist_col = dbc.Col([
         html.Div([
             html.H4('Decklist', className='d-flex mb-0'),
@@ -200,7 +200,7 @@ def create_deck_analysis_layout(deck, selected_card):
         html.Div([
             dbc.Row([
                 dbc.Col(
-                    html.Img(src=utils.images.get_card_image(selected_card, 'SM'), className='w-100'),
+                    html.Img(src=utils.images.get_card_image(selected_card, 'SM', game), className='w-100'),
                     sm=6, md=4
                 ),
                 dbc.Col([
@@ -284,7 +284,7 @@ def layout(
         create_filter(include, exclude, granularity, placement),
         dcc.Store(id=_filter_store, data=filters),
         dcc.Store(id=_deck_options_store, data=[]),
-        create_deck_analysis_layout(deck, selected_card)
+        create_deck_analysis_layout(deck, selected_card, game)
     ])
     return cont
 

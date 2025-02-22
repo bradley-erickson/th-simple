@@ -136,8 +136,9 @@ def create_list_item(card, max_count, total, game):
             style={'backgroundColor': color},
             className='text-end')
     ]
-    cells.extend(counts[:4])
-    cells.extend(win_rates[:4])
+    cell_cutoff = 2 if game == 'POCKET' else 4
+    cells.extend(counts[:cell_cutoff])
+    cells.extend(win_rates[:cell_cutoff])
     row = html.Tr(cells, id=id)
     return row
 
@@ -152,12 +153,13 @@ def create_list_layout(cards, total, game):
         else:
             other.append(create_list_item(card, max_count, total, game))
 
+    count_cutoff = 2 if game == 'POCKET' else 4
     headers = [html.Th('Card'),
-        html.Th('Play-rate %', colSpan=5, className='text-center small'),
-        html.Th('Win-rate %', colSpan=4, className='text-center small')]
+        html.Th('Play-rate %', colSpan=count_cutoff + 1, className='text-center small'),
+        html.Th('Win-rate %', colSpan=count_cutoff, className='text-center small')]
     subheaders = [html.Th(), html.Th('Overall', className='small')] +\
-        [html.Th(i, className='text-end small') for i in range(1, 5)] +\
-        [html.Th(i, className='text-end small') for i in range(1, 5)]
+        [html.Th(i, className='text-end small') for i in range(1, count_cutoff + 1)] +\
+        [html.Th(i, className='text-end small') for i in range(1, count_cutoff + 1)]
 
     body = [html.Tr(html.Td(['Skeleton', dbc.Badge(skeleton_count, className='ms-1')]))] + skeleton + [html.Tr(html.Td('Other'))] + other
 
