@@ -26,10 +26,19 @@ card_table = f'{prefix}-card-table'
 hide_common = f'{prefix}-hide-common'
 _remove_item = f'{prefix}-remove-item'
 
+_helper_progress_bar = [dbc.Progress(value=14, color='danger', bar=True, class_name=f'bg-opacity-{o}') for o in [75, 50, 25]] +\
+    [dbc.Progress(value=16, color='transparent', bar=True)] +\
+    [dbc.Progress(value=14, color='success', bar=True, class_name=f'bg-opacity-{o}') for o in [25, 50, 75]]
+
 _help_icon = f'{prefix}-help'
 _help_children = html.Ul([
     html.Li([html.Strong('Quickly compare:'), ' Analyze and compare multiple decklists.']),
     html.Li([html.Strong('Decklist input:'), ' Select decks from LimitlessTCG or input decks manually to compare.']),
+    html.Li([
+        html.Strong('Color-coded insights:'), ' Understand how a card count compares to the average',
+        dbc.Progress(_helper_progress_bar),
+        html.Div([dbc.Label('<<'), dbc.Label('<'), dbc.Label('='), dbc.Label('>'), dbc.Label('>>')], className='d-flex justify-content-between')
+    ]),
     feedback_link.list_item,
 ], className='mb-0')
 
@@ -86,8 +95,8 @@ def remove_row_from_table(clicks, children):
     triggered_id = ctx.triggered_id.get('index', None)
     if triggered_id is None:
         raise dash.exceptions.PreventUpdate
-    matched_idx = next(idx for idx, child in enumerate(children) if f'decklist-{triggered_id}' == child['props']['id'])
-    if triggered_id is None or clicks[matched_idx] is None:
+    matched_idx = next(idx for idx, child in enumerate(children) if f'decklist-{triggered_id}' == child['props']['children']['props'].get('id', None))
+    if clicks[matched_idx] is None:
         raise dash.exceptions.PreventUpdate
     patch = Patch()
     del patch[matched_idx]
@@ -141,7 +150,7 @@ def update_card_table(decks, labels, hide):
         for item in card['decks']:
             color = 'success' if item[1] > card['count'] else 'danger' if item[1] < card['count'] else ''
             diff = abs(item[1] - card['count'])
-            opacity = '25' if diff >= 2 else '50' if diff >= 1 else '75'
+            opacity = '75' if diff >= 2 else '50' if diff >= 1 else '25'
             cells[item[0]+1] = html.Td(item[1], className=f'bg-opacity-{opacity} bg-{color} text-center')
 
         if hide and len(card['decks']) == len(decks) and all(c[1] == card['decks'][0][1] for c in card['decks']):
