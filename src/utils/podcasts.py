@@ -80,8 +80,13 @@ def parse_rss_feed_for_first_item(xml_content):
     if xml_content:
         # Parse XML content
         root = ET.fromstring(xml_content)
-        image = root.find(".//channel/image/url").text
-        # Iterate through items and return single
+        image = root.find(".//channel/image/url")
+        if image is not None:
+            image = image.text
+        namespaces = {'itunes': 'http://www.itunes.com/dtds/podcast-1.0.dtd'}
+        image_element = root.find('.//channel/itunes:image', namespaces=namespaces)
+        if image is None and image_element is not None:
+            image = image_element.get('href')
         for item in root.findall(".//channel/item"):
             title = item.find("title").text
             summary = item.find("description").text
