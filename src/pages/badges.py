@@ -37,9 +37,11 @@ color_input = f'{prefix}-color-input'
 date_input = f'{prefix}-date-input'
 background_input = f'{prefix}-background-input'
 pronouns = f'{prefix}-pronouns'
+tier = f'{prefix}-tier'
 output = f'{prefix}-output'
 output_trainer = f'{output}-trainer'
 output_pronouns = f'{output}-pronouns'
+output_tier = f'{output}-tier'
 output_deck = f'{output}-deck'
 output_store = f'{output}-store'
 output_date = f'{output}-date'
@@ -88,6 +90,8 @@ def layout():
                      options=['Grass', 'Fire', 'Water', 'Lightning',
                               'Psychic', 'Fighting', 'Dark', 'Metal',
                               'Dragon', 'Fairy', 'Colorless']),
+        dbc.Label('Tier'),
+        dcc.Dropdown(options=['League Challenge', 'League Cup', 'Regionals', 'Internationals', 'Locals', 'Online'], value='Locals', id=tier, clearable=False),
         dbc.Label('Date'),
         html.Div(dcc.DatePickerSingle(date=datetime.date.today(), id=date_input))
     ]
@@ -108,7 +112,8 @@ def layout():
                     html.H4(id=output_trainer),
                     html.Div(['earned ', html.Span(id=output_pronouns)], className='mb-2'),
                     html.H4(id=output_deck, className='d-flex justify-content-around'),
-                    html.Div(['badge at ', html.Strong(id=output_store), ' on ', html.Span(id=output_date)]),
+                    html.Div([dbc.Badge(id=output_tier, class_name='me-1'), 'badge at ', html.Strong(id=output_store)]),
+                    html.Div([' on ', html.Span(id=output_date)]),
                 ],id=output, class_name='text-center gym-badge', body=True),
                 md=7, lg=6, xl=5, xxl=4
             )
@@ -118,8 +123,8 @@ def layout():
 
 
 for input_id, output_id in zip(
-    [player_input, pronouns, store_input],
-    [output_trainer, output_pronouns, output_store]
+    [player_input, pronouns, store_input, tier],
+    [output_trainer, output_pronouns, output_store, output_tier]
 ):
     clientside_callback(
         ClientsideFunction(namespace='clientside', function_name='return_self'),
