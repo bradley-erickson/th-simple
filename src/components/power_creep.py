@@ -16,7 +16,7 @@ def _read_in_data():
     return gb
 
 
-_power_creep_df = _read_in_data()
+# _power_creep_df = _read_in_data()
 
 
 def hp_by_stage_by_era():

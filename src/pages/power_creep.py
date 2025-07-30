@@ -7,12 +7,12 @@ import components.power_creep
 # TODO
 description = 'Something about power creep'
 
-dash.register_page(
-    __name__,
-    path='/power-creep',
-    title='Power Creep',
-    description=description
-)
+# dash.register_page(
+#     __name__,
+#     path='/power-creep',
+#     title='Power Creep',
+#     description=description
+# )
 
 # DOM ids
 _prefix = 'home'
