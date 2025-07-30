@@ -30,7 +30,7 @@ _help_icon = f'{prefix}-help'
 _help_children = html.Ul([
     html.Li([html.Strong('Set Card Priorities:'), ' Input your decklists and set card priorities.']),
     html.Li([html.Strong('Determine Prize Cards:'), ' Scroll through your deck to figure out which cards are prized.']),
-    feedback_link.list_item
+    feedback_link.list_item('prize-checker')
 ], className='mb-0')
 
 EXAMPLE = '''Pokémon (18)

@@ -39,7 +39,7 @@ _help_children = html.Ul([
         dbc.Progress(_helper_progress_bar),
         html.Div([dbc.Label('<<'), dbc.Label('<'), dbc.Label('='), dbc.Label('>'), dbc.Label('>>')], className='d-flex justify-content-between')
     ]),
-    feedback_link.list_item,
+    feedback_link.list_item('diff-table'),
 ], className='mb-0')
 
 

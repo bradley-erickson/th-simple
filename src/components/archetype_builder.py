@@ -5,7 +5,6 @@ import random
 import uuid
 
 import components.deck_label
-import components.archetype_builder
 import utils.pokemon
 
 remove_tag = 'archetype_remove_tag_type'

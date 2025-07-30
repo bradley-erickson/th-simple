@@ -40,7 +40,7 @@ _help_children = html.Ul([
     html.Li([html.Strong('Matchups:'), ' See how the deck fairs against others.']),
     html.Li([html.Strong('Decklist:'), ' Analyze the most common card inclusions.']),
     html.Li([html.Strong('Card Analysis:'), ' Get in-dept analysis regarding specific cards.']),
-    components.feedback_link.list_item,
+    components.feedback_link.list_item('decklist'),
 ], className='mb-0')
 
 # Decklist filter DOM ids

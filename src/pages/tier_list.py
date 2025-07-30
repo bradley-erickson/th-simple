@@ -48,7 +48,7 @@ meta_percentage_breakdown = f'{prefix}-meta-percentage-breakdown'
 _help_icon = f'{prefix}-help'
 _help_children = html.Ul([
     html.Li([html.Strong('Drag n Drop:'), ' Easily create your tier list by dragging and dropping decks into tiers.']),
-    feedback_link.list_item
+    feedback_link.list_item('tier-list')
 ], className='mb-0')
 
 

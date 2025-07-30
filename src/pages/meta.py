@@ -31,7 +31,7 @@ _help_children = html.Ul([
     html.Li([html.Strong('Filter:'), ' Select which types of tournaments you wish to see.']),
     html.Li([html.Strong('Breakdown:'), ' View the overall distribution of deck archetypes and analyze top performers.']),
     html.Li([html.Strong('Matchups:'), ' Explore detailed head-to-head comparisons between deck archetypes.']),
-    feedback_link.list_item,
+    feedback_link.list_item('meta'),
 ], className='mb-0')
 
 breakdown = f'{prefix}-breakdown'

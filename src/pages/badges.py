@@ -54,7 +54,7 @@ _help_icon = f'{prefix}-help'
 _help_children = html.Ul([
     html.Li([html.Strong('Create:'), ' Customize your badge']),
     html.Li([html.Strong('Share:'), ' Download an image to share']),
-    feedback_link.list_item
+    feedback_link.list_item('badge')
 ], className='mb-0')
 
 def layout():

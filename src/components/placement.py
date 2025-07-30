@@ -9,6 +9,7 @@ OPTIONS = [
     {'label': 'Top 32', 'value': 32},
     {'label': 'Top 64', 'value': 64},
     {'label': 'All', 'value': 10_000},
+    {'label': 'Upper 2%', 'value': 0.02},
     {'label': 'Upper 5%', 'value': 0.05},
     {'label': 'Upper 10%', 'value': 0.1},
     {'label': 'Upper 25%', 'value': 0.25},

@@ -35,7 +35,7 @@ b_only_total = f'{b_only}-total'
 _help_icon = f'{prefix}-help'
 _help_children = html.Ul([
     html.Li([html.Strong('Simple to Use:'), ' Input your decklists and see a Venn diagram-like comparison.']),
-    feedback_link.list_item
+    feedback_link.list_item('diff-venn')
 ], className='mb-0')
 
 

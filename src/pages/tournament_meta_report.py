@@ -33,7 +33,7 @@ _help_children = html.Ul([
     html.Li([html.Strong('Purpose:'), ' This dashboard allows Tournamet Organizers to see a snapshot of the local meta.']),
     html.Li([html.Strong('Usage:'), ' Upload a tdf, choose a deck for each player, inpsect breakdown and matchups.']),
     html.Li([html.Strong('Data Privacy:'), " The uploaded data is processed to display relevant information, but no information is collected. If you clear cookies or click the clear button, your data will be deleted forever."]),
-    feedback_link.list_item,
+    feedback_link.list_item('none'),
 ], className='mb-0')
 
 # upload tab

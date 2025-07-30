@@ -29,64 +29,76 @@ webhook_url = os.environ['FEEDBACK_URL']
 
 feedback_text = "We'd love to hear your thoughts about our site. Whether it's a suggestion, a bug, or just a quick comment, your feedback is crucial in helping us improve. If you wish to be contacted, leave your contact information so we can follow up. Thanks for helping us make our website better for everyone."
 
+PAGES = {
+    'none': 'None',
+    'meta': 'Meta Analysis',
+    'decklist': 'Decklist Analysis',
+    'badge': 'Badge Maker',
+    'journal': 'Battle Journal',
+    'diff-table': 'Deck Diff Table Compare',
+    'diff-venn': 'Deck Diff Venn Diagram',
+    'podcast': 'Podcast Hub',
+    'prize-checker': 'Prize Checker',
+    'tier-list': 'Tier List'
+    # TODO add option for new external battle journal
+}
 
-layout = html.Div([
-    html.H2('Feedback'),
-    html.Strong('We value your feedback!'),
-    html.P(feedback_text),
-    dbc.Alert(id=alert, dismissable=True, duration=5_000, is_open=False),
-    dbc.Form([
-        html.Div([
-            dbc.Label('Reason'),
-            dbc.RadioItems(
-                ['Website issue', 'New feature suggestion', 'General comment'],
-                id=reason
-            )
-        ]),
-        html.Div([
-            dbc.Label('Relevant Page'),
-            dcc.Dropdown(
-                ['None', 'Meta Analysis', 'Decklist Analysis', 'Badge Maker',
-                 'Battle Journal', 'Deck Diff Table Compare', 'Deck Diff Venn Diagram',
-                 'Podcast Hub', 'Prize Checker', 'Tier List Creator'
-                ],
-                value='None',
-                id=relevant_page,
-                clearable=False
-            )
-        ]),
-        html.Div([
-            dbc.Label('Comments'),
-            dbc.Textarea(
-                id=comments,
-                value='',
-                required=True,
-                placeholder='Please describe your feedback in detail...'
-            ),
-            dbc.FormText('Responses must be a minimum of 10 characters.', color='muted', id=comments_message)
-        ]),
-        html.Div([
-            dbc.Label('Contact'),
-            dbc.Row([
-                dbc.Col(dcc.Dropdown(
-                    ['None', 'Twitter', 'Bluesky', 'Discord', 'Email'],
-                    placeholder='Preference',
-                    value='None',
-                    id=contact_method,
-                    clearable=False
-                ),xs=6, sm=5, md=4, lg=3, xl=2),
-                dbc.Col(dbc.Input(
-                    placeholder='Contact',
-                    id=contact_user,
-                    class_name='inputgroup-input-fix',
-                    value=''
-                ),xs=6, sm=7, md=8, lg=9, xl=10)
+
+def layout(page=None):
+    return html.Div([
+        html.H2('Feedback'),
+        html.Strong('We value your feedback!'),
+        html.P(feedback_text),
+        dbc.Alert(id=alert, dismissable=True, duration=5_000, is_open=False),
+        dbc.Form([
+            html.Div([
+                dbc.Label('Reason'),
+                dbc.RadioItems(
+                    ['Website issue', 'New feature suggestion', 'General comment'],
+                    id=reason
+                )
             ]),
-            dbc.FormText('Please provide a username to contact.', color='muted', id=contact_message)
-        ]),
-        dbc.Button('Submit', id=submit, type='submit', disabled=True, class_name='mt-1'),
+            html.Div([
+                dbc.Label('Relevant Page'),
+                dcc.Dropdown(
+                    options=PAGES,
+                    value=page if page else 'none',
+                    id=relevant_page,
+                    clearable=False
+                )
+            ]),
+            html.Div([
+                dbc.Label('Comments'),
+                dbc.Textarea(
+                    id=comments,
+                    value='',
+                    required=True,
+                    placeholder='Please describe your feedback in detail...'
+                ),
+                dbc.FormText('Responses must be a minimum of 10 characters.', color='muted', id=comments_message)
+            ]),
+            html.Div([
+                dbc.Label('Contact'),
+                dbc.Row([
+                    dbc.Col(dcc.Dropdown(
+                        ['None', 'Twitter', 'Bluesky', 'Discord', 'Email'],
+                        placeholder='Preference',
+                        value='None',
+                        id=contact_method,
+                        clearable=False
+                    ),xs=6, sm=5, md=4, lg=3, xl=2),
+                    dbc.Col(dbc.Input(
+                        placeholder='Contact',
+                        id=contact_user,
+                        class_name='inputgroup-input-fix',
+                        value=''
+                    ),xs=6, sm=7, md=8, lg=9, xl=10)
+                ]),
+                dbc.FormText('Please provide a username to contact.', color='muted', id=contact_message)
+            ]),
+            dbc.Button('Submit', id=submit, type='submit', disabled=True, class_name='mt-1'),
+        ])
     ])
-])
 
 clientside_callback(
     ClientsideFunction(namespace='clientside', function_name='update_feedback_submit_disabled'),

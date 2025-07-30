@@ -47,7 +47,7 @@ _help_children = html.Ul([
     html.Li([html.Strong('Track Your Games:'), ' Log your games, view your history, and dive into detailed analysis.']),
     html.Li([html.Strong('Filter & Analyze:'), ' Easily filter your game history for better insights.']),
     html.Li([html.Strong('Data Privacy:'), " Your game data is stored locally in your browser. It's never collected. If you clear cookies or click the clear button, your data will be deleted forever."]),
-    feedback_link.list_item,
+    feedback_link.list_item('journal'),
 ], className='mb-0')
 
 # buttons
