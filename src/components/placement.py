@@ -16,8 +16,21 @@ OPTIONS = [
     {'label': 'Upper 50%', 'value': 0.5}
 ]
 
+REDUCED_OPTIONS = [
+    {'label': 'Winner', 'value': 1},
+    {'label': 'Finals', 'value': 2},
+    {'label': 'Top 4', 'value': 4},
+    {'label': 'Top 8', 'value': 8},
+    {'label': 'Top 16', 'value': 16},
+    {'label': 'Top 32', 'value': 32},
+    {'label': 'Upper 2%', 'value': 0.02},
+    {'label': 'Upper 5%', 'value': 0.05},
+    {'label': 'Upper 10%', 'value': 0.1},
+]
 
-def create_placement_dropdown(id, placement, className=''):
+
+def create_placement_dropdown(id, placement, className='', reduced_options=False):
+    options = REDUCED_OPTIONS if reduced_options else OPTIONS
     return dcc.Dropdown(
-        options=OPTIONS, id=id, value=placement, className=className
+        options=options, id=id, value=placement, className=className
     )

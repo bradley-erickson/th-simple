@@ -23,7 +23,6 @@ dash.register_page(
 )
 
 prefix = 'meta'
-loading = f'{prefix}-loading'
 tour_store = f'{prefix}-tour-store'
 
 _help_icon = f'{prefix}-help'
@@ -92,17 +91,16 @@ def fetch_breakdown_data(tour_data, placing=None):
 def layout(players=None, start_date=None, end_date=None, platform=None, game=None):
     tours = tour_filter.TourFiltersAIO(players, start_date, end_date, platform, game, prefix)
     tour_filters = tour_filter.create_tour_filter(players, start_date, end_date, platform, game)
-    
+
     cont = html.Div([
         html.Div([
             html.H2('Meta Analysis', className='d-inline-block'),
             help_icon.create_help_icon(_help_icon, _help_children, className='align-top'),
         ]),
-        dbc.Alert([
-            'The Tier List Creator has moved to its own ',
-            dcc.Link('Tool', href='/tools/tier-list', className='alert-link')
-        ], id='tierlist-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
-        dbc.Alert(['Loading data from server, this may take a moment...'], id=loading, is_open=False, color='warning'),
+        # dbc.Alert([
+        #     'The Tier List Creator has moved to its own ',
+        #     dcc.Link('Tool', href='/tools/tier-list', className='alert-link')
+        # ], id='tierlist-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
         dcc.Store(id=tour_store, data=tour_filters),
         dcc.Store(id=archetype_store, data=[]),
         tours,
@@ -155,6 +153,7 @@ def layout(players=None, start_date=None, end_date=None, platform=None, game=Non
         ], className='mb-1'),
         dbc.Spinner([
             html.Div(id=matchups),
+            html.Small('Match-ups with less than 5 results are excluded'),
             dcc.Store(id=matchup_data_store, data=[])
         ])
     ])

@@ -51,7 +51,7 @@ patreon_banner = dbc.Alert([
     'Help support the site on ',
     html.A('Patreon', href=patreon_link, target='_blank', className='alert-link'),
     '!'
-], id=banner_id)
+], id=banner_id, class_name='my-1')
 
 
 clientside_callback(

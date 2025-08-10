@@ -17,3 +17,9 @@ def weeks_ago_3():
     today = date.today()
     weeks_ago_3 = str(today - timedelta(21))
     return weeks_ago_3
+
+
+def weeks_ago_1():
+    today = date.today()
+    weeks_ago_1 = str(today - timedelta(7))
+    return weeks_ago_1

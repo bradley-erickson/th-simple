@@ -32,8 +32,9 @@ def layout():
             'If we are ',
             html.Strong('missing'),
             ' a podcast, please submit a ',
-            feedback_link.link_item,
-            " with the podcast's name and we'll get it added!"
+            feedback_link.link_item('podcast'),
+            " with the podcast's name and RSS feed URL",
+            " (Spotify-only shows may require enabling the RSS feed first)."
         ])
     ])
     return cont
