@@ -62,7 +62,8 @@ def get_card(card):
         query = f'{set_query} number:SWSH{card["number"]}'
     else:
         query = f'{set_query} number:{card["number"]}'
-    obj = _query_card(query)
+    # obj = _query_card(query)
+    obj = None
     if obj is None:
         basic_energy = not any(c.isdigit() for c in card['number']) or ('Energy' in card['name'] and card['name'].split(' ')[0] in ENERGY)
         card['supertype'] = 'Energy' if basic_energy else None
