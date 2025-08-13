@@ -1,5 +1,5 @@
 import dash
-from dash import html, dcc, clientside_callback, ClientsideFunction, callback, Output, Input, State, ALL, Patch
+from dash import html, dcc, clientside_callback, ClientsideFunction, callback, Output, Input, State, ALL, Patch, MATCH
 import dash_bootstrap_components as dbc
 import dash_extensions as de
 from datetime import date
@@ -34,6 +34,12 @@ title_input = f'{prefix}-list-title-input'
 title_text = f'{prefix}-list-title-text'
 
 date_created = f'{prefix}-list-date-created'
+
+# tier titles
+_tier_title = f'{prefix}-tier-title'
+_tier_title_input = f'{_tier_title}-input'
+_tier_titles_collapse = f'{_tier_title}-collapse'
+_tier_titles_toggle = f'{_tier_title}-toggle'
 
 drag_container = f'{prefix}-list-archetype-drag-container'
 drag_wrapper = f'{prefix}-list-archetype-drag-wrapper'
@@ -77,7 +83,7 @@ def create_tier_row(tier, color, bottom_border=False, top=False):
     top_css = 'rounded-top' if top else ''
     return dbc.Row(
         [
-            dbc.Col(html.Div(html.P(tier.upper()), className=f'tier-list-header bg-{color}'), width=1),
+            dbc.Col(html.Div(html.P(id={'index': tier, 'type': _tier_title}), className=f'tier-list-header bg-{color}'), width=1),
             dbc.Col(
                 width=11,
                 class_name='tier-list-content',
@@ -94,6 +100,24 @@ def create_tier_row(tier, color, bottom_border=False, top=False):
 drop_complete_event = {"event": "dropcomplete", "props": ["detail.id", "detail.target"]}
 
 
+tier_titles = dbc.Card([
+    html.A(
+        dbc.CardHeader([
+            html.I(className='fas fa-pen-to-square me-1'),
+            html.Strong('Customize Tier Titles')
+        ]),
+        id=_tier_titles_toggle
+    ),
+    dbc.Collapse(
+        dbc.CardBody([
+            dbc.Input(value=t.upper(), id={'type': _tier_title_input, 'index': t})
+            for t in ['s', 'a', 'b', 'c', 'd']
+        ]),
+        id=_tier_titles_collapse
+    )
+])
+
+
 def layout(players=None, start_date=None, end_date=None, platform=None, game=None):
     tours = tour_filter.TourFiltersAIO(players, start_date, end_date, platform, game, prefix)
     archetype_raw = utils.data.get_decks(tour_filter.create_tour_filter(players, start_date, end_date, platform, game))
@@ -103,11 +127,10 @@ def layout(players=None, start_date=None, end_date=None, platform=None, game=Non
         'search': deck['name'],
     } for deck in archetype_raw]
 
-
     additional_decks = dbc.Card([
         html.A(
             dbc.CardHeader([
-                html.I(className='fas fa-filter me-1'),
+                html.I(className='fas fa-layer-group me-1'),
                 html.Strong('Custom Deck Archetypes')
             ]),
             id=additional_archetypes
@@ -154,6 +177,7 @@ def layout(players=None, start_date=None, end_date=None, platform=None, game=Non
         dbc.Alert(_help_children, id='tierlist-info-alert', color='info', dismissable=True, persistence=True, persistence_type='local'),
         tours,
         additional_decks,
+        tier_titles,
         html.Div([
             dbc.Label('Archetype select'),
             dcc.Dropdown(
@@ -179,6 +203,19 @@ clientside_callback(
     Output(archetype_collapse, 'is_open'),
     Input(additional_archetypes, 'n_clicks'),
     State(archetype_collapse, 'is_open')
+)
+
+clientside_callback(
+    ClientsideFunction(namespace='clientside', function_name='toggle_with_button'),
+    Output(_tier_titles_collapse, 'is_open'),
+    Input(_tier_titles_toggle, 'n_clicks'),
+    State(_tier_titles_collapse, 'is_open')
+)
+
+clientside_callback(
+    ClientsideFunction(namespace='clientside', function_name='return_self'),
+    Output({'type': _tier_title, 'index': MATCH}, 'children'),
+    Input({'type': _tier_title_input, 'index': MATCH}, 'value')
 )
 
 clientside_callback(
