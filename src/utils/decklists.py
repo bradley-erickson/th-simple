@@ -1,6 +1,8 @@
 import hashlib
 from pokemontcgsdk import PokemonTcgException
 
+import th_helpers.utils.cards
+
 import utils.cards
 
 
@@ -21,9 +23,9 @@ def _parse_decklist_str(l):
         except IndexError:
             unable_to_parse.append(c)
             continue
-        energy_check = c_set != 'Energy' and c_num not in utils.cards.ENERGY.values()
+        energy_check = c_set != 'Energy' and c_num not in th_helpers.utils.cards.ENERGY.values()
         c_set = c_set if energy_check else 'BRS'
-        c_num = c_num if energy_check else c_split[2].replace('{', '').replace('}', '') if c_split[1] == 'Basic' else utils.cards.ENERGY[c_split[1]]
+        c_num = c_num if energy_check else c_split[2].replace('{', '').replace('}', '') if c_split[1] == 'Basic' else th_helpers.utils.cards.ENERGY[c_split[1]]
         card = {
             'card_code': f'{c_set}-{c_num.zfill(3) if energy_check else c_num}',
             'set': c_set,
@@ -47,9 +49,9 @@ def _parse_decklist_dict_list(l):
         c_set = c['set']
         c_num = c['number']
         c_name = c['name'].split(' ')
-        energy_check = c_set != 'Energy' and c_num not in utils.cards.ENERGY.values()
+        energy_check = c_set != 'Energy' and c_num not in th_helpers.utils.cards.ENERGY.values()
         c_set = c_set if energy_check else 'BRS'
-        c_num = c_num if energy_check else c_name[1].replace('{', '').replace('}', '') if c_name[0] == 'Basic' else utils.cards.ENERGY[c_name[0]]
+        c_num = c_num if energy_check else c_name[1].replace('{', '').replace('}', '') if c_name[0] == 'Basic' else th_helpers.utils.cards.ENERGY[c_name[0]]
         card = {
             'card_code': f'{c_set}-{c_num.zfill(3) if energy_check else c_num}',
             'set': c_set,
@@ -63,13 +65,12 @@ def _parse_decklist_dict_list(l):
             unable_to_parse.append(card)
             continue
         deck.append(card)
-        pass
     return deck, unable_to_parse
 
 
 def _hash_pokemon(card):
-    attack_strings = [str(cls.__dict__) for cls in card.get('attacks', [])]
-    ability_strings = [str(cls.__dict__) for cls in card.get('abilities', [])]
+    attack_strings = [str(cls) for cls in card.get('attacks', [])]
+    ability_strings = [str(cls) for cls in card.get('abilities', [])]
     combined = ''.join(attack_strings).encode('utf-8') + ''.join(ability_strings).encode('utf-8')
     return hashlib.sha256(combined).hexdigest()
 

@@ -2,6 +2,8 @@ import dash
 from dash import html, callback, Output, Input, State, Patch, ALL, ctx
 import dash_bootstrap_components as dbc
 
+import th_helpers.utils.cards
+
 from components import download_button, feedback_link, deck_select, help_icon
 import utils.cards
 import utils.decklists
@@ -128,7 +130,7 @@ def update_card_table(decks, labels, hide):
         fetched_card = utils.cards.get_card(card)
         fetched_card['decks'] = deck_counts
         card_info.append(fetched_card)
-    sorted_cards = utils.cards.sort_deck(card_info)
+    sorted_cards = th_helpers.utils.cards.sort_deck(card_info)
 
     headers = [html.Th('')]
     for label in labels:
@@ -156,5 +158,5 @@ def update_card_table(decks, labels, hide):
         if hide and len(card['decks']) == len(decks) and all(c[1] == card['decks'][0][1] for c in card['decks']):
             continue
         rows.append(html.Tr(cells))
-    table_children = [html.Thead(headers, className='sticky-top')] + [html.Tbody(rows)]
+    table_children = [html.Thead(html.Tr(headers), className='sticky-top')] + [html.Tbody(rows)]
     return table_children

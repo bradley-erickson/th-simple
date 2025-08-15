@@ -110,7 +110,13 @@ tier_titles = dbc.Card([
     ),
     dbc.Collapse(
         dbc.CardBody([
-            dbc.Input(value=t.upper(), id={'type': _tier_title_input, 'index': t})
+            # TODO this ought to be a dynamic list that the user can add to / remove from
+            # we can build the tiers based on this list.
+            dbc.Input(
+                value=t.upper(),
+                id={'type': _tier_title_input, 'index': t},
+                debounce=True
+            )
             for t in ['s', 'a', 'b', 'c', 'd']
         ]),
         id=_tier_titles_collapse

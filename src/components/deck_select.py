@@ -122,7 +122,7 @@ class DeckSelectAIO(html.Div):
                 )
             ], xl=2, lg=3, class_name='d-flex justify-content-between align-items-start'),
             dbc.Col([
-                dbc.Input(value='', placeholder='Label', id=self.ids.manual_label(aio_id)),
+                dbc.Input(value='', placeholder='Label', id=self.ids.manual_label(aio_id), debounce=True),
                 dbc.Textarea(
                     value='', placeholder='Paste decklist here', id=self.ids.manual_input(aio_id),
                     size='sm', spellcheck='false', class_name='my-1'
@@ -190,7 +190,6 @@ class DeckSelectAIO(html.Div):
     def update_selected_deck(deck, manual_clicks, manual_input):
         if ctx.triggered_id is None:
             raise dash.exceptions.PreventUpdate
-        
         subcomponent = ctx.triggered_id['subcomponent']
         if subcomponent == 'limitless_players':    
             base_url = 'https://limitlesstcg.com'
