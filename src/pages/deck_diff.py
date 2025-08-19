@@ -2,9 +2,11 @@ import dash
 from dash import html, callback, clientside_callback, ClientsideFunction, Output, Input
 import dash_bootstrap_components as dbc
 
+import th_helpers.utils.cards
+
 from components import download_button, feedback_link, help_icon
 import components.deck_select
-from utils import images, cards as _cards
+from utils import images
 
 page_title = 'Deck Diff Venn Diagram'
 page_icon = 'fa-code-compare'
@@ -84,7 +86,7 @@ clientside_callback(
 )
 
 def clean_list(raw, mid=False):
-    cards_sorted = _cards.sort_deck(raw)
+    cards_sorted = th_helpers.utils.cards.sort_deck(raw)
     cards_comp = [dbc.Col([
         html.Img(src=images.get_card_image(c.get('card_code', None), 'SM'), className='w-100'),
         dbc.Badge(

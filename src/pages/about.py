@@ -11,7 +11,7 @@ dash.register_page(
     description='Discover Trainer Hill: Your Premier Source for Pokémon TCG Analytics'
 )
 
-play_limitless_link = html.A('play.limitlesstcg', href='play.limitlesstcg.com')
+play_limitless_link = html.A('play.limitlesstcg', href='https://play.limitlesstcg.com')
 
 faq = [
     {'q': 'What is Trainer Hill?',
@@ -21,7 +21,7 @@ faq = [
     {'q': 'Where does the data come from?',
      'a': ['Online data is collected from the ', play_limitless_link,
            ' online tournament platform. ', 'Data from Majors tournaments is collected from both ',
-           html.A('LimitlessTCG', href='www.limitlesstcg.com'), ' and ', html.A('PokeData', href='www.pokedata.ovh'),
+           html.A('LimitlessTCG', href='https://www.limitlesstcg.com'), ' and ', html.A('PokeData', href='https://www.pokedata.ovh'),
            '.']},
     {'q': 'How are deck archetypes determined?',
      'a': ['The ', play_limitless_link, ' online tournament platform keeps an up-to-date ruleset that determines ',

@@ -10,7 +10,7 @@ color_breakdown = colors.blue
 color_inclusion = colors.red
 color_winrate = colors.green
 
-def create_grid_item(card, total, game):
+def create_grid_item(card, total, game, allow_small=False):
     id = card['card_code']
     play_rate = sum(x['decks'] for x in card.get('counts')) / total
 
@@ -73,7 +73,7 @@ def create_grid_item(card, total, game):
             int(max_num),
             class_name='position-absolute top-0 end-0 m-2 mt-3 rounded-circle font-monospace border border-light',
         )
-    ], className='position-relative', id=id, xs=4, sm=3, md=2, lg=2)
+    ], className='position-relative', id=id, xs=4, sm=3, md=2, lg=2, xl=1 if allow_small else 2)
     return item
 
 def create_grid_layout(cards, total, game):
