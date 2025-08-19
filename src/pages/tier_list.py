@@ -124,9 +124,17 @@ tier_titles = dbc.Card([
 ])
 
 
-def layout(players=None, start_date=None, end_date=None, platform=None, game=None):
-    tours = tour_filter.TourFiltersAIO(players, start_date, end_date, platform, game, prefix)
-    archetype_raw = utils.data.get_decks(tour_filter.create_tour_filter(players, start_date, end_date, platform, game))
+def layout(**kwargs):
+    tours = tour_filter.TourFiltersAIO(
+        kwargs.get('players'),
+        kwargs.get('start_date'),
+        kwargs.get('end_date'),
+        kwargs.get('platform'),
+        kwargs.get('game'),
+        kwargs.get('division'),
+        prefix)
+    tour_filters = tour_filter.create_tour_filter(**kwargs)
+    archetype_raw = utils.data.get_decks(tour_filters)
     decks = [{
         'label': deck_label.format_label(deck),
         'value': deck['id'],

@@ -250,20 +250,24 @@ def create_deck_analysis_layout(deck, selected_card, game):
     ], id=_deck)
 
 
-def layout(
-        deck=None, 
-        players=None,
-        start_date=None, end_date=None,
-        platform=None,
-        game=None,
-        include=None, exclude=None,
-        granularity=0.6,
-        placement=0.5,
-        selected_card=None
-    ):
+def layout(**kwargs):
+    tours = components.tour_filter.TourFiltersAIO(
+        kwargs.get('players'),
+        kwargs.get('start_date'),
+        kwargs.get('end_date'),
+        kwargs.get('platform'),
+        kwargs.get('game'),
+        kwargs.get('division'),
+        _prefix)
+    filters = components.tour_filter.create_tour_filter(**kwargs)
+    game = kwargs.get('game')
+    deck = kwargs.get('deck')
+    placement = kwargs.get('placement', 0.5)
+    include = kwargs.get('include')
+    exclude = kwargs.get('exclude')
+    granularity = kwargs.get('granularity', 0.6)
+    selected_card = kwargs.get('selected_card')
     include = None if include == 'None' else include
-    tours = components.tour_filter.TourFiltersAIO(players, start_date, end_date, platform, game, _prefix)
-    filters = components.tour_filter.create_tour_filter(players, start_date, end_date, platform, game)
     filters['deck'] = deck
     filters['placement'] = placement
     filters['include'] = include

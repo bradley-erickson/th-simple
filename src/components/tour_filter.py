@@ -3,6 +3,8 @@ import dash_bootstrap_components as dbc
 from datetime import date, timedelta
 import uuid
 
+import utils.constants as c
+
 def default_players(p):
     return p if p else 50
 
@@ -17,6 +19,13 @@ def default_platform(p):
 
 def default_game(g):
     return g if g else 'PTCG'
+
+def default_division(d):
+    if d is None or len(d) == 0:
+        return ['JR', 'SR', 'MA']
+    if type(d) == str:
+        return [d]
+    return d
 
 class TourFiltersAIO(html.Div):
 
@@ -39,6 +48,16 @@ class TourFiltersAIO(html.Div):
         platform_tooltip = lambda aio_id: {
             'component': 'TourFiltersAIO',
             'subcomponent': 'platform_tooltip',
+            'aio_id': aio_id
+        }
+        division = lambda aio_id: {
+            'component': 'TourFiltersAIO',
+            'subcomponent': 'division',
+            'aio_id': aio_id
+        }
+        division_collapse = lambda aio_id: {
+            'component': 'TourFiltersAIO',
+            'subcomponent': 'division_collapse',
             'aio_id': aio_id
         }
         game = lambda aio_id: {
@@ -76,6 +95,7 @@ class TourFiltersAIO(html.Div):
         end_date=None,
         platform=None,
         game=None,
+        division=None,
         aio_id=None
     ):
         if aio_id is None:
@@ -86,12 +106,14 @@ class TourFiltersAIO(html.Div):
             'start_date': default_start_date(start_date),
             'end_date': end_date,
             'platform': default_platform(platform),
-            'game': default_game(game)
+            'game': default_game(game),
+            'division': default_division(division)
         }
 
         platform_text = {'all': 'on all platforms', 'inperson': 'at majors', 'online': 'online'}
         end_date_text = f" - {initial_data['end_date']}" if initial_data['end_date'] else ''
-        header_text = f' - {initial_data["game"]} {initial_data["players"]} players, from {initial_data["start_date"]}{end_date_text} {platform_text[initial_data["platform"]]}'
+        division_text = f"in {initial_data['division']}" if platform == 'inperson' else ''
+        header_text = f' - {initial_data["game"]} {initial_data["players"]} players, from {initial_data["start_date"]}{end_date_text} {platform_text[initial_data["platform"]]} {division_text}'
         filters = dbc.Card([
             html.A(
                 dbc.CardHeader([
@@ -138,7 +160,7 @@ class TourFiltersAIO(html.Div):
                                 dbc.Tooltip([
                                     '"Online" gathers data exclusively from the Play LimitlessTCG tournament platform.',
                                     html.Br(),
-                                    '"Majors" compiles data from players who advanced to Day 2 in Major tournaments, including Regionals, Special Events, Internationals, and Worlds.',
+                                    '"Majors" compiles data from players in Major tournaments, including Regionals, Special Events, Internationals, and Worlds.',
                                 ], target=self.ids.platform_tooltip(aio_id))
                             ])),
                             dbc.RadioItems(
@@ -150,6 +172,18 @@ class TourFiltersAIO(html.Div):
                                 value=initial_data['platform'],
                                 id=self.ids.platform(aio_id)
                             ),
+                            dbc.Collapse([
+                                dbc.Label('Division'),
+                                dbc.Checklist(
+                                    options={
+                                        'JR': 'Juniors',
+                                        'SR': 'Seniors',
+                                        'MA': 'Masters'
+                                    },
+                                    value=initial_data['division'],
+                                    id=self.ids.division(aio_id)
+                                )
+                            ], id=self.ids.division_collapse(aio_id), is_open=False)
                         ], md=6, lg=4, xl=3),
                     ], className='mb-1'),
                     dbc.Button(
@@ -175,6 +209,7 @@ class TourFiltersAIO(html.Div):
         Input(ids.dates(MATCH), 'end_date'),
         Input(ids.platform(MATCH), 'value'),
         Input(ids.game(MATCH), 'value'),
+        Input(ids.division(MATCH), c.DASH.VALUE),
         State(ids.initial(MATCH), 'data')
     )
 
@@ -186,6 +221,7 @@ class TourFiltersAIO(html.Div):
         Input(ids.dates(MATCH), 'end_date'),
         Input(ids.platform(MATCH), 'value'),
         Input(ids.game(MATCH), 'value'),
+        Input(ids.division(MATCH), c.DASH.VALUE),
         Input('_pages_location', 'hash')
     )
 
@@ -196,18 +232,29 @@ class TourFiltersAIO(html.Div):
         State(ids.collapse(MATCH), 'is_open')
     )
 
+    clientside_callback(
+        ClientsideFunction(namespace=c.DASH.CLIENTSIDE, function_name='toggleWithPlatformValue'),
+        Output(ids.division_collapse(MATCH), c.DASH.IS_OPEN),
+        Input(ids.platform(MATCH), c.DASH.VALUE)
+    )
 
-def create_tour_filter(players=None, start_date=None, end_date=None, platform=None, game=None):
+
+def create_tour_filter(**kwargs):
     params = {}
-    params['players'] = default_players(players)
-    params['start_date'] = default_start_date(start_date)
-    params['end_date'] = default_end_date(end_date)
-    params['platform'] = default_platform(platform)
-    params['game'] = default_game(game)
+    params['players'] = default_players(kwargs.get('players'))
+    params['start_date'] = default_start_date(kwargs.get('start_date'))
+    params['end_date'] = default_end_date(kwargs.get('end_date'))
+    params['platform'] = default_platform(kwargs.get('platform'))
+    params['game'] = default_game(kwargs.get('game'))
+    params['division'] = default_division(kwargs.get('division'))
     return params
 
 def create_param_string(tf):
     end_string = f'&end_date={tf["end_date"]}' if 'end_date' in tf and tf['end_date'] is not None else ''
     platform_string = f'&platform={tf["platform"]}' if 'platform' in tf and tf['platform'] in ['online', 'inperson'] else ''
-    param_str = f'?game={tf["game"]}&players={tf["players"]}&start_date={tf["start_date"]}{end_string}{platform_string}'
+    divisions = tf['division']
+    divisions = [divisions] if type(divisions) == str else divisions
+    divisions = [f'division={d}' for d in divisions]
+    divisions_string = f"&{('&').join(divisions)}" if 'platform' in tf and tf['platform'] == 'inperson' and divisions else ''
+    param_str = f'?game={tf["game"]}&players={tf["players"]}&start_date={tf["start_date"]}{end_string}{platform_string}{divisions_string}'
     return param_str

@@ -88,9 +88,16 @@ def fetch_breakdown_data(tour_data, placing=None):
     return overall
 
 
-def layout(players=None, start_date=None, end_date=None, platform=None, game=None):
-    tours = tour_filter.TourFiltersAIO(players, start_date, end_date, platform, game, prefix)
-    tour_filters = tour_filter.create_tour_filter(players, start_date, end_date, platform, game)
+def layout(**kwargs):
+    tours = tour_filter.TourFiltersAIO(
+        kwargs.get('players'),
+        kwargs.get('start_date'),
+        kwargs.get('end_date'),
+        kwargs.get('platform'),
+        kwargs.get('game'),
+        kwargs.get('division'),
+        prefix)
+    tour_filters = tour_filter.create_tour_filter(**kwargs)
 
     cont = html.Div([
         html.Div([
@@ -183,7 +190,6 @@ def update_options(tour_filters):
 @cache.cache.memoize(21600)
 def update_breakdown_overall(tour_filters, archetypes, show_more):
     decks = {d['value']: d['label'] for d in archetypes}
-
     overall = fetch_breakdown_data(tour_filters)
     breakpoint = 15 if show_more else 8
     for d in overall:
@@ -205,7 +211,6 @@ def update_breakdown_overall(tour_filters, archetypes, show_more):
 )
 def update_breakdown(tour_filters, archetypes, place, show_more):
     decks = {d['value']: d['label'] for d in archetypes}
-
     top_x = fetch_breakdown_data(tour_filters, place)
     breakpoint = 15 if show_more else 8
     for d in top_x:

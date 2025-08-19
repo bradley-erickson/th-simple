@@ -163,3 +163,5 @@ cython_debug/
 *.sqlite
 .requests-cache/
 .session-cache/
+
+src/data/

@@ -10,6 +10,12 @@
     background-size: cover;
     background-position: right;
 }
+.home-card .card-header.card {
+    position: relative;
+    background: linear-gradient(to right, var(--bs-card-bg) 15%, rgba(255, 255, 255, 0)), url('card-analysis.png');
+    background-size: cover;
+    background-position: right;
+}
 .home-card:hover {
     border: 2px solid var(--bs-dark) !important;
 }
