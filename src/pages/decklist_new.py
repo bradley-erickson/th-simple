@@ -454,6 +454,7 @@ def update_skeleton(tf, view):
     params['granularity'] = tf['granularity']
     r = utils.data.session.post(url, params=params)
     out = {'cards': [], 'total': 0}
+    total = out['total']
     if r.status_code == 200:
         resp = r.json()
         out['cards'] = resp['data']

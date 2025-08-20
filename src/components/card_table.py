@@ -12,7 +12,9 @@ color_winrate = colors.green
 
 def create_grid_item(card, total, game, allow_small=False):
     id = card['card_code']
-    play_rate = sum(x['decks'] for x in card.get('counts')) / total
+    play_rate = card.get('play_rate')
+    if not play_rate:
+        play_rate = sum(x['decks'] for x in card.get('counts')) / total
 
     df = pd.DataFrame(
         data={
@@ -20,7 +22,7 @@ def create_grid_item(card, total, game, allow_small=False):
             'play_rate': [c['decks']/total for c in card.get('counts')]
         }
     )
-    max_num = df.loc[df.play_rate.idxmax()]['count']
+    max_num = df.loc[df[df['count'] > 0].play_rate.idxmax(), 'count']
     df = df[df['count'] > 0]
     df.dropna(inplace=True)
 
@@ -77,7 +79,7 @@ def create_grid_item(card, total, game, allow_small=False):
     return item
 
 def create_grid_layout(cards, total, game):
-    skeleton_count = sum(c['count'] for c in cards if c['skeleton'])
+    skeleton_count = sum(c['count'] for c in cards if c['skeleton'] if c['count'] > 0)
     row = dbc.Row([
         html.H5(['Skeleton', dbc.Badge(skeleton_count, className='ms-1')]),
         dbc.Row([create_grid_item(card, total, game) for card in cards if card['skeleton']], className='g-1 mb-1'),
@@ -95,19 +97,19 @@ def create_list_item(card, max_count, total, game):
         dbc.Progress(value=card['play_rate'], max=1, color=color_inclusion, label=f"{card['play_rate']:.1%}"),
     ]
 
-    counts = [html.Td()]*max_count
-    win_rates = [html.Td()]*max_count
+    counts = [html.Td()]*(max_count + 1)
+    win_rates = [html.Td()]*(max_count + 1)
     for count in sorted(card['counts'], key=lambda d: d['count']):
         c = count['count']
         c_value = count["decks"] / total
         c_color = colors.blue_gradient[math.floor(c_value * 100)]
-        counts[c-1] = html.Td(
+        counts[c] = html.Td(
             html.Span(f'{c_value:.1%}', className='d-none d-md-inline'),
             style={'backgroundColor': c_color},
             className='text-end'
         )
         win_rate_value = count['win_rate']
-        win_rates[c-1] = html.Td(
+        win_rates[c] = html.Td(
             html.Span(f'{win_rate_value:.1%}', className='d-none d-md-inline'),
             style={'backgroundColor': colors.green_gradient[math.floor(win_rate_value * 100)]},
             className='text-end')
@@ -137,8 +139,8 @@ def create_list_item(card, max_count, total, game):
             className='text-end')
     ]
     cell_cutoff = 2 if game == 'POCKET' else 4
-    cells.extend(counts[:cell_cutoff])
-    cells.extend(win_rates[:cell_cutoff])
+    cells.extend(counts[1:cell_cutoff + 1])
+    cells.extend(win_rates[:cell_cutoff + 1])
     row = html.Tr(cells, id=id)
     return row
 
@@ -156,10 +158,10 @@ def create_list_layout(cards, total, game):
     count_cutoff = 2 if game == 'POCKET' else 4
     headers = [html.Th('Card'),
         html.Th('Play-rate %', colSpan=count_cutoff + 1, className='text-center small'),
-        html.Th('Win-rate %', colSpan=count_cutoff, className='text-center small')]
+        html.Th('Win-rate %', colSpan=count_cutoff + 1, className='text-center small')]
     subheaders = [html.Th(), html.Th('Overall', className='small')] +\
         [html.Th(i, className='text-end small') for i in range(1, count_cutoff + 1)] +\
-        [html.Th(i, className='text-end small') for i in range(1, count_cutoff + 1)]
+        [html.Th(i, className='text-end small') for i in range(0, count_cutoff + 1)]
 
     body = [html.Tr(html.Td(['Skeleton', dbc.Badge(skeleton_count, className='ms-1')]))] + skeleton + [html.Tr(html.Td('Other'))] + other
 
