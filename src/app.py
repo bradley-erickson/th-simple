@@ -6,6 +6,10 @@ from flask import send_from_directory
 import os
 import uuid
 
+if os.getenv('TH_DEPLOY'):
+    from gevent import monkey
+    monkey.patch_all()
+
 load_dotenv()
 
 from components import navbar, footer
