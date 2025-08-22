@@ -204,7 +204,6 @@ def update_breakdown_overall(tour_filters, archetypes, show_more):
     Input(archetype_select, 'options'),
     Input(breakdown_place, 'value'),
     Input(breakdown_show_more, 'value'),
-    background=True,
     running=[
         (Output(breakdown_place, 'disabled'), True, False)
     ]
@@ -224,7 +223,6 @@ def update_breakdown(tour_filters, archetypes, place, show_more):
     Input(tour_store, 'data'),
     Input(archetype_select, 'value'),
     Input(placing_id, 'value'),
-    background=True,
     running=[
         (Output(placing_id, 'disabled'), True, False),
         (Output(archetype_select, 'disabled'), True, False)

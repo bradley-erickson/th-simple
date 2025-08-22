@@ -6,13 +6,13 @@ bind = "0.0.0.0:8000"
 backlog = 128
 
 # Concurrency model
-workers = 1                   # single vCPU → keep this at 1
+workers = 2                   # single vCPU → keep this at 1
 worker_class = "gevent"
-worker_connections = 400      # extra headroom with 2 GB RAM
+worker_connections = 200      # extra headroom with 2 GB RAM
 
 # Timeouts
 keepalive = 5
-timeout = 120
+timeout = 60
 graceful_timeout = 30
 
 # Stability / slow leaks
@@ -27,7 +27,3 @@ worker_tmp_dir = "/dev/shm" if os.path.exists("/dev/shm") else tempfile.gettempd
 accesslog = "-"               # or None to save a bit of CPU
 errorlog = "-"
 loglevel = "info"
-
-# If behind a proxy (App Platform is), consider enabling ProxyFix in your app.
-# In Flask: from werkzeug.middleware.proxy_fix import ProxyFix; app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
-# Or set: forwarded_allow_ips = "*"

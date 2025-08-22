@@ -6,8 +6,6 @@ import random
 
 from components import feedback_link, help_icon
 import components.deck_select
-import utils.cards
-import utils.decklists
 import utils.images
 
 description = 'Hone your Pokémon TCG skills with our tool. Practice figuring out your prizes to refine your gameplay strategy.'

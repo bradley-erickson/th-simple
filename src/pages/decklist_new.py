@@ -403,7 +403,6 @@ def update_deck_title(tf, current):
     Input(_filter_store, 'data'),
     Input(_deck_options_store, 'data'),
     Input(_decklist_filter_against_archetypes, 'value'),
-    background=True
 )
 def update_deck_matchups(tf, options, against):
     if len(options) == 0:
@@ -442,7 +441,6 @@ def _create_card_inclusion_bar(count, percentage):
     Output(_card_count_inclusion, 'children'),
     Input(_filter_store, 'data'),
     Input(_decklist_skeleton_view_toggle, 'value'),
-    background=True
 )
 def update_skeleton(tf, view):
     url = f'{utils.data.analysis_url}/decklists/{tf["deck"]}/skeleton-counts'
@@ -486,7 +484,6 @@ def update_skeleton(tf, view):
 @callback(
     Output(_card_trend, 'children'),
     Input(_filter_store, 'data'),
-    background=True
 )
 def update_card_trend_children(tf):
     if tf['selected_card'] is None:
@@ -510,7 +507,6 @@ def update_card_trend_children(tf):
     Input(_filter_store, 'data'),
     Input(_deck_options_store, 'data'),
     Input(_decklist_filter_against_archetypes, 'value'),
-    background=True
 )
 def update_card_matchups_children(tf, options, against):
     if tf['selected_card'] is None:

@@ -1,5 +1,4 @@
 import hashlib
-from pokemontcgsdk import PokemonTcgException
 
 import th_helpers.utils.cards
 
@@ -33,12 +32,9 @@ def _parse_decklist_str(l):
             'name': ' '.join(c_split[1:-2]),
             'count': int(c_split[0]),
         }
-        try:
-            card = utils.cards.get_card(card)
-        except PokemonTcgException:
-            unable_to_parse.append(c)
-            continue
-        deck.append(card)
+        card = utils.cards.get_card(card)
+        if card is not None:
+            deck.append(card)
     return deck, unable_to_parse
 
 
@@ -59,12 +55,9 @@ def _parse_decklist_dict_list(l):
             'name': c['name'],
             'count': c['count'],
         }
-        try:
-            card = utils.cards.get_card(card)
-        except PokemonTcgException:
-            unable_to_parse.append(card)
-            continue
-        deck.append(card)
+        card = utils.cards.get_card(card)
+        if card is not None:
+            deck.append(card)
     return deck, unable_to_parse
 
 

@@ -1,5 +1,5 @@
 import dash
-from dash import html, DiskcacheManager, CeleryManager
+from dash import html
 import dash_bootstrap_components as dbc
 from dotenv import load_dotenv
 from flask import send_from_directory
@@ -7,6 +7,7 @@ import os
 import uuid
 
 if os.getenv('TH_DEPLOY'):
+    print('Monkey patching for Gevent')
     from gevent import monkey
     monkey.patch_all()
 
@@ -19,14 +20,6 @@ dbc_css = ("https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates@V1.0.
 html2canvas = {'src': 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'}
 
 launch_uid = uuid.uuid4()
-
-if 'REDIS_URL' in os.environ:
-    from celery import Celery
-    celery_app = Celery(__name__, broker=os.environ['REDIS_URL'], backend=os.environ['REDIS_URL'])
-    background_callback_manager = CeleryManager(celery_app, cache_by=[lambda: launch_uid], expire=1800)
-    celery_app.conf.broker_connection_retry_on_startup = True
-else:
-    background_callback_manager = None
 
 app = dash.Dash(
     __name__,
@@ -53,7 +46,6 @@ app = dash.Dash(
     ],
     suppress_callback_exceptions=True,
     title='Trainer Hill',
-    background_callback_manager=background_callback_manager
 )
 cache.cache.init_app(app.server)
 
@@ -109,4 +101,4 @@ def serve_text_file():
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run(debug=True)

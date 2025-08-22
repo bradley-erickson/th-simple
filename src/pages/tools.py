@@ -10,6 +10,7 @@ dash.register_page(
 )
 
 def layout():
+    # TODO these should include a placeholder image that shows the page
     tool_pages = {page['title']: page for page in dash.page_registry.values() if page['path'].startswith('/tools/')}
     links = [html.Div([
         html.H3(dcc.Link(p['title'], href=p['path']), id=p['module'].replace('pages.', '')),
