@@ -8,7 +8,7 @@ backlog = 128
 # Concurrency model
 workers = 2                   # single vCPU → keep this at 1
 worker_class = "gevent"
-worker_connections = 200      # extra headroom with 2 GB RAM
+worker_connections = 500      # extra headroom with 2 GB RAM
 
 # Timeouts
 keepalive = 5

@@ -1,0 +1,16 @@
+# ./Caddyfile
+beta.trainerhill.com {
+	encode gzip
+	log {
+		output stdout
+		format console
+	}
+
+	@health path /health
+	handle @health {
+		respond "ok" 200
+	}
+
+	# Send everything else to the app container
+	reverse_proxy app:8000
+}

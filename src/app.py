@@ -2,7 +2,7 @@ import dash
 from dash import html
 import dash_bootstrap_components as dbc
 from dotenv import load_dotenv
-from flask import send_from_directory
+from flask import send_from_directory, jsonify
 import os
 import uuid
 
@@ -98,6 +98,11 @@ server = app.server
 @server.route('/ads.txt')
 def serve_text_file():
     return send_from_directory(directory='assets', path='ads.txt')
+
+
+@server.get('/health')
+def check_health():
+    return jsonify(ok=True)
 
 
 if __name__ == "__main__":
