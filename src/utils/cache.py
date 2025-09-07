@@ -1,8 +1,5 @@
 from flask_caching import Cache
 import os
-import requests_cache
-
-# requests_cache.install_cache(backend='filesystem', cache_name='.requests-cache')
 
 config = {
     "DEBUG": True,          # some Flask specific configs

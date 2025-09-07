@@ -42,10 +42,9 @@ browserlike_headers = {
 
 
 # cache for half an hour
-@cache.cache.memoize(timeout=1800)
+@cache.cache.memoize(timeout=3600)
 def download_rss_feed(url):
     response = requests.get(url, headers=browserlike_headers)
-    
     # Check if the request was successful (status code 200)
     if response.status_code == 200:
         return response.text

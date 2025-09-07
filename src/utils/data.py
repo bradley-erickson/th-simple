@@ -3,9 +3,13 @@ import os
 from dotenv import load_dotenv
 import requests_cache
 
+import utils.cache
+import utils.constants as c
+
 load_dotenv()
 
-BASE_URL = 'https://api.trainerhill.com'
+# BASE_URL = 'https://api.trainerhill.com'
+BASE_URL = 'https://swap.api.trainerhill.com'
 # BASE_URL = 'http://localhost:5000'
 api_url = f'{BASE_URL}/api'
 analysis_url = f'{BASE_URL}/analysis'
@@ -14,6 +18,8 @@ api_key = {'x-api-key': os.environ['TRAINER_HILL_API_KEY']}
 session = requests_cache.CachedSession(expire_after=datetime.timedelta(1), backend='filesystem', cache_name='.session-cache')
 session.headers.update(api_key)
 
+
+@utils.cache.cache.memoize(c.TIME.HALF_DAY)
 def get_decks(tour_filter):
     url = f'{api_url}/decks'
     r = session.get(url, params=tour_filter)
@@ -31,6 +37,7 @@ def get_decks(tour_filter):
     return decks
 
 
+@utils.cache.cache.memoize(c.TIME.HALF_DAY)
 def fetch_matchup_data(tour_data, decks):
     params = tour_data.copy()
     params['games_played'] = 5
@@ -41,3 +48,16 @@ def fetch_matchup_data(tour_data, decks):
     if r.status_code == 200:
         return r.json()['data']
     return []
+
+
+@utils.cache.cache.memoize(c.TIME.HALF_DAY)
+def fetch_core_cards(params):
+    url = f'{analysis_url}/cards/core'
+    r = session.post(url, params=params)
+    cards = []
+    total = 0
+    if r.status_code == 200:
+        resp = r.json()
+        cards = resp['data']
+        total = resp['total']
+    return cards, total

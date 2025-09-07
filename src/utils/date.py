@@ -13,6 +13,10 @@ def convert_datestring(date_string):
     return readable_date
 
 
+def today():
+    return str(date.today())
+
+
 def weeks_ago_3():
     today = date.today()
     weeks_ago_3 = str(today - timedelta(21))
